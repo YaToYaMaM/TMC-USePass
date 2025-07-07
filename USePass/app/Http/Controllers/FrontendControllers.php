@@ -18,4 +18,9 @@ class FrontendControllers extends Controller
 //    ]);
 //});
     }
+
+    public function user()
+    {
+        return Inertia::render('Frontend/EUserId');
+    }
 }

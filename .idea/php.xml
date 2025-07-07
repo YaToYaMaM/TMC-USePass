@@ -15,6 +15,11 @@
     <option name="highlightLevel" value="WARNING" />
     <option name="transferred" value="true" />
   </component>
+  <component name="PhpCodeSniffer">
+    <phpcs_settings>
+      <phpcs_by_interpreter asDefaultInterpreter="true" interpreter_id="c38241d9-3f29-4763-83b2-b468008fed06" timeout="30000" />
+    </phpcs_settings>
+  </component>
   <component name="PhpIncludePathManager">
     <include_path>
       <path value="$PROJECT_DIR$/USePass/vendor/doctrine/deprecations" />
@@ -31,7 +36,6 @@
       <path value="$PROJECT_DIR$/USePass/vendor/league/flysystem-local" />
       <path value="$PROJECT_DIR$/USePass/vendor/league/flysystem" />
       <path value="$PROJECT_DIR$/USePass/vendor/league/uri-interfaces" />
-      <path value="$PROJECT_DIR$/USePass/vendor/monolog/monolog" />
       <path value="$PROJECT_DIR$/USePass/vendor/fruitcake/php-cors" />
       <path value="$PROJECT_DIR$/USePass/vendor/psr/simple-cache" />
       <path value="$PROJECT_DIR$/USePass/vendor/psr/http-factory" />
@@ -146,9 +150,15 @@
       <path value="$PROJECT_DIR$/USePass/vendor/composer" />
       <path value="$PROJECT_DIR$/USePass/vendor/laravel/breeze" />
       <path value="$PROJECT_DIR$/USePass/vendor/laravel/sanctum" />
+      <path value="$PROJECT_DIR$/USePass/vendor/monolog/monolog" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
+  <component name="PhpStan">
+    <PhpStan_settings>
+      <phpstan_by_interpreter asDefaultInterpreter="true" interpreter_id="c38241d9-3f29-4763-83b2-b468008fed06" timeout="60000" />
+    </PhpStan_settings>
+  </component>
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
   </component>
@@ -156,6 +166,11 @@
     <phpunit_settings>
       <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/USePass/phpunit.xml" custom_loader_path="$PROJECT_DIR$/USePass/vendor/autoload.php" use_configuration_file="true" />
     </phpunit_settings>
+  </component>
+  <component name="Psalm">
+    <Psalm_settings>
+      <psalm_fixer_by_interpreter asDefaultInterpreter="true" interpreter_id="c38241d9-3f29-4763-83b2-b468008fed06" timeout="60000" />
+    </Psalm_settings>
   </component>
   <component name="PsalmOptionsConfiguration">
     <option name="transferred" value="true" />

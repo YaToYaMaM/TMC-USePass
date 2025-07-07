@@ -7,6 +7,7 @@ use Inertia\Inertia;
 
 
 Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->name('home');
+Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
 //        'canLogin' => Route::has('login'),
