@@ -6,6 +6,8 @@
       <sourceFolder url="file://$MODULE_DIR$/USePass/database/factories" isTestSource="false" packagePrefix="Database\Factories\" />
       <sourceFolder url="file://$MODULE_DIR$/USePass/database/seeders" isTestSource="false" packagePrefix="Database\Seeders\" />
       <sourceFolder url="file://$MODULE_DIR$/USePass/tests" isTestSource="true" packagePrefix="Tests\" />
+      <sourceFolder url="file://$MODULE_DIR$/USePass/tests/Feature" isTestSource="true" />
+      <sourceFolder url="file://$MODULE_DIR$/USePass/tests/Unit" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/brianium/paratest" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/brick/math" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/carbonphp/carbon-doctrine-types" />
@@ -133,6 +135,8 @@
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/vlucas/phpdotenv" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/voku/portable-ascii" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/webmozart/assert" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/breeze" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/sanctum" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

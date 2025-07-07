@@ -144,11 +144,18 @@
       <path value="$PROJECT_DIR$/USePass/vendor/brianium/paratest" />
       <path value="$PROJECT_DIR$/USePass/vendor/nikic/php-parser" />
       <path value="$PROJECT_DIR$/USePass/vendor/composer" />
+      <path value="$PROJECT_DIR$/USePass/vendor/laravel/breeze" />
+      <path value="$PROJECT_DIR$/USePass/vendor/laravel/sanctum" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
   <component name="PhpStanOptionsConfiguration">
     <option name="transferred" value="true" />
+  </component>
+  <component name="PhpUnit">
+    <phpunit_settings>
+      <PhpUnitSettings configuration_file_path="$PROJECT_DIR$/USePass/phpunit.xml" custom_loader_path="$PROJECT_DIR$/USePass/vendor/autoload.php" use_configuration_file="true" />
+    </phpunit_settings>
   </component>
   <component name="PsalmOptionsConfiguration">
     <option name="transferred" value="true" />
