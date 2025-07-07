@@ -1,12 +1,15 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\FrontendControllers;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
-Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->name('home');
+Route::get('/', [FrontendControllers::class, 'index'])->name('home');
+Route::get('/guard', [FrontendControllers::class, 'guard'])->name('guard');
+
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
 //        'canLogin' => Route::has('login'),

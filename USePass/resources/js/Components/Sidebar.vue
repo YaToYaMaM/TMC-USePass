@@ -5,7 +5,8 @@ import {Link} from "@inertiajs/vue3";
 </script>
 
 <template>
-    <aside
+    <div class="flex h-full">
+        <aside
         :class="[
           'bg-gray-100 text-black p-4 transition-all duration-300 ease-in-out h-full',
           isCollapsed ? 'w-16' : 'w-52'
@@ -51,7 +52,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/contact"
+                        href="/guard"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/secguard.png" alt="User Icon" width="24" height="24" />
@@ -97,6 +98,11 @@ import {Link} from "@inertiajs/vue3";
             </ul>
         </nav>
     </aside>
+        <div class="p-10">
+        <slot />
+        </div>
+    </div>
+
 </template>
 
 <style scoped>

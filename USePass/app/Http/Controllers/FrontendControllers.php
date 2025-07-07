@@ -7,7 +7,8 @@ use Inertia\Inertia;
 
 class FrontendControllers extends Controller
 {
-    public function index(){
+    public function index()
+    {
         return Inertia::render('Frontend/Home');
 //        Route::get('/', function () {
 //    return Inertia::render('Welcome', [
@@ -18,4 +19,18 @@ class FrontendControllers extends Controller
 //    ]);
 //});
     }
+
+    public function guard()
+    {
+        return Inertia::render('Frontend/Guard');
+//        Route::get('/', function () {
+//    return Inertia::render('Welcome', [
+//        'canLogin' => Route::has('login'),
+//        'canRegister' => Route::has('register'),
+//        'laravelVersion' => Application::VERSION,
+//        'phpVersion' => PHP_VERSION,
+//    ]);
+//});
+    }
+
 }
