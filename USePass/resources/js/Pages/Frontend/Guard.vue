@@ -55,7 +55,7 @@ function handleImageUpload(event: Event) {
 
 
             <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
+                <div class="bg-white w-full max-w-2xl p-6 rounded-lg shadow-lg">
                     <h2 class="text-xl font-bold mb-4">Add Guard</h2>
 
                     <!-- Form Fields -->
@@ -92,7 +92,7 @@ function handleImageUpload(event: Event) {
                                 </select>
                             </div>
                             <!-- First Name -->
-                            <div class="w-1/2">
+                            <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">ID number</label>
                                 <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
