@@ -41,7 +41,8 @@ function handleImageUpload(event: Event) {
 
             <div class="flex justify-between items-center mb-4">
                 <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>
-                <button @click="triggerImport" class="px-4 py-2 bg-green-500 text-white border border-white rounded">Import</button>
+                <div class="flex justify-end">
+                <button @click="triggerImport" class=" px-4 py-2 bg-green-500 text-white border border-white rounded">Import</button>
                 <input
                     type="file"
                     ref="importFileInput"
@@ -49,6 +50,7 @@ function handleImageUpload(event: Event) {
                     accept=".csv,.xlsx,.xls,.docx,.pdf,.exel"
                     class="hidden"
                 />
+             </div>
             </div>
 
             <h1 class="text-xl font-bold">Security Guard</h1>
@@ -136,6 +138,23 @@ function handleImageUpload(event: Event) {
                     </form>
                 </div>
             </div>
+        </div>
+
+        <div class="w-full flex flex-col flex-1 border border-black rounded p-2 mt-10">
+
+            <div class="border border-black rounded p-2 flex flex-initial">
+
+                <img src="@/Icons/secguard.png" alt="image">
+                <div class="flex flex-col">
+                    <h1 class="text-lg font-extrabold">Froilan P. Cañete</h1>
+                    <h3>Guard 1</h3>
+                </div>
+                <button class="border border-black rounded ml-10 p-5">Edit</button>
+            </div>
+            <div class="border border-black roundedp-2 m-2">
+                sdfsdf
+            </div>
+
         </div>
     </Frontend>
 </template>

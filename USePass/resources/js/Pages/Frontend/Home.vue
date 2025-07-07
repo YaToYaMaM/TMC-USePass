@@ -1,6 +1,8 @@
 <template>
     <FrontendLayout>
-
+    <div>
+        <h1 class="text-4xl text-black font-extrabold">Dashboard</h1>
+    </div>
     </FrontendLayout>
 
 

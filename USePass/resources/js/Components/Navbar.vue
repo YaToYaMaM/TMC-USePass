@@ -4,7 +4,8 @@ import {Link} from "@inertiajs/vue3";
 
     <template>
         <nav class="flex justify-between p-4 bg-red-800">
-            <div class="text-lg text-white">
+
+            <div class="text-2xl text-white font-extrabold font-sans">
                 USePass
             </div>
             <div>
