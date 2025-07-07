@@ -7,7 +7,7 @@ import {Link} from "@inertiajs/vue3";
 <template>
     <aside
         :class="[
-          'bg-gray-100 text-black p-4 transition-all duration-300 ease-in-out',
+          'bg-gray-100 text-black p-4 transition-all duration-300 ease-in-out overflow-y-auto h-full',
           isCollapsed ? 'w-16' : 'w-44'
         ]"
 
