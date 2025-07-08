@@ -4,6 +4,8 @@
     </Frontend>
 </template>
 
+
+
 <script setup>
 import Frontend from '@/Layouts/FrontendLayout.vue';
 import {Head} from "@inertiajs/vue3";

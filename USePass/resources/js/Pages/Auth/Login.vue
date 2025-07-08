@@ -31,22 +31,21 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <div class="relative bg-white rounded-lg drop-shadow-[0px_4px_34px_rgba(118,0,0,0.06)] w-full max-w-md px-8 pt-28 pb-8 min-h-[500px]">
-            <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-48 max-w-100  rounded-full shadow-md">
-                <img src="/images/Logo2.png" alt="Logo" class="w-50 px-7" />
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-8">
+            <div class="border-white flex justify-center mb-6 rounded-lg" >
+                <img src="/images/Logo2.png" alt="Logo" class="w-40" />
             </div>
 
             <form @submit.prevent="submit" class="space-y-6">
                 <div>
-                    <label class="block text-[17px] font-normal text-customRed mb-1">Username</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Username</label>
                     <div class="relative">
                         <input
                             v-model="form.email"
                             type="email"
                             required
                             placeholder="Enter your username"
-                            class="w-full border-0 border-b-2 border-red-900 focus:outline-none focus:border-customRed rounded-sm  py-2 pr-10
-                            placeholder:text-md placeholder:italic"
+                            class="w-full border-b-2 border-red-900 focus:outline-none focus:border-red-600 py-2 pr-10"
                         />
                         <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-900">
               <i class="fas fa-user"></i>
@@ -56,15 +55,14 @@ const submit = () => {
                 </div>
 
                 <div>
-                    <label class="block text-[17px] font-normal text-customRed mb-1">Password</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
                     <div class="relative">
                         <input
                             v-model="form.password"
                             type="password"
                             required
                             placeholder="Enter your password"
-                            class="w-full border-0 border-b-2 border-red-900 focus:outline-none focus:border-customRed rounded-sm py-2 pr-10
-                            placeholder:text-md placeholder:italic"
+                            class="w-full border-b-2 border-red-900 focus:outline-none focus:border-red-600 py-2 pr-10"
                         />
                         <span class="absolute right-2 top-1/2 transform -translate-y-1/2 text-red-900">
               <i class="fas fa-key"></i>
@@ -83,7 +81,7 @@ const submit = () => {
 
                 <button
                     type="submit"
-                    class="block w-40 mx-auto bg-red-900 hover:bg-red-700 text-white font-semibold py-2 rounded shadow"
+                    class="w-full bg-red-900 hover:bg-red-700 text-white font-semibold py-2 rounded shadow"
                 >
                     Login
                 </button>

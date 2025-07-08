@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import {Link} from "@inertiajs/vue3";
-import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 </script>
 
     <template>
         <nav class="flex justify-between p-4 bg-red-800">
-
-            <div class="text-2xl text-white font-extrabold font-sans">
+            <div class="text-lg text-white">
                 USePass
             </div>
             <div>

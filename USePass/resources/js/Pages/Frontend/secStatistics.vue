@@ -1,6 +1,9 @@
 <template>
     <Frontend>
         <h1>This is Statistics</h1>
+
+
+
     </Frontend>
 </template>
 
