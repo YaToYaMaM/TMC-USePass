@@ -17,8 +17,8 @@
             />
 
             <p class="text-white italic text-base md:text-lg lg:text-xl mb-6">
-                "Track Student. Ensure Safety.
-                <strong class="text-yellow-300 font-bold">USePass.</strong>"
+                "Track Student. Ensure Safety. <br>
+                USePass."
             </p>
 
             <input
