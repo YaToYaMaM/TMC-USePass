@@ -8,7 +8,7 @@ const showModal = ref(false);
 const selectedImage = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const importFileInput = ref<HTMLInputElement | null>(null);
-
+const selectedLocation = ref('Tagum');
 const showEditModal = ref(false);
 const guardToEdit = ref<{ id: number; name: string; title: string } | null>(null);
 
@@ -84,7 +84,6 @@ function updateGuard() {
     <Frontend>
         <Head title="Guard Page" />
         <div class="flex flex-col p-3 ">
-
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>
