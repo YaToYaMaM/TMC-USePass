@@ -3,7 +3,8 @@
   <div class="pt-6  min-h-screen space-y-6">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Dashboard</h1>
-      <div class="inline-flex justify-center gap-1 mt-6 bg-gray-300 p-1 rounded-md shadow max-w-fit mx-auto">
+<!--      <div class="inline-flex justify-center gap-1 mt-6 bg-gray-300 p-1 rounded-md shadow max-w-fit mx-auto">-->
+          <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
         <button
             @click="selectUnit('Tagum')"
             :class="[
