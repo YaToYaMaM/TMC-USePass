@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 const isCollapsed = ref(false);
-import {Link} from "@inertiajs/vue3";
+
 </script>
 
 <template>
-    <aside
+    <div class="flex h-full">
+        <aside
         :class="[
           'bg-gray-100 text-black p-4 transition-all duration-300 ease-in-out h-full',
           isCollapsed ? 'w-16' : 'w-52'
@@ -39,7 +40,7 @@ import {Link} from "@inertiajs/vue3";
 
                 <li class="flex items-center space-x-3 text-sm">
                     <a
-                        href="/"
+                        href="/dashboard"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
 <!--                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
@@ -51,7 +52,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/contact"
+                        href="/guard"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/secguard.png" alt="User Icon" width="24" height="24" />
@@ -60,7 +61,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/students"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/students.png" alt="User Icon" width="24" height="24" />
@@ -69,7 +70,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/statistics"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
@@ -78,7 +79,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/reports"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
@@ -87,7 +88,7 @@ import {Link} from "@inertiajs/vue3";
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/logs"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/logs.png" alt="User Icon" width="24" height="24" />
@@ -96,9 +97,14 @@ import {Link} from "@inertiajs/vue3";
                 </li>
             </ul>
         </nav>
-    </aside>
-</template>
 
+    </aside>
+
+        <div class="px-10 py-1 w-full">
+            <slot />
+        </div>
+    </div>
+</template>
 <style scoped>
 
 </style>
