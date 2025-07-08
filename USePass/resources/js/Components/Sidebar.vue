@@ -2,7 +2,14 @@
 import { ref } from 'vue';
 const isCollapsed = ref(false);
 import {Link} from "@inertiajs/vue3";
+
+import {defineComponent} from "vue";
+
+// export default defineComponent({
+//     components: {Link}
+// })
 </script>
+
 
 <template>
     <div class="flex h-full">
@@ -38,16 +45,16 @@ import {Link} from "@inertiajs/vue3";
             Menu
             <ul class="space-y-4">
 
-                <li class="flex items-center space-x-3 text-sm">
+                <li class="flex items-center space-x-3 text-sm" >
                     <a
-                        href="/"
+                        href="/dashboard"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
 <!--                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">-->
 <!--                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M13 5v6h6" />-->
 <!--                        </svg>-->
                         <img src="@/Icons/dashboard.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Dashboard</span>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Dashboard</span>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
@@ -56,43 +63,43 @@ import {Link} from "@inertiajs/vue3";
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/secguard.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Security Guard</span>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Security Guard</span>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/students"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/students.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Students</span>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Students</span>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/statistics"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Statistics</span>
+                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Statistics</Link>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/reports"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Reports</span>
+                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Reports</Link>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
-                        href="/about"
+                        href="/logs"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/logs.png" alt="User Icon" width="24" height="24" />
-                        <span v-if="!isCollapsed" class="whitespace-nowrap">Logs</span>
+                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Logs</Link>
                     </a>
                 </li>
             </ul>

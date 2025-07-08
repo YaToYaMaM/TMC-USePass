@@ -20,6 +20,12 @@ class FrontendControllers extends Controller
 //});
     }
 
+
+    public function dashboard()
+    {
+        return Inertia::render('Frontend/secDashboard');
+    }
+
     public function guard()
     {
         return Inertia::render('Frontend/Guard');
@@ -31,6 +37,26 @@ class FrontendControllers extends Controller
 //        'phpVersion' => PHP_VERSION,
 //    ]);
 //});
+    }
+
+    public function students()
+    {
+        return Inertia::render('Frontend/secStudents');
+    }
+
+    public function statistics()
+    {
+        return Inertia::render('Frontend/secStatistics');
+    }
+
+    public function reports()
+    {
+        return Inertia::render('Frontend/secReports');
+    }
+
+    public function logs()
+    {
+        return Inertia::render('Frontend/secLogs');
     }
 
 }

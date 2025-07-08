@@ -2,6 +2,7 @@
 import {Link} from "@inertiajs/vue3";
 import Navbar from "@/Components/Navbar.vue";
 import Sidebar from "@/Components/Sidebar.vue";
+
 </script>
 
 <template>
