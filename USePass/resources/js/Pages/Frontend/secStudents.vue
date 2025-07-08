@@ -87,26 +87,26 @@ function backToStudentForm() {
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
 
                     <!-- Button Group -->
-                    <div class="inline-flex border border-gray-300 rounded overflow-hidden">
+                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-                                'px-3 py-1 text-sm border-r border-gray-300',
-                                selectedLocation === 'Tagum'
-                                  ? 'bg-gray-400 text-white font-semibold'
-                                  : 'bg-white text-gray-600'
-                              ]"
+        'px-3 py-1 text-sm border-r border-gray-300',
+        selectedLocation === 'Tagum'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
+      ]"
                         >
                             Tagum
                         </button>
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-                                'px-3 py-1 text-sm',
-                                selectedLocation === 'Mabini'
-                                  ? 'bg-gray-400 text-white font-semibold'
-                                  : 'bg-white text-gray-600'
-                              ]"
+        'px-3 py-1 text-sm',
+        selectedLocation === 'Mabini'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
+      ]"
                         >
                             Mabini
                         </button>

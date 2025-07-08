@@ -92,14 +92,14 @@ function updateGuard() {
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
 
                     <!-- Button Group -->
-                    <div class="inline-flex border border-gray-300 rounded overflow-hidden">
+                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
         'px-3 py-1 text-sm border-r border-gray-300',
         selectedLocation === 'Tagum'
-          ? 'bg-gray-400 text-white font-semibold'
-          : 'bg-white text-gray-600'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
       ]"
                         >
                             Tagum
@@ -109,8 +109,8 @@ function updateGuard() {
                             :class="[
         'px-3 py-1 text-sm',
         selectedLocation === 'Mabini'
-          ? 'bg-gray-400 text-white font-semibold'
-          : 'bg-white text-gray-600'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
       ]"
                         >
                             Mabini
@@ -312,6 +312,13 @@ function updateGuard() {
                                 class="w-full border border-gray-300 p-2 rounded"
                                 required
                             />
+                        </div>
+                        <div class="mb-4">
+                        <select class="w-full border border-gray-300 p-2 rounded">
+                            <option value="" disabled selected>Select Role</option>
+                            <option value="male">Add Guard</option>
+                            <option value="female">Add Student</option>
+                        </select>
                         </div>
                         <div class="flex justify-end space-x-2">
                             <button type="button" @click="showEditModal = false" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
