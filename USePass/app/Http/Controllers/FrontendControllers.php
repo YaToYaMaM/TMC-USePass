@@ -23,4 +23,9 @@ class FrontendControllers extends Controller
     {
         return Inertia::render('Frontend/EUserId');
     }
+
+    public function otp()
+    {
+        return Inertia::render('Frontend/Eotp');
+    }
 }

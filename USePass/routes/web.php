@@ -8,6 +8,7 @@ use Inertia\Inertia;
 
 Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->name('home');
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
+Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
 //        'canLogin' => Route::has('login'),
@@ -26,5 +27,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+//Route::get('/usepass-otp', function () {
+//    return Inertia::render('Frontend/userOTP');
+//});
 
 require __DIR__.'/auth.php';
