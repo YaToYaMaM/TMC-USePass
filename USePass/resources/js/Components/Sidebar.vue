@@ -98,7 +98,7 @@ import {Link} from "@inertiajs/vue3";
             </ul>
         </nav>
     </aside>
-        <div class="p-10">
+        <div class="px-10 py-1 w-full">
         <slot />
         </div>
     </div>
