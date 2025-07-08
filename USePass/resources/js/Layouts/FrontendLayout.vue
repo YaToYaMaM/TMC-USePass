@@ -6,7 +6,7 @@ import Sidebar from "@/Components/Sidebar.vue";
 </script>
 
 <template>
- <div class="h-screen overflow-hidden flex flex-col">
+ <div class="h-screen overflow-auto flex flex-col">
      <Navbar/>
      <Sidebar>
          <slot />

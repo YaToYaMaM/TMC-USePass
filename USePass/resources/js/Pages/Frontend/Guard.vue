@@ -131,7 +131,7 @@ function updateGuard() {
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h1 class="text-xl font-bold mb-4">Security Guard</h1>
-            <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto ml-96">
+            <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
             <select class="border border-gray-300 p-2 rounded w-full md:w-24 text-sm">
                 <option>Active</option>
                 <option>Inactive</option>
@@ -313,6 +313,14 @@ function updateGuard() {
                                 class="w-full border border-gray-300 p-2 rounded"
                                 required
                             />
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">Title</label>
+                            <select class="w-full border border-gray-300 p-2 rounded">
+                                <option value="" disabled selected>Select Roles</option>
+                                <option value="male">Add Guard</option>
+                                <option value="female">Add Student</option>
+                            </select>
                         </div>
                         <div class="flex justify-end space-x-2">
                             <button type="button" @click="showEditModal = false" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
