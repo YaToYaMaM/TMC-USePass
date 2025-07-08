@@ -8,7 +8,6 @@ const showModal = ref(false);
 const selectedImage = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const importFileInput = ref<HTMLInputElement | null>(null);
-const selectedLocation = ref('Tagum')
 const showEditModal = ref(false);
 const guardToEdit = ref<{ id: number; name: string; title: string } | null>(null);
 
@@ -83,7 +82,6 @@ function updateGuard() {
 <template>
     <Frontend>
         <Head title="Guard Page" />
-
         <div class="flex flex-col p-3 ">
 
             <!-- Top Control Buttons -->
