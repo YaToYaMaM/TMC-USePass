@@ -2,21 +2,23 @@
 import {Link} from "@inertiajs/vue3";
 </script>
 
-    <template>
-        <nav class="flex justify-between p-4 bg-red-800">
-            <div class="text-lg text-white">
-                USePass
-            </div>
-            <div>
-                <ul class="flex gap-x-4 me-auto mb-2 mb-lg-0 ">
-                    <li class="nav-item">
-                        <Link class="text-white" :href="route('home')">Home</Link>
-                    </li>
+<template>
+    <nav class="relative flex justify-between items-center px-6 py-4 bg-red-800 h-20 overflow-hidden">
+        <div class="absolute left-6 top-1/2 -translate-y-1/2">
+            <img src="/images/Logo1.png" alt="Logo" class="w-28 h-auto object-contain" />
+        </div>
+        <!-- Spacer to prevent overlap -->
+        <div class="flex-1"></div>
 
-                </ul>
-            </div>
-        </nav>
-    </template>
+        <div class="ml-36">
+            <ul class="flex gap-x-4">
+                <li class="nav-item">
+                    <Link class="text-white" :href="route('home')">Home</Link>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</template>
 
 <style scoped>
 
