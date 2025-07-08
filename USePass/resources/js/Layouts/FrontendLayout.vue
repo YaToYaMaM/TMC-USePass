@@ -5,11 +5,12 @@ import Sidebar from "@/Components/Sidebar.vue";
 </script>
 
 <template>
-    <div class="h-screen overflow-hidden flex flex-col">
-        <Navbar/>
-        <Sidebar>
-            <slot />
-        </Sidebar>
-    </div>
+ <div class="h-screen overflow-hidden flex flex-col">
+     <Navbar/>
+     <Sidebar>
+         <slot />
+     </Sidebar>
+ </div>
+
 </template>
 
