@@ -28,4 +28,8 @@ class FrontendControllers extends Controller
     {
         return Inertia::render('Frontend/Eotp');
     }
+    public function deets()
+    {
+        return Inertia::render('Frontend/Edetails');
+    }
 }

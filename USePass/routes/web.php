@@ -9,6 +9,7 @@ use Inertia\Inertia;
 Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->name('home');
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
+Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
 //        'canLogin' => Route::has('login'),
