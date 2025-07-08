@@ -10,10 +10,14 @@
         <!-- Foreground content -->
         <div class="relative z-10 p-4 rounded-lg text-center max-w-lg w-full">
             <img
-                src="/images/logo3.png"
+                src="/images/logo1.png"
                 alt="USePass Logo"
                 class="mx-auto mb-2 w-full max-w-[600px] h-100"
             />
+            <p class="text-white italic text-base md:text-lg lg:text-xl mb-6">
+                "Track Student. Ensure Safety. <br>
+                USePass."
+            </p>
             <h1 class="text-white font-extrabold text-base md:text-lg lg:text-4xl mb-6">
                 OTP Verification
             </h1>
