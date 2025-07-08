@@ -81,7 +81,7 @@ import {defineComponent} from "vue";
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
-                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Statistics</Link>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Statistics</span>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
@@ -90,7 +90,7 @@ import {defineComponent} from "vue";
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
-                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Reports</Link>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Reports</span>
                     </a>
                 </li>
                 <li class="flex items-center space-x-3">
@@ -99,7 +99,7 @@ import {defineComponent} from "vue";
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
                         <img src="@/Icons/logs.png" alt="User Icon" width="24" height="24" />
-                        <Link v-if="!isCollapsed" class="whitespace-nowrap" >Logs</Link>
+                        <span v-if="!isCollapsed" class="whitespace-nowrap" >Logs</span>
                     </a>
                 </li>
             </ul>
