@@ -31,7 +31,7 @@ const guards = ref([
     },
     {
         id: 3,
-        name: "John Robert Paler",
+        name: "Tristan Leoniel Ordaniza",
         description: "Unauthorized access",
         type: "Spot Report",
         date: "2025-07-06",

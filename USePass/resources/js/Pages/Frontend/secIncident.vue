@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import IncidentTable from "@/Components/IncidentTable.vue";
+import SpotTable from "@/Components/SpotTable.vue";
 
 
 const showModal = ref(false);
@@ -10,6 +11,7 @@ const selectedImage = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
 const importFileInput = ref<HTMLInputElement | null>(null);
 const selectedLocation = ref('Tagum');
+const selectedIncident = ref('Incident');
 const showEditModal = ref(false);
 const guardToEdit = ref<{ id: number; name: string; title: string } | null>(null);
 const selectedDate = ref<string>('');
@@ -90,7 +92,6 @@ function updateGuard() {
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <span></span>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Download as PDF</button>
 
                     <!-- Button Group -->
                     <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
@@ -127,26 +128,58 @@ function updateGuard() {
 
                 <!-- Date & Dropdown aligned right -->
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 ml-auto w-full sm:w-auto">
+                    <div class="relative w-full md:w-64">
+                        <input
+                            type="text"
+                            placeholder="Search a Incident..."
+                            class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
+                        />
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <!-- Magnifying Glass SVG Icon -->
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                    </div>
                     <input
                         type="date"
                         class="border border-gray-300 p-2 rounded w-full sm:w-36 text-sm"
                         v-model="selectedDate"
                     />
-
-                    <div class="relative w-full sm:w-36">
-                        <select class="border border-gray-300 p-2 rounded w-full text-sm">
-                            <option>All</option>
-                            <option>Incident Report</option>
-                            <option>Spot Report</option>
-                        </select>
+                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
+                        <button
+                            @click="selectedIncident = 'Incident'"
+                            :class="[
+        'px-3 py-1 text-sm border-r border-gray-300',
+        selectedIncident === 'Incident'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
+      ]"
+                        >
+                            Incident Report
+                        </button>
+                        <button
+                            @click="selectedIncident = 'Spot'"
+                            :class="[
+        'px-3 py-1 text-sm',
+        selectedIncident === 'Spot'
+          ? 'bg-white text-black shadow'
+          : 'bg-transparent text-black'
+      ]"
+                        >
+                            Spot Report
+                        </button>
                     </div>
+
 
                 </div>
 
             </div>
             <div>
-                <IncidentTable />
-
+                <IncidentTable v-if="selectedIncident === 'Incident'" />
+                <SpotTable v-else-if="selectedIncident === 'Spot'" />
             </div>
         </div>
     </Frontend>
