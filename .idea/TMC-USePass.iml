@@ -137,6 +137,7 @@
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/webmozart/assert" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/breeze" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/sanctum" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/phpmailer/phpmailer" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
