@@ -19,6 +19,7 @@ Route::get('/students', [FrontendControllers::class, 'students'])->name('student
 Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
 Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
 Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
+Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [

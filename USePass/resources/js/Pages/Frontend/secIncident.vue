@@ -24,16 +24,16 @@ function handleImageUpload(event: Event) {
     }
 }
 
-    function triggerImport() {
-        importFileInput.value?.click();
-    }
+function triggerImport() {
+    importFileInput.value?.click();
+}
 
-    function handleImportFile(event: Event) {
-        const file = (event.target as HTMLInputElement).files?.[0];
-        if (file) {
-            alert(`Imported file: ${file.name}`);
-            // You can add logic here to upload it or read its content
-        }
+function handleImportFile(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+        alert(`Imported file: ${file.name}`);
+        // You can add logic here to upload it or read its content
+    }
 }
 // Mock guard list (you can fetch this from a backend later)
 const guards = ref([
@@ -82,12 +82,11 @@ function updateGuard() {
 
 <template>
     <Frontend>
-        <Head title="Guard Page" />
+        <Head title="Incident Report" />
         <div class="flex flex-col p-3 ">
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>
-
+                <span></span>
                 <div class="flex flex-wrap items-center gap-2">
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
 
@@ -119,38 +118,32 @@ function updateGuard() {
                 </div>
 
                 <!-- Hidden file input -->
-                <input
-                    type="file"
-                    ref="importFileInput"
-                    @change="handleImportFile"
-                    accept=".csv,.xlsx,.xls,.docx,.pdf"
-                    class="hidden"
-                />
+
             </div>
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h1 class="text-xl font-bold mb-4">Security Guard</h1>
-            <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
-            <select class="border border-gray-300 p-2 rounded w-full md:w-24 text-sm">
-                <option>Active</option>
-                <option>Inactive</option>
-            </select>
-                <div class="relative w-full md:w-64">
-                    <input
-                        type="text"
-                        placeholder="Search a Guard..."
-                        class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
-                    />
-                    <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                        <!-- Magnifying Glass SVG Icon -->
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
-                             viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                  d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
-                        </svg>
+                <h1 class="text-xl font-bold mb-4">Security Guard</h1>
+                <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto ml-96">
+                    <select class="border border-gray-300 p-2 rounded w-full md:w-24 text-sm">
+                        <option>Active</option>
+                        <option>Inactive</option>
+                    </select>
+                    <div class="relative w-full md:w-64">
+                        <input
+                            type="text"
+                            placeholder="Search a student..."
+                            class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
+                        />
+                        <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
+                            <!-- Magnifying Glass SVG Icon -->
+                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M21 21l-4.35-4.35M17 10a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
             <!-- Guard Card -->
             <div v-for="guard in paginatedGuards" :key="guard.id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
@@ -244,14 +237,14 @@ function updateGuard() {
                             </div>
                         </div>
                         <div class="mb-4 flex space-x-4">
-                        <div class="w-1/2">
-                            <label class="block text-sm font-medium mb-1">Password</label>
-                            <input type="password" class="w-full border border-gray-300 p-2 rounded" required />
-                        </div>
-                        <div class="w-1/2">
-                            <label class="block text-sm font-medium mb-1">Confirm Password</label>
-                            <input type="password" class="w-full border border-gray-300 p-2 rounded" required />
-                        </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Password</label>
+                                <input type="password" class="w-full border border-gray-300 p-2 rounded" required />
+                            </div>
+                            <div class="w-1/2">
+                                <label class="block text-sm font-medium mb-1">Confirm Password</label>
+                                <input type="password" class="w-full border border-gray-300 p-2 rounded" required />
+                            </div>
                         </div>
 
                         <div class="mb-4 flex justify-center">
@@ -314,11 +307,11 @@ function updateGuard() {
                             />
                         </div>
                         <div class="mb-4">
-                        <select class="w-full border border-gray-300 p-2 rounded">
-                            <option value="" disabled selected>Select Role</option>
-                            <option value="male">Add Guard</option>
-                            <option value="female">Add Student</option>
-                        </select>
+                            <select class="w-full border border-gray-300 p-2 rounded">
+                                <option value="" disabled selected>Select Role</option>
+                                <option value="male">Add Guard</option>
+                                <option value="female">Add Student</option>
+                            </select>
                         </div>
                         <div class="flex justify-end space-x-2">
                             <button type="button" @click="showEditModal = false" class="px-4 py-2 bg-gray-300 rounded">Cancel</button>
