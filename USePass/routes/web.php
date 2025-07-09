@@ -30,6 +30,22 @@ Route::get('/incident', [FrontendControllers::class, 'incident'])->name('inciden
 //    ]);
 //});
 
+Route::get('/incident-report/print', function () {
+    return Inertia::render('Frontend/IncidentReportTemplate', [
+        'report' => [
+            'name' => request('name'),
+            'date' => request('date'),
+            'what' => request('what'),
+            'who' => request('who'),
+            'where' => request('where'),
+            'when' => request('when'),
+            'how' => request('how'),
+            'why' => request('why'),
+            'recommendation' => request('recommendation'),
+        ],
+    ]);
+});
+
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
