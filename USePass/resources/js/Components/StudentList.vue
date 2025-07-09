@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white rounded-lg shadow p-6">
+    <div class="bg-white rounded-lg shadow p-6 w-[533px]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Students</h3>
             <a href="#" class="text-blue-500 text-sm">See All</a>

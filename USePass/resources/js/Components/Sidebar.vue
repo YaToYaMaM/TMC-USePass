@@ -100,7 +100,7 @@ const isCollapsed = ref(false);
 
     </aside>
 
-        <div class="px-10 py-1 w-full">
+        <div class="px-10 w-full overflow-y-auto">
             <slot />
         </div>
     </div>
