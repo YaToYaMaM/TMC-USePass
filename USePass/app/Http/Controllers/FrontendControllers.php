@@ -74,4 +74,8 @@ class FrontendControllers extends Controller
     {
         return Inertia::render('Frontend/secLogs');
     }
+    public function incident()
+    {
+        return Inertia::render('Frontend/secIncident');
+    }
 }

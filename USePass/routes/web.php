@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Auth\CustomForgotPasswordController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -20,6 +20,7 @@ Route::get('/students', [FrontendControllers::class, 'students'])->name('student
 Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
 Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
 Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
+Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
@@ -30,6 +31,22 @@ Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
 //    ]);
 //});
 
+Route::get('/incident-report/print', function () {
+    return Inertia::render('Frontend/IncidentReportTemplate', [
+        'report' => [
+            'name' => request('name'),
+            'date' => request('date'),
+            'what' => request('what'),
+            'who' => request('who'),
+            'where' => request('where'),
+            'when' => request('when'),
+            'how' => request('how'),
+            'why' => request('why'),
+            'recommendation' => request('recommendation'),
+        ],
+    ]);
+});
+
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
@@ -39,6 +56,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::post('/otp/request', [CustomForgotPasswordController::class, 'sendOtp'])->name('otp.request');
+Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm'])->name('otp.form');
+Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
 
 //Route::get('/usepass-otp', function () {
 //    return Inertia::render('Frontend/userOTP');

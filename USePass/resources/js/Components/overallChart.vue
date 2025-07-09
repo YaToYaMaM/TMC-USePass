@@ -1,6 +1,6 @@
 <template>
     <div class="bg-white rounded-lg shadow p-6">
-        <h3 class="text-lg font-semibold mb-4">Students</h3>
+        <h3 class="text-lg font-semibold mb-4">Overall</h3>
         <Bar :data="chartData" :options="chartOptions" />
     </div>
 </template>
@@ -12,11 +12,11 @@ import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, Li
 ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale)
 
 const chartData = {
-    labels: ['BSIT', 'BEED', 'BSED', 'BTVTED', 'BSABE'],
+    labels: ['STUDENTS', 'TEACHERS', 'VISITORS', 'ALUMNI'],
     datasets: [
         {
-            label: 'Students',
-            data: [689, 343, 543, 793, 1120],
+            label: 'Overall',
+            data: [3435, 58, 0, 0],
             backgroundColor: '#760000',
             barThickness: 50,
         },

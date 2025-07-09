@@ -88,6 +88,15 @@ const isCollapsed = ref(false);
                 </li>
                 <li class="flex items-center space-x-3">
                     <a
+                        href="/incident"
+                        class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
+                    >
+                        <img src="@/Icons/statistics.png" alt="User Icon" width="24" height="24" />
+                        <span v-if="!isCollapsed" class="whitespace-nowrap">Incident Reports</span>
+                    </a>
+                </li>
+                <li class="flex items-center space-x-3">
+                    <a
                         href="/logs"
                         class="w-48 flex items-center space-x-3 p-2 rounded-md hover:bg-red-800 hover:text-white transition"
                     >
@@ -100,7 +109,7 @@ const isCollapsed = ref(false);
 
     </aside>
 
-        <div class="px-10 py-1 w-full">
+        <div class="px-10 w-full overflow-y-auto">
             <slot />
         </div>
     </div>

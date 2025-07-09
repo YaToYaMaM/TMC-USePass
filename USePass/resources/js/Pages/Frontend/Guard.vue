@@ -83,7 +83,7 @@ function updateGuard() {
 <template>
     <Frontend>
         <Head title="Guard Page" />
-        <div class="flex flex-col p-3 ">
+        <div class="flex flex-col p-3">
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>
@@ -96,23 +96,23 @@ function updateGuard() {
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-        'px-3 py-1 text-sm border-r border-gray-300',
-        selectedLocation === 'Tagum'
-          ? 'bg-white text-black shadow'
-          : 'bg-transparent text-black'
-      ]"
-                        >
+                                    'px-3 py-1 text-sm border-r border-gray-300',
+                                    selectedLocation === 'Tagum'
+                                      ? 'bg-white text-black shadow'
+                                      : 'bg-transparent text-black'
+                                  ]"
+                            >
                             Tagum
                         </button>
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-        'px-3 py-1 text-sm',
-        selectedLocation === 'Mabini'
-          ? 'bg-white text-black shadow'
-          : 'bg-transparent text-black'
-      ]"
-                        >
+                                'px-3 py-1 text-sm',
+                                selectedLocation === 'Mabini'
+                                  ? 'bg-white text-black shadow'
+                                  : 'bg-transparent text-black'
+                              ]"
+                            >
                             Mabini
                         </button>
                     </div>
@@ -130,7 +130,7 @@ function updateGuard() {
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h1 class="text-xl font-bold mb-4">Security Guard</h1>
-            <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto ml-96">
+            <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
             <select class="border border-gray-300 p-2 rounded w-full md:w-24 text-sm">
                 <option>Active</option>
                 <option>Inactive</option>
@@ -138,7 +138,7 @@ function updateGuard() {
                 <div class="relative w-full md:w-64">
                     <input
                         type="text"
-                        placeholder="Search a student..."
+                        placeholder="Search a Guard..."
                         class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
                     />
                     <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
