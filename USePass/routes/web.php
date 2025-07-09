@@ -11,6 +11,7 @@ Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->nam
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
+Route::get('/ghome', [App\Http\Controllers\FrontendControllers::class, 'ghome'])->name('ghome');
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 
 Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('dashboard');
