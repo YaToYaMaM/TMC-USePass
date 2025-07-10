@@ -8,7 +8,12 @@ const form = useForm({
 });
 
 const otpDigits = reactive(['', '', '', '', '', '']);
-const timer = ref(120); // 2 minutes
+const props = defineProps({
+    otp_start_time: String, // ⏱️ passed from Laravel backend
+});
+
+const EXPIRE_SECONDS = 120;
+const timer = ref(EXPIRE_SECONDS);
 const expired = ref(false);
 let interval = null;
 
@@ -36,13 +41,39 @@ const focusNext = (i, e) => {
     }
 };
 
+const handlePaste = (event) => {
+    const pasteData = event.clipboardData.getData('text');
+    if (!/^\d{6}$/.test(pasteData)) return; // Only proceed if exactly 6 digits
+
+    event.preventDefault(); // Prevent default paste
+
+    for (let i = 0; i < 6; i++) {
+        otpDigits[i] = pasteData[i];
+    }
+
+    // Optionally focus the last field
+    setTimeout(() => {
+        document.getElementById('otp-5')?.focus();
+    }, 10);
+};
+
 const handleSubmit = () => {
     form.otp = otpDigits.join('');
     form.post(route('otp.verify'));
 };
-
 onMounted(() => {
-    startTimer();
+    const startTime = new Date(props.otp_start_time);
+    const now = new Date();
+    const elapsed = Math.floor((now - startTime) / 1000);
+    const remaining = EXPIRE_SECONDS - elapsed;
+
+    if (remaining > 0) {
+        timer.value = remaining;
+        startTimer(); // only start if still valid
+    } else {
+        timer.value = 0;
+        expired.value = true;
+    }
 });
 </script>
 
@@ -69,6 +100,7 @@ onMounted(() => {
                            :id="`otp-${i}`"
                            maxlength="1"
                            @input="focusNext(i, $event)"
+                           @paste="handlePaste($event)"
                            class="w-12 h-12 text-center border-2 border-red-700 rounded-xl focus:outline-none text-xl"
                            :disabled="expired"
                     />

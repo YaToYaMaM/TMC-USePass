@@ -5,7 +5,7 @@ import Navbar from "@/Components/Navbar.vue";
 </script>
 
 <template>
-    <nav class="relative flex justify-between items-center px-6 py-4 bg-red-800 h-[64px] overflow-hidden">
+    <nav class="relative flex justify-between items-center px-6 py-4 bg-red-800 h-[56px] min-h-15 flex-shrink-0 overflow-hidden">
         <div class="absolute left-6 top-1/2 -translate-y-1/2">
             <img src="/images/Logo1.png" alt="Logo" class="w-28 h-auto object-contain" />
         </div>

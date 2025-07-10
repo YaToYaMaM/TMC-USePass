@@ -3,11 +3,11 @@ import {Link} from "@inertiajs/vue3";
 </script>
 
 <template>
-    <nav class="relative flex justify-between items-center px-6 py-4 bg-red-800 h-20 overflow-hidden">
+    <nav class="relative flex justify-between items-center px-6 py-4 bg-red-800 h-15 min-h-15 flex-shrink-0 overflow-hidden">
         <div class="absolute left-6 top-1/2 -translate-y-1/2">
             <img src="/images/Logo1.png" alt="Logo" class="w-28 h-auto object-contain" />
         </div>
-        <!-- Spacer to prevent overlap -->
+
         <div class="flex-1"></div>
 
         <div class="ml-36">
@@ -19,6 +19,7 @@ import {Link} from "@inertiajs/vue3";
         </div>
     </nav>
 </template>
+
 
 <style scoped>
 
