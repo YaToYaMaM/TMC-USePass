@@ -21,12 +21,14 @@ onMounted(() => {
     setTimeout(() => window.print(), 500);
 });
 </script>
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
 <template>
     <Head title="Print Report"/>
     <div v-if="props.report"  class="p-10 text-sm font-sans leading-relaxed text-black max-w-3xl mx-auto bg-white">
-        <h1 class="text-lg font-bold text-center mb-1">University of Southeastern Philippines</h1>
-        <h2 class="text-center text-sm">Security Service Unit</h2>
+        <img src="/images/usep-logo-small.png" alt="Logo" class="mx-auto mb-2 w-20 h-auto">
+        <h1 class="text-lg font-bold text-center mb-1 font-bookman">University of Southeastern Philippines</h1>
+        <h2 class="text-center text-sm italic">Security Service Unit</h2>
         <h3 class="text-center font-bold text-lg mt-2 mb-1">INCIDENT REPORT</h3>
         <p class="text-left mb-4 text-base">Date: <span class="underline">{{ report.date }}</span></p>
 
@@ -78,3 +80,6 @@ onMounted(() => {
         </div>
     </div>
 </template>
+<style>
+
+</style>

@@ -3,60 +3,20 @@ import {ref, computed} from "vue";
 const guards = ref([
     {
         id: 1,
-        name: "Froilan Canete",
-        description: "Burning Computer",
-        type: "Incident Report",
-        date: "2025-07-08",
-        what: "Computer suddenly caught fire.",
-        who: "IT personnel",
-        where: "Lab 3",
-        when: "2:30 PM, July 8, 2025",
-        how: "Possibly due to overheating power supply",
-        why: "Lack of regular maintenance",
-        recommendation: "Install cooling systems and perform regular checkups"
+        guardName: "Froilan Canete",
+        findings: "Turn on lights",
+        time: "8:25 PM",
+        date: "2025-07-09",
+        location: "SOM Building",
+        actionTaken: "Switch Off the lights",
+        teamLeader: "Joan Malintad",
+        departmentRepresentative: "Chai",
+        Rtype:"Spot Report",
+
     },
-    {
-        id: 2,
-        name: "Carlos Reyes",
-        description: "Unauthorized access",
-        type: "Spot Report",
-        date: "2025-07-07",
-        what: "Individual accessed server room without clearance.",
-        who: "Unknown person",
-        where: "Main Building Server Room",
-        when: "1:00 AM",
-        how: "By bypassing security keycard",
-        why: "Possible lapse in guard supervision",
-        recommendation: "Install CCTV, review access logs"
-    },
-    {
-        id: 3,
-        name: "Tristan Leoniel Ordaniza",
-        description: "Unauthorized access",
-        type: "Spot Report",
-        date: "2025-07-06",
-        what: "Suga wa napalong.",
-        who: "Unknown person",
-        where: "SOM Building",
-        when: "9:00 pM",
-        how: "By bypassing security keycardbe ",
-        why: "Possible lapse in guard supervision",
-        recommendation: "Check the room before you leave"
-    },
-    {
-        id: 3,
-        name: "John Robert Paler",
-        description: "Unauthorized access",
-        type: "Spot Report",
-        date: "2025-07-06",
-        what: "Suga wa napalong.",
-        who: "Unknown person",
-        where: "SOM Building",
-        when: "9:00 pM",
-        how: "By bypassing security keycardbe ",
-        why: "Possible lapse in guard supervision",
-        recommendation: "Check the room before you leave"
-    },
+
+
+
 ]);
 
 const showViewModal = ref(false);
@@ -68,7 +28,7 @@ function openEditModal(report: any) {
 }
 function printReport() {
     const query = new URLSearchParams(selectedReport.value).toString();
-    window.open(`/incident-report/print?${query}`, '_blank');
+    window.open(`/spot-report/print?${query}`, '_blank');
 }
 const currentPage = ref(1);
 const itemsPerPage = 7;
@@ -90,7 +50,7 @@ const totalPages = computed(() =>
             <thead class="bg-gray-50">
             <tr class="text-gray-600 uppercase text-xs tracking-wider">
                 <th class="px-6 py-3 text-left">Guard on Duty</th>
-                <th class="px-6 py-3 text-left">Description</th>
+                <th class="px-6 py-3 text-left">Findings</th>
                 <th class="px-6 py-3 text-left">Type of Report</th>
                 <th class="px-6 py-3 text-left">Date</th>
                 <th class="px-6 py-3 text-center">Action</th>
@@ -101,9 +61,9 @@ const totalPages = computed(() =>
                 v-for="(item, index)
                 in paginatedIncident"
                 :key="index">
-                <td class="px-6 py-4 font-medium whitespace-nowrap">{{ item.name }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.what }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.type }}</td>
+                <td class="px-6 py-4 font-medium whitespace-nowrap">{{ item.guardName}}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.findings }}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.Rtype }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.date }}</td>
                 <td class="px-6 py-4 text-center">
                     <button
@@ -179,32 +139,36 @@ const totalPages = computed(() =>
             <!-- Report Info Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700">
                 <div>
-                    <label class="text-xl font-bold block">What:</label>
-                    <p class="text-gray-900">{{ selectedReport.what }}</p>
+                    <label class="text-xl font-bold block">Findings:</label>
+                    <p class="text-gray-900">{{ selectedReport.findings }}</p>
                 </div>
                 <div>
-                    <label class="text-xl font-bold block">Who:</label>
-                    <p class="text-gray-900">{{ selectedReport.who }}</p>
+                    <label class="text-xl font-bold block">Time:</label>
+                    <p class="text-gray-900">{{ selectedReport.time }}</p>
                 </div>
                 <div>
-                    <label class="text-xl font-bold block">Where:</label>
-                    <p class="text-gray-900">{{ selectedReport.where }}</p>
+                    <label class="text-xl font-bold block">Date:</label>
+                    <p class="text-gray-900">{{ selectedReport.location }}</p>
                 </div>
                 <div>
-                    <label class="font-bold text-xl block">When:</label>
-                    <p class="text-gray-900">{{ selectedReport.when }}</p>
+                    <label class="font-bold text-xl block">Guard Name:</label>
+                    <p class="text-gray-900">{{ selectedReport.guardName }}</p>
                 </div>
                 <div>
-                    <label class="font-bold text-xl block">How:</label>
-                    <p class="text-gray-900">{{ selectedReport.how }}</p>
+                    <label class="font-bold text-xl block">Team Leader:</label>
+                    <p class="text-gray-900">{{ selectedReport.teamLeader }}</p>
                 </div>
                 <div>
-                    <label class="font-bold text-xl block">Why:</label>
-                    <p class="text-gray-900">{{ selectedReport.why }}</p>
+                    <label class="font-bold text-xl block">Type:</label>
+                    <p class="text-gray-900">{{ selectedReport.Rtype }}</p>
+                </div>
+                <div>
+                    <label class="font-bold text-xl block">Action Taken:</label>
+                    <p class="text-gray-900">{{ selectedReport.actionTaken }}</p>
                 </div>
                 <div class="md:col-span-2">
-                    <label class="font-bold text-xl block">Recommendation:</label>
-                    <p class="text-gray-900">{{ selectedReport.recommendation }}</p>
+                    <label class="font-bold text-xl block">Department Representative:</label>
+                    <p class="text-gray-900">{{ selectedReport.departmentRepresentative }}</p>
                 </div>
             </div>
 

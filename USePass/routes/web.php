@@ -45,6 +45,20 @@ Route::get('/incident-report/print', function () {
         ],
     ]);
 });
+Route::get('/spot-report/print', function () {
+    return Inertia::render('Frontend/SpotReportTemplate', [
+        'report' => [
+            'guardName' => request('guardName'),
+            'date' => request('date'),
+            'findings' => request('findings'),
+            'time' => request('time'),
+            'location' => request('location'),
+            'actionTaken' => request('actionTaken'),
+            'teamLeader' => request('teamLeader'),
+            'departmentRepresentative' => request('departmentRepresentative'),
+        ],
+    ]);
+});
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
