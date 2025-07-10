@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
-import { usePage } from '@inertiajs/vue3';
 import {Head} from "@inertiajs/vue3";
 
 const props = defineProps<{
@@ -21,17 +20,47 @@ onMounted(() => {
     setTimeout(() => window.print(), 500);
 });
 </script>
-<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
 <template>
     <Head title="Print Report"/>
     <div v-if="props.report"  class="p-10 text-sm font-sans leading-relaxed text-black max-w-3xl mx-auto bg-white">
         <img src="/images/usep-logo-small.png" alt="Logo" class="mx-auto mb-2 w-20 h-auto">
         <h1 class="text-lg font-bold text-center mb-1 font-bookman">University of Southeastern Philippines</h1>
+        <div class="relative text-center mb-4">
         <h2 class="text-center text-sm italic">Security Service Unit</h2>
-        <h3 class="text-center font-bold text-lg mt-2 mb-1">INCIDENT REPORT</h3>
-        <p class="text-left mb-4 text-base">Date: <span class="underline">{{ report.date }}</span></p>
 
+            <div class="absolute top-0 right-0 border border-black text-xs p-2 w-44">
+                <p class="font-bold text-center border-b border-black pb-1 mb-2">
+                    FOR SSU USE ONLY
+                </p>
+                <div class="space-y-1">
+                    <div>
+                        <p>_________________________</p>
+                        <p>Log No.</p>
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Log Date</p>
+
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Spot Report No.</p>
+
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Department</p>
+
+                    </div>
+                </div>
+            </div>
+            <div>
+        <h3 class="text-center font-bold text-lg mt-2 mb-16">INCIDENT REPORT</h3>
+        <p class="text-left mb-4 text-base">Date: <span class="underline">{{ report.date }}</span></p>
+            </div>
+
+        </div>
         <p class="mb-4 font-bold">TO WHOM IT MAY CONCERN:</p>
         <p class="mb-4 mx-5">
             This is to submit my report with regards to the incident reported in my area of responsibility, to wit:
