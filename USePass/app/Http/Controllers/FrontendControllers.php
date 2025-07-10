@@ -34,6 +34,11 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/Gscan');
     }
 
+    public function ghome()
+    {
+        return Inertia::render('Frontend/Ghome');
+    }
+
     public function deets()
     {
         return Inertia::render('Frontend/Edetails');

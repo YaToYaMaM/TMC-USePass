@@ -1,5 +1,5 @@
 <?php
-
+use App\Http\Controllers\Auth\CustomForgotPasswordController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -11,6 +11,7 @@ Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->nam
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
+Route::get('/ghome', [App\Http\Controllers\FrontendControllers::class, 'ghome'])->name('ghome');
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 
 Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('dashboard');
@@ -69,6 +70,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+Route::post('/otp/request', [CustomForgotPasswordController::class, 'sendOtp'])->name('otp.request');
+Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm'])->name('otp.form');
+Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
 
 //Route::get('/usepass-otp', function () {
 //    return Inertia::render('Frontend/userOTP');

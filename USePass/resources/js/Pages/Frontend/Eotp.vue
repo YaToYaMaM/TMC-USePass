@@ -5,7 +5,7 @@
     >
         <div class="absolute top-0 left-0 w-full h-12 bg-[#760000] z-20"></div>
         <!-- Overlay layer -->
-        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+        <div class="absolute inset-0 bg-black bg-opaciPHP ty-60"></div>
 
         <!-- Foreground content -->
         <div class="relative z-10 p-4 rounded-lg text-center max-w-lg w-full">
