@@ -33,11 +33,44 @@ onMounted(() => {
 
 
         <!-- Title -->
-        <div class="text-center my-4">
-            <h3 class="text-xl font-bold">SECURITY SPOT REPORT</h3>
-            <p class="text-xs italic">(For Security and Austerity Measures)</p>
-            <p class="text-xs">Series of 2015</p>
+        <!-- Header Container -->
+        <div class="relative text-center mb-4">
+            <!-- Centered Title -->
+            <div>
+                <h3 class="text-lg font-bold uppercase tracking-wide">SECURITY SPOT REPORT</h3>
+                <p class="text-xs italic text-gray-600">
+                    (For Security and Austerity Measures)<br />
+                    Series of 2015
+                </p>
+            </div>
 
+            <!-- FOR SSU USE ONLY Box positioned absolutely to the right -->
+            <div class="absolute top-0 right-0 border border-black text-xs p-2 w-44">
+                <p class="font-bold text-center border-b border-black pb-1 mb-2">
+                    FOR SSU USE ONLY
+                </p>
+                <div class="space-y-1">
+                    <div>
+                        <p>_________________________</p>
+                        <p>Log No.</p>
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Log Date</p>
+
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Spot Report No.</p>
+
+                    </div>
+                    <div>
+                        <p>_________________________</p>
+                        <p>Department</p>
+
+                    </div>
+                </div>
+            </div>
         </div>
 
 
