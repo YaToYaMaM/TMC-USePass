@@ -90,16 +90,19 @@ onMounted(() => {
         </p>
         </div>
         <div class="flex justify-between mt-10">
-            <div>
-                <p>Yours truly,</p>
+
+            <div class="text-center">
+                <p class="text-left">Yours truly,</p>
                 <br />
                 <p class="underline text-lg font-semibold">{{ report.guardName }}</p>
+                <p>(Signature Over Printed Name)</p>
                 <p class="font-semibold">(Guard on Duty)</p>
             </div>
-            <div class="text-right">
-                <p>Verified:</p>
+            <div class="text-center">
+                <p class="text-left">Verified:</p>
                 <br />
                 <p class="underline text-lg font-semibold">{{ report.teamLeader }}</p>
+                <p>(Signature Over Printed Name)</p>
                 <p class="font-semibold">(Team Leader)</p>
             </div>
         </div>
@@ -112,7 +115,7 @@ onMounted(() => {
                 <p class="font-semibold">Head, SSU</p>
                 <p class="font-semibold">Date:____________________</p>
             </div>
-            <div class="text-right">
+            <div class="text-left">
                 <p>Copy Received:</p>
                 <br />
                 <p class="underline text-lg font-semibold">{{ report.departmentRepresentative }}</p>
