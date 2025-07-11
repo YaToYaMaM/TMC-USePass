@@ -31,11 +31,8 @@ onMounted(() => {
             <h2 class="text-sm italic">Security Service Unit</h2>
         </div>
 
-
-        <!-- Title -->
-        <!-- Header Container -->
         <div class="relative text-center mb-4">
-            <!-- Centered Title -->
+
             <div>
                 <h3 class="text-lg font-bold uppercase tracking-wide">SECURITY SPOT REPORT</h3>
                 <p class="text-xs italic text-gray-600">
@@ -44,7 +41,6 @@ onMounted(() => {
                 </p>
             </div>
 
-            <!-- FOR SSU USE ONLY Box positioned absolutely to the right -->
             <div class="absolute top-0 right-0 border border-black text-xs p-2 w-44">
                 <p class="font-bold text-center border-b border-black pb-1 mb-2">
                     FOR SSU USE ONLY
@@ -74,10 +70,7 @@ onMounted(() => {
         </div>
 
         <div class="text-[15px]">
-        <!-- Date -->
         <p class="mb-4"><strong>Date:</strong> <span class="underline">{{ report.date }}</span></p>
-
-        <!-- Body -->
         <p class="mb-4 font-bold">TO WHOM IT MAY CONCERN:</p>
 
         <p class="mb-4">
@@ -89,7 +82,6 @@ onMounted(() => {
             (specific department/office/building).
         </p>
 
-        <!-- Action Taken -->
         <p class="font-bold">ACTION TAKEN:</p>
         <p class="mb-6 underline font-semibold">{{ report.actionTaken }}</p>
 
@@ -97,7 +89,6 @@ onMounted(() => {
             This security spot report is subject for recording of the department or office concerned for further action.
         </p>
         </div>
-        <!-- Signatories -->
         <div class="flex justify-between mt-10">
             <div>
                 <p>Yours truly,</p>
@@ -130,10 +121,8 @@ onMounted(() => {
             </div>
         </div>
 
-        <!-- Footer -->
         <div class="mt-10 border-t pt-4 text-xs">
             <div class="flex justify-between items-start">
-                <!-- Left: VISION and Address -->
                 <div class="flex flex-col text-left max-w-md space-y-1">
                     <p class="font-semibold">
                         VISION:
@@ -151,7 +140,6 @@ onMounted(() => {
                     </div>
                 </div>
 
-                <!-- Right: Logos -->
                 <div class="flex items-center space-x-3">
                     <img src="/images/Picture3.png" alt="Logo2" class="h-20 w-auto object-contain" />
                     <img src="/images/Picture2.png" alt="Logo3" class="h-20 w-auto object-contain" />
