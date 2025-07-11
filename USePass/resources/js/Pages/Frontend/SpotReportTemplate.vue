@@ -73,7 +73,7 @@ onMounted(() => {
             </div>
         </div>
 
-        <div class="text-[17px]">
+        <div class="text-[15px]">
         <!-- Date -->
         <p class="mb-4"><strong>Date:</strong> <span class="underline">{{ report.date }}</span></p>
 
