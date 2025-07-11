@@ -178,8 +178,8 @@ function updateGuard() {
 
             </div>
             <div>
-                <IncidentTable v-if="selectedIncident === 'Incident'" />
-                <SpotTable v-else-if="selectedIncident === 'Spot'" />
+                <IncidentTable v-if="selectedIncident === 'Incident'"  :selectedDate="selectedDate" />
+                <SpotTable v-else-if="selectedIncident === 'Spot'" :selectedDate="selectedDate"/>
             </div>
         </div>
     </Frontend>

@@ -70,7 +70,7 @@ const selectedDate = ref<string>('');
                 </div>
 
             </div>
-            <StudentReportTable />
+            <StudentReportTable :selectedDate="selectedDate" />
         </div>
     </Frontend>
 </template>

@@ -1,6 +1,11 @@
 <script setup lang="ts">
-import {ref, computed} from "vue";
-const guards = ref([
+import { ref, computed } from "vue";
+
+const props = defineProps<{
+    selectedDate: string;
+}>();
+
+const student = ref([
     {
         id: "2022-00381",
         name: "Froilan Canete",
@@ -13,7 +18,7 @@ const guards = ref([
         name: "Joan Malintad",
         program: "BSIT",
         major: "Information Security",
-        date: "2025-07-08",
+        date: "2025-07-07",
     },
     {
         id: "2022-00291",
@@ -24,20 +29,24 @@ const guards = ref([
     },
 ]);
 
-
 const currentPage = ref(1);
 const itemsPerPage = 7;
 
+const filteredStudents = computed(() => {
+    if (!props.selectedDate) return student.value;
+    return student.value.filter((s) => s.date === props.selectedDate);
+});
+
 const paginatedIncident = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
-    return guards.value.slice(start, start + itemsPerPage);
+    return filteredStudents.value.slice(start, start + itemsPerPage);
 });
 
 const totalPages = computed(() =>
-    Math.ceil(guards.value.length / itemsPerPage)
+    Math.ceil(filteredStudents.value.length / itemsPerPage)
 );
-
 </script>
+
 
 <template>
     <div class="overflow-x-auto mt-6 rounded-lg shadow border border-gray-200">
