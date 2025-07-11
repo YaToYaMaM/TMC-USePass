@@ -73,41 +73,42 @@ onMounted(() => {
             </div>
         </div>
 
-
+        <div class="text-[17px]">
         <!-- Date -->
         <p class="mb-4"><strong>Date:</strong> <span class="underline">{{ report.date }}</span></p>
 
         <!-- Body -->
         <p class="mb-4 font-bold">TO WHOM IT MAY CONCERN:</p>
+
         <p class="mb-4">
             Sir/Madame;
             <br /><br />
             This is to inform your good office that as I conducted clearing inspection in my area of responsibility on or about
-            <span class="underline">{{ report.time }}</span> hours dated <span class="underline">{{ report.date }}</span>,
-            I found out that <span class="underline">{{ report.findings }}</span> at <span class="underline">{{ report.location }}</span>
+            <span class="underline font-semibold">{{ report.time }}</span> hours dated <span class="underline font-semibold">{{ report.date }}</span>,
+            I found out that <span class="underline font-semibold">{{ report.findings }}</span> at <span class="underline font-semibold">{{ report.location }}</span>
             (specific department/office/building).
         </p>
 
         <!-- Action Taken -->
         <p class="font-bold">ACTION TAKEN:</p>
-        <p class="mb-6 underline">{{ report.actionTaken }}</p>
+        <p class="mb-6 underline font-semibold">{{ report.actionTaken }}</p>
 
         <p class="mb-6">
             This security spot report is subject for recording of the department or office concerned for further action.
         </p>
-
+        </div>
         <!-- Signatories -->
         <div class="flex justify-between mt-10">
             <div>
                 <p>Yours truly,</p>
                 <br />
-                <p class="underline text-lg">{{ report.guardName }}</p>
+                <p class="underline text-lg font-semibold">{{ report.guardName }}</p>
                 <p class="font-semibold">(Guard on Duty)</p>
             </div>
             <div class="text-right">
                 <p>Verified:</p>
                 <br />
-                <p class="underline text-lg">{{ report.teamLeader }}</p>
+                <p class="underline text-lg font-semibold">{{ report.teamLeader }}</p>
                 <p class="font-semibold">(Team Leader)</p>
             </div>
         </div>
@@ -116,14 +117,14 @@ onMounted(() => {
             <div>
                 <p>Noted:</p>
                 <br />
-                <p class="underline text-lg">Celso Talarde</p>
+                <p class="underline text-lg font-semibold">Celso Talarde</p>
                 <p class="font-semibold">Head, SSU</p>
                 <p class="font-semibold">Date:____________________</p>
             </div>
             <div class="text-right">
                 <p>Copy Received:</p>
                 <br />
-                <p class="underline text-lg">{{ report.departmentRepresentative }}</p>
+                <p class="underline text-lg font-semibold">{{ report.departmentRepresentative }}</p>
                 <p class="font-semibold">Concerned Department/Office/Unit</p>
                 <p class="font-semibold">Date:____________________</p>
             </div>
