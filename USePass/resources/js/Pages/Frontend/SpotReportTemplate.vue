@@ -130,10 +130,36 @@ onMounted(() => {
         </div>
 
         <!-- Footer -->
-        <div class="mt-10 border-t pt-4 text-xs text-center">
-            <p><strong>VISION:</strong> PREMIER RESEARCH UNIVERSITY TRANSFORMING COMMUNITIES IN THE ASEAN AND BEYOND</p>
-            <p>University of Southeastern Philippines | Apokon, Tagum City, Davao del Norte 8100 | www.usep.edu.ph</p>
+        <div class="mt-10 border-t pt-4 text-xs">
+            <div class="flex justify-between items-start">
+                <!-- Left: VISION and Address -->
+                <div class="flex flex-col text-left max-w-md space-y-1">
+                    <p class="font-semibold">
+                        VISION:
+                        <span class="font-normal "><strong>
+          PREMIER RESEARCH UNIVERSITY TRANSFORMING COMMUNITIES IN THE ASEAN AND BEYOND </strong>
+        </span>
+                    </p>
+                    <div class="flex flex-initial">
+                    <p class="text-wrap text-left px-2">
+                        University of Southeastern Philippines | Apokon, Tagum City, Davao del Norte 8100 www.usep.edu.ph
+                    </p>
+                    <p class="text-wrap text-left">
+                        (084) 645-3050 local 501  www.usep.edu.ph useptagum@usep.edu.ph
+                    </p>
+                    </div>
+                </div>
+
+                <!-- Right: Logos -->
+                <div class="flex items-center space-x-3">
+                    <img src="/images/Picture3.png" alt="Logo2" class="h-20 w-auto object-contain" />
+                    <img src="/images/Picture2.png" alt="Logo3" class="h-20 w-auto object-contain" />
+                    <img src="/images/Picture4.png" alt="Logo4" class="h-20 w-auto object-contain" />
+                </div>
+            </div>
         </div>
+
+
     </div>
 </template>
 
