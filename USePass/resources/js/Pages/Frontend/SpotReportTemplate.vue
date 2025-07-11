@@ -164,7 +164,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.font-old {
-    font-family: 'OldEnglish', serif;
-}
+
 </style>
