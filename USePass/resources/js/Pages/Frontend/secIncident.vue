@@ -1,87 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref} from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import IncidentTable from "@/Components/IncidentTable.vue";
 import SpotTable from "@/Components/SpotTable.vue";
 
 
-const showModal = ref(false);
-const selectedImage = ref<File | null>(null);
-const imagePreview = ref<string | null>(null);
-const importFileInput = ref<HTMLInputElement | null>(null);
 const selectedLocation = ref('Tagum');
 const selectedIncident = ref('Incident');
-const showEditModal = ref(false);
-const guardToEdit = ref<{ id: number; name: string; title: string } | null>(null);
 const selectedDate = ref<string>('');
 
-function submitForm() {
-    alert('Guard saved!');
-    showModal.value = false;
-}
-function handleImageUpload(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-        selectedImage.value = file;
-        imagePreview.value = URL.createObjectURL(file);
-    }
-}
 
-function triggerImport() {
-    importFileInput.value?.click();
-}
-
-function handleImportFile(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
-    if (file) {
-        alert(`Imported file: ${file.name}`);
-        // You can add logic here to upload it or read its content
-    }
-}
-// Mock guard list (you can fetch this from a backend later)
-const guards = ref([
-    { id: 1, name: "Froilan Canete", title: "Security Guard" },
-    { id: 2, name: "Marvin Dela Cruz", title: "Security Guard" },
-    { id: 3, name: "Carlos Reyes", title: "Security Guard" },
-    { id: 4, name: "Ronald Sison", title: "Security Guard" },
-    { id: 5, name: "Elmer Santos", title: "Security Guard" },
-    { id: 6, name: "Benjie Ramos", title: "Security Guard" },
-    { id: 7, name: "Jake Garcia", title: "Security Guard" },
-]);
-
-const currentPage = ref(1);
-const guardsPerPage = 4;
-
-const paginatedGuards = computed(() => {
-    const start = (currentPage.value - 1) * guardsPerPage;
-    return guards.value.slice(start, start + guardsPerPage);
-});
-
-const totalPages = computed(() =>
-    Math.ceil(guards.value.length / guardsPerPage)
-);
-
-function goToPage(page: number) {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-    }
-}
-function openEditModal(guard: { id: number; name: string; title: string }) {
-    guardToEdit.value = { ...guard };
-    showEditModal.value = true;
-}
-
-function updateGuard() {
-    if (guardToEdit.value) {
-        const index = guards.value.findIndex(g => g.id === guardToEdit.value?.id);
-        if (index !== -1) {
-            guards.value[index] = { ...guardToEdit.value };
-            alert("Guard updated!");
-        }
-    }
-    showEditModal.value = false;
-}
 </script>
 
 <template>
@@ -178,8 +107,8 @@ function updateGuard() {
 
             </div>
             <div>
-                <IncidentTable v-if="selectedIncident === 'Incident'" />
-                <SpotTable v-else-if="selectedIncident === 'Spot'" />
+                <IncidentTable v-if="selectedIncident === 'Incident'"  :selectedDate="selectedDate" />
+                <SpotTable v-else-if="selectedIncident === 'Spot'" :selectedDate="selectedDate"/>
             </div>
         </div>
     </Frontend>

@@ -7,21 +7,30 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 
-Route::get('/', [App\Http\Controllers\FrontendControllers::class, 'index'])->name('home');
+
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
-Route::get('/ghome', [App\Http\Controllers\FrontendControllers::class, 'ghome'])->name('ghome');
+
+
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 
-Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('dashboard');
-Route::get('/guard', [FrontendControllers::class, 'guard'])->name('guard');
-Route::get('/students', [FrontendControllers::class, 'students'])->name('students');
-Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
-Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
-Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
-Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
+// Admin Dashboard
+Route::middleware(['auth', 'can:isAdmin'])->group(function () {
+//    Route::get('/', [FrontendControllers::class, 'index'])->name('home');
+    Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/guard', [FrontendControllers::class, 'guard'])->name('guard');
+    Route::get('/students', [FrontendControllers::class, 'students'])->name('students');
+    Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
+    Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
+    Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
+    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
+});
 
+// User Guard Dashboard
+Route::middleware(['auth', 'can:isGuard'])->group(function () {
+    Route::get('/', [FrontendControllers::class, 'ghome'])->name('guard.ghome');
+});
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [
 //        'canLogin' => Route::has('login'),

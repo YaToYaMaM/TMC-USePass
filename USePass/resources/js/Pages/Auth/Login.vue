@@ -75,7 +75,9 @@ const submit = () => {
 
                 <div class="flex justify-between items-center text-sm">
                     <label class="flex items-center space-x-2"></label>
-                    <Link href="/forgot-password" class="text-red-900 font-semibold hover:underline">Forgot password?</Link>
+                    <Link v-if="canResetPassword" :href="route('password.request')" class="text-red-900 font-semibold hover:underline">
+                        Forgot password?
+                    </Link>
                 </div>
 
                 <button

@@ -7,17 +7,21 @@ use Inertia\Inertia;
 
 class FrontendControllers extends Controller
 {
-    public function index(){
-        return Inertia::render('Frontend/Home');
-//        Route::get('/', function () {
-//    return Inertia::render('Welcome', [
-//        'canLogin' => Route::has('login'),
-//        'canRegister' => Route::has('register'),
-//        'laravelVersion' => Application::VERSION,
-//        'phpVersion' => PHP_VERSION,
-//    ]);
-//});
+    public function index()
+    {
+        if (auth()->check()) {
+            if (auth()->user()->isAdmin()) {
+                return Inertia::render('Frontend/secDashboard');
+            }
+
+            if (auth()->user()->isGuard()) {
+                return Inertia::render('Frontend/Ghome');
+            }
+        }
+
+        return redirect()->route('login');
     }
+
 
     public function user()
     {

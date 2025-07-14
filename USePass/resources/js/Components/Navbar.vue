@@ -13,7 +13,7 @@ import {Link} from "@inertiajs/vue3";
         <div class="ml-36">
             <ul class="flex gap-x-4">
                 <li class="nav-item">
-                    <Link class="text-white" :href="route('home')">Home</Link>
+                    <p class="text-white">Logout</p>
                 </li>
             </ul>
         </div>
