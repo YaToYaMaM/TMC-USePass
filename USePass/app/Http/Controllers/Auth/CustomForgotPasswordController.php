@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use App\Models\User;
 
 class CustomForgotPasswordController extends Controller
 {
@@ -74,10 +77,40 @@ class CustomForgotPasswordController extends Controller
         ]);
 
         if ($request->otp == Session::get('otp')) {
-            // Proceed to reset password
-            return redirect()->route('password.reset', ['token' => 'dummy-token']); // or custom logic
+            $user = User::where('email', Session::get('otp_email'))->first();
+            if (!$user) {
+                return back()->withErrors(['otp' => 'No user found for this email.']);
+            }
+
+            $token = Password::getRepository()->create($user);
+
+            return redirect()->route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ]);
         }
 
         return back()->withErrors(['otp' => 'Invalid OTP.']);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => 'required|min:8|confirmed',
+        ]);
+
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->save();
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+            ? redirect()->route('login')->with('status', __($status))
+            : back()->withErrors(['email' => [__($status)]]);
     }
 }
