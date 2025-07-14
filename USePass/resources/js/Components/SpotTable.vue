@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import {ref, computed} from "vue";
-const guards = ref([
+const reports = ref([
     {
         id: 1,
         guardName: "Froilan Canete",
@@ -32,14 +32,21 @@ function printReport() {
 }
 const currentPage = ref(1);
 const itemsPerPage = 7;
+const props = defineProps<{
+    selectedDate: string;
+}>();
+const filteredReport = computed(() => {
+    if (!props.selectedDate) return reports.value;
+    return reports.value.filter((s) => s.date === props.selectedDate);
+});
 
 const paginatedIncident = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
-    return guards.value.slice(start, start + itemsPerPage);
+    return filteredReport.value.slice(start, start + itemsPerPage);
 });
 
 const totalPages = computed(() =>
-    Math.ceil(guards.value.length / itemsPerPage)
+    Math.ceil(filteredReport.value.length / itemsPerPage)
 );
 
 </script>

@@ -31,11 +31,8 @@ onMounted(() => {
             <h2 class="text-sm italic">Security Service Unit</h2>
         </div>
 
-
-        <!-- Title -->
-        <!-- Header Container -->
         <div class="relative text-center mb-4">
-            <!-- Centered Title -->
+
             <div>
                 <h3 class="text-lg font-bold uppercase tracking-wide">SECURITY SPOT REPORT</h3>
                 <p class="text-xs italic text-gray-600">
@@ -44,7 +41,6 @@ onMounted(() => {
                 </p>
             </div>
 
-            <!-- FOR SSU USE ONLY Box positioned absolutely to the right -->
             <div class="absolute top-0 right-0 border border-black text-xs p-2 w-44">
                 <p class="font-bold text-center border-b border-black pb-1 mb-2">
                     FOR SSU USE ONLY
@@ -73,41 +69,40 @@ onMounted(() => {
             </div>
         </div>
 
-
-        <!-- Date -->
+        <div class="text-[15px]">
         <p class="mb-4"><strong>Date:</strong> <span class="underline">{{ report.date }}</span></p>
-
-        <!-- Body -->
         <p class="mb-4 font-bold">TO WHOM IT MAY CONCERN:</p>
+
         <p class="mb-4">
             Sir/Madame;
             <br /><br />
             This is to inform your good office that as I conducted clearing inspection in my area of responsibility on or about
-            <span class="underline">{{ report.time }}</span> hours dated <span class="underline">{{ report.date }}</span>,
-            I found out that <span class="underline">{{ report.findings }}</span> at <span class="underline">{{ report.location }}</span>
+            <span class="underline font-semibold">{{ report.time }}</span> hours dated <span class="underline font-semibold">{{ report.date }}</span>,
+            I found out that <span class="underline font-semibold">{{ report.findings }}</span> at <span class="underline font-semibold">{{ report.location }}</span>
             (specific department/office/building).
         </p>
 
-        <!-- Action Taken -->
         <p class="font-bold">ACTION TAKEN:</p>
-        <p class="mb-6 underline">{{ report.actionTaken }}</p>
+        <p class="mb-6 underline font-semibold">{{ report.actionTaken }}</p>
 
         <p class="mb-6">
             This security spot report is subject for recording of the department or office concerned for further action.
         </p>
-
-        <!-- Signatories -->
+        </div>
         <div class="flex justify-between mt-10">
-            <div>
-                <p>Yours truly,</p>
+
+            <div class="text-center">
+                <p class="text-left">Yours truly,</p>
                 <br />
-                <p class="underline text-lg">{{ report.guardName }}</p>
+                <p class="underline text-lg font-semibold">{{ report.guardName }}</p>
+                <p>(Signature Over Printed Name)</p>
                 <p class="font-semibold">(Guard on Duty)</p>
             </div>
-            <div class="text-right">
-                <p>Verified:</p>
+            <div class="text-center">
+                <p class="text-left">Verified:</p>
                 <br />
-                <p class="underline text-lg">{{ report.teamLeader }}</p>
+                <p class="underline text-lg font-semibold">{{ report.teamLeader }}</p>
+                <p>(Signature Over Printed Name)</p>
                 <p class="font-semibold">(Team Leader)</p>
             </div>
         </div>
@@ -116,29 +111,50 @@ onMounted(() => {
             <div>
                 <p>Noted:</p>
                 <br />
-                <p class="underline text-lg">Celso Talarde</p>
+                <p class="underline text-lg font-semibold">Celso Talarde</p>
                 <p class="font-semibold">Head, SSU</p>
                 <p class="font-semibold">Date:____________________</p>
             </div>
-            <div class="text-right">
+            <div class="text-left">
                 <p>Copy Received:</p>
                 <br />
-                <p class="underline text-lg">{{ report.departmentRepresentative }}</p>
+                <p class="underline text-lg font-semibold">{{ report.departmentRepresentative }}</p>
                 <p class="font-semibold">Concerned Department/Office/Unit</p>
                 <p class="font-semibold">Date:____________________</p>
             </div>
         </div>
 
-        <!-- Footer -->
-        <div class="mt-10 border-t pt-4 text-xs text-center">
-            <p><strong>VISION:</strong> PREMIER RESEARCH UNIVERSITY TRANSFORMING COMMUNITIES IN THE ASEAN AND BEYOND</p>
-            <p>University of Southeastern Philippines | Apokon, Tagum City, Davao del Norte 8100 | www.usep.edu.ph</p>
+        <div class="mt-10 border-t pt-4 text-xs">
+            <div class="flex justify-between items-start">
+                <div class="flex flex-col text-left max-w-md space-y-1">
+                    <p class="font-semibold">
+                        VISION:
+                        <span class="font-normal "><strong>
+          PREMIER RESEARCH UNIVERSITY TRANSFORMING COMMUNITIES IN THE ASEAN AND BEYOND </strong>
+        </span>
+                    </p>
+                    <div class="flex flex-initial">
+                    <p class="text-wrap text-left px-2">
+                        University of Southeastern Philippines | Apokon, Tagum City, Davao del Norte 8100 www.usep.edu.ph
+                    </p>
+                    <p class="text-wrap text-left">
+                        (084) 645-3050 local 501  www.usep.edu.ph useptagum@usep.edu.ph
+                    </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <img src="/images/Picture3.png" alt="Logo2" class="h-20 w-auto object-contain" />
+                    <img src="/images/Picture2.png" alt="Logo3" class="h-20 w-auto object-contain" />
+                    <img src="/images/Picture4.png" alt="Logo4" class="h-20 w-auto object-contain" />
+                </div>
+            </div>
         </div>
+
+
     </div>
 </template>
 
 <style scoped>
-.font-old {
-    font-family: 'OldEnglish', serif;
-}
+
 </style>
