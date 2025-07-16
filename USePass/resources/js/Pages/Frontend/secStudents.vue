@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
+import { router } from '@inertiajs/vue3'
 
 
 const showModal = ref(false);
@@ -11,15 +12,12 @@ const importFileInput = ref<HTMLInputElement | null>(null);
 const selectedLocation = ref('Tagum');
 const showParentModal = ref(false);
 
-function submitForm() {
-    alert('student saved!');
-    showModal.value = false;
-}
 function handleImageUpload(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (file) {
         selectedImage.value = file;
         imagePreview.value = URL.createObjectURL(file);
+        form.value.student_profile_image = file;
     }
 }
 
@@ -34,7 +32,7 @@ function handleImportFile(event: Event) {
         // You can add logic here to upload it or read its content
     }
 }
-// Mock student list (you can fetch this from a backend later)
+
 const students = ref([
     { id: 1, name: "Froilan Canete", title: "Information Technology" },
     { id: 2, name: "Marvin Dela Cruz", title: "BS English" },
@@ -44,6 +42,36 @@ const students = ref([
     { id: 6, name: "Benjie Ramos", title: "BS English" },
     { id: 7, name: "Jake Garcia", title: "BS English" },
 ]);
+
+const form = ref({
+    student_last_name: '',
+    student_first_name: '',
+    student_middle_initial: '',
+    student_gender: '',
+    id_number: '',
+    student_program: '',
+    student_major: '',
+    student_unit: '',
+    student_email: '',
+    student_phone_number: '',
+    student_profie_image: null
+});
+function submitForm() {
+    const payload = new FormData();
+    for (const key in students.value) {
+        if (students.value[key] !== null) {
+            payload.append(key, students.value[key]);
+        }
+    }
+
+    router.post('/students', payload, {
+        forceFormData: true,
+        onSuccess: () => {
+            alert('Student saved!');
+            showModal.value = false;
+        }
+    });
+}
 
 const currentPage = ref(1);
 const studentsPerPage = 4;
@@ -220,19 +248,19 @@ function backToStudentForm() {
                         <div class="mb-4 flex space-x-4">
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Last Name</label>
-                                <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.student_last_name" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">First Name</label>
-                                <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.student_first_name" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/12">
                                 <label class="block text-sm font-medium mb-1">M.I</label>
-                                <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.student_middle_initial" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/6">
                                 <label class="block text-sm font-medium mb-1">Gender</label>
-                                <select class="w-full border border-gray-300 p-2 rounded" required>
+                                <select v-model="form.student_gender" class="w-full border border-gray-300 p-2 rounded" required>
                                     <option value="" disabled selected>Select gender</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
@@ -245,11 +273,11 @@ function backToStudentForm() {
 
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">ID Number</label>
-                                <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.id_number" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Program</label>
-                                <select class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
+                                <select v-model="form.student_program" class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
                                     <option value="" disabled selected>Select Program</option>
                                     <option value="male">Information Technology</option>
                                     <option value="female">Education</option>
@@ -258,7 +286,7 @@ function backToStudentForm() {
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Major</label>
-                                <select class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
+                                <select v-model="form.student_major" class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
                                     <option value="" disabled selected>Select Major</option>
                                     <option value="male">Information Security</option>
                                     <option value="female">Elementary Education</option>
@@ -267,7 +295,7 @@ function backToStudentForm() {
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Unit</label>
-                                <select class="w-full border border-gray-300 p-2 w-fit min-w-[100px] rounded" required>
+                                <select v-model="form.student_unit" class="w-full border border-gray-300 p-2 w-fit min-w-[100px] rounded" required>
                                     <option value="" disabled selected>Select Unit</option>
                                     <option value="male">Tagum</option>
                                     <option value="female">Mabini</option>
@@ -277,11 +305,11 @@ function backToStudentForm() {
                         <div class="mb-4 flex space-x-4">
                             <div class="w-1/2">
                                 <label class="block text-sm font-medium mb-1">Email</label>
-                                <input type="Text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.student_email" type="Text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/2">
                                 <label class="block text-sm font-medium mb-1">Contact Number</label>
-                                <input type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.student_phone_number" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                         </div>
 

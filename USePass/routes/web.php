@@ -2,6 +2,7 @@
 use App\Http\Controllers\Auth\CustomForgotPasswordController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -69,6 +70,7 @@ Route::get('/spot-report/print', function () {
         ],
     ]);
 });
+Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
