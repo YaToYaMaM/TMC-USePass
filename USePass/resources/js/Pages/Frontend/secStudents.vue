@@ -3,6 +3,7 @@ import { ref, computed } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3'
+import axios from 'axios';
 
 
 const showModal = ref(false);
@@ -48,29 +49,38 @@ const form = ref({
     student_first_name: '',
     student_middle_initial: '',
     student_gender: '',
-    id_number: '',
+    id: '',
     student_program: '',
     student_major: '',
     student_unit: '',
     student_email: '',
     student_phone_number: '',
-    student_profie_image: null
+    student_profie_image: null,
+
+    parent_last_name: '',
+    parent_first_name: '',
+    parent_middle_initial: '',
+    parent_phone_num: '',
+    parent_email: '',
+    parent_relation: '',
 });
-function submitForm() {
-    const payload = new FormData();
-    for (const key in students.value) {
-        if (students.value[key] !== null) {
-            payload.append(key, students.value[key]);
-        }
+async function submitForm() {
+    const formData = new FormData();
+    for (const key in form.value) {
+        formData.append(key, form.value[key]);
     }
 
-    router.post('/students', payload, {
-        forceFormData: true,
-        onSuccess: () => {
-            alert('Student saved!');
-            showModal.value = false;
-        }
-    });
+    try {
+        router.post('/students', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        });
+        alert('Student and parent saved!');
+        showModal.value = false;
+        showParentModal.value = false;
+    } catch (error) {
+        console.error(error);
+        alert('Something went wrong.');
+    }
 }
 
 const currentPage = ref(1);
@@ -273,7 +283,7 @@ function backToStudentForm() {
 
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">ID Number</label>
-                                <input v-model="form.id_number" type="text" class="w-full border border-gray-300 p-2 rounded" required />
+                                <input v-model="form.id" type="text" class="w-full border border-gray-300 p-2 rounded" required />
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Program</label>
@@ -370,14 +380,15 @@ function backToStudentForm() {
                             <p class="text-sm font-medium mb-2">Parent/Guardian</p>
 
                             <div class="mb-2 flex gap-2">
-                                <input type="text" placeholder="Last Name" class="w-1/3 border border-gray-300 p-2 rounded text-sm" required />
-                                <input type="text" placeholder="First Name" class="w-1/3 border border-gray-300 p-2 rounded text-sm" required />
-                                <input type="text" placeholder="M.I" class="w-1/6 border border-gray-300 p-2 rounded text-sm" />
+                                <input v-model="form.parent_last_name" type="text" placeholder="Last Name" class="w-1/3 border border-gray-300 p-2 rounded text-sm" required />
+                                <input v-model="form.parent_first_name" type="text" placeholder="First Name" class="w-1/3 border border-gray-300 p-2 rounded text-sm" required />
+                                <input v-model="form.parent_middle_initial" type="text" placeholder="M.I" class="w-1/6 border border-gray-300 p-2 rounded text-sm" />
                             </div>
 
                             <div class="mb-4 flex gap-2">
-                                <input type="text" placeholder="Contact Number" class="w-1/2 border border-gray-300 p-2 rounded text-sm" required />
-                                <select class="w-1/2 border border-gray-300 p-2 rounded text-sm" required>
+                                <input v-model="form.parent_phone_num" type="text" placeholder="Contact #" class="w-1/3 border border-gray-300 p-2 rounded text-sm" required />
+                                <input v-model="form.parent_email" type="text" placeholder="Email" class="w-1/2 border border-gray-300 p-2 rounded text-sm" required />
+                                <select v-model="form.parent_relation" class="w-1/4 border border-gray-300 p-2 rounded text-sm" required>
                                     <option value="" disabled selected>Relationship</option>
                                     <option value="father">Father</option>
                                     <option value="mother">Mother</option>
