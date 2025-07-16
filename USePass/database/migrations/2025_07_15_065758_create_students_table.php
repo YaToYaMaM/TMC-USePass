@@ -12,22 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
-            $table->id();
-            $table->string('student_first_name',100)->nullable();
-            $table->string('student_last_name',100)->nullable();
-            $table->string('student_middle_initial',50)->nullable();
-            $table->string('student_gender',50)->nullable();
-            $table->string('student_program',100)->nullable();
-            $table->string('student_major',100)->nullable();
-            $table->enum('student_unit', ['Tagum', 'Mabini'])->default('Tagum');
+            $table->string('students_id')->primary();
 
-            $table->string('student_email',100)->unique();
-            $table->string('student_phone_num',20)->nullable();
-            $table->string('student_profile_image')->nullable();
+            $table->string('students_first_name', 100)->nullable();
+            $table->string('students_last_name', 100)->nullable();
+            $table->string('students_middle_initial', 50)->nullable();
+            $table->string('students_gender', 50)->nullable();
+            $table->string('students_program', 100)->nullable();
+            $table->string('students_major', 100)->nullable();
+            $table->enum('students_unit', ['Tagum', 'Mabini'])->default('Tagum');
+
+            $table->string('students_email', 100)->unique();
+            $table->string('students_phone_num', 20)->nullable();
+            $table->string('students_profile_image')->nullable();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

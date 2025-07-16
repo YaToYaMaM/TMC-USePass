@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('students_records', function (Blueprint $table) {
             $table->id('record_id');
-            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
+            $table->string('students_id');
+            $table->foreign('students_id')
+                ->references('students_id')->on('students')
+                ->onDelete('cascade');
 
             $table->timestamp('record_in')->nullable();
             $table->timestamp('record_out')->nullable();
