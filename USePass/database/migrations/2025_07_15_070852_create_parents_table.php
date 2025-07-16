@@ -13,14 +13,18 @@ return new class extends Migration
     {
         Schema::create('parents', function (Blueprint $table) {
             $table->id('parent_id');
-            $table->foreignId('student_id')->constrained('students')->onDelete('cascade');
 
-            $table->string('parent_first_name',100)->nullable();
-            $table->string('parent_last_name',100)->nullable();
-            $table->string('parent_middle_initial',50)->nullable();
-            $table->string('parent_relation',50)->nullable();
-            $table->string('parent_email',100)->unique();
-            $table->string('parent_phone_num',20)->nullable();
+            $table->string('students_id');
+            $table->foreign('students_id')
+                ->references('students_id')->on('students')
+                ->onDelete('cascade');
+
+            $table->string('parent_first_name', 100)->nullable();
+            $table->string('parent_last_name', 100)->nullable();
+            $table->string('parent_middle_initial', 50)->nullable();
+            $table->string('parent_relation', 50)->nullable();
+            $table->string('parent_email', 100)->unique();
+            $table->string('parent_phone_num', 20)->nullable();
             $table->timestamps();
         });
     }
