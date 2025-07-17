@@ -155,6 +155,10 @@ const totalPages = computed(() =>
                 </div>
                 <div>
                     <label class="text-xl font-bold block">Date:</label>
+                    <p class="text-gray-900">{{ selectedReport.date }}</p>
+                </div>
+                <div>
+                    <label class="text-xl font-bold block">Location:</label>
                     <p class="text-gray-900">{{ selectedReport.location }}</p>
                 </div>
                 <div>
