@@ -31,6 +31,8 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 // User Guard Dashboard
 Route::middleware(['auth', 'can:isGuard'])->group(function () {
     Route::get('/', [FrontendControllers::class, 'ghome'])->name('guard.ghome');
+    Route::get('/scan', [FrontendControllers::class, 'scan'])->name('scan');
+    Route::get('/glog', [FrontendControllers::class, 'glog'])->name('glog');
 });
 //Route::get('/', function () {
 //    return Inertia::render('Welcome', [

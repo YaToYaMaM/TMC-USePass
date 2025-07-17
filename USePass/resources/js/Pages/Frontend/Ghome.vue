@@ -25,9 +25,9 @@
                                 </div>
                             </div>
                             <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
-                                <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</a>
-                                <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">SCANNER</a>
-                                <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGS</a>
+                                <Link :href="route('guard.ghome')" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</Link>
+                                <Link :href="route('scan')" class="text-white font-bold text-xs sm:text-sm hover:underline">SCANNER</Link>
+                                <Link :href="route('glog')" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGS</Link>
                                 <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGOUT</a>
                             </nav>
                         </div>
@@ -130,7 +130,12 @@
 </template>
 
 <script>
+import { Link } from '@inertiajs/vue3'
+
 export default {
+    components: {
+        Link
+    },
     data() {
         return {
             menuOpen: false,
@@ -138,7 +143,7 @@ export default {
             currentPage: 1,
             itemsPerPage: 7,
             searchText: '',
-            selectedDate: '2025-07-03', // <-- date filter
+            selectedDate: '2025-07-03',
             students: [
                 { name: "Alice D.", course: "BS in IT", subject: "Data Structures", time: "08:00 AM", date: "2025-07-03" },
                 { name: "Brian S.", course: "BS in CS", subject: "Algorithms", time: "08:30 AM", date: "2025-07-03" },
