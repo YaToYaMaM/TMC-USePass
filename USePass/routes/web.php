@@ -1,10 +1,13 @@
 <?php
 use App\Http\Controllers\Auth\CustomForgotPasswordController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
 
 
@@ -92,5 +95,17 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
 //Route::get('/usepass-otp', function () {
 //    return Inertia::render('Frontend/userOTP');
 //});
+
+Route::post('/logout', function () {
+    Auth::logout();
+    request()->session()->invalidate();
+    request()->session()->regenerateToken();
+
+    return redirect('/');
+})->name('logout');
+
+Route::get('/js-routes', function () {
+    return response()->json(new Ziggy);
+});
 
 require __DIR__.'/auth.php';
