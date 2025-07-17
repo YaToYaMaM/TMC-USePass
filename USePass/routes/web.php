@@ -2,11 +2,11 @@
 use App\Http\Controllers\Auth\CustomForgotPasswordController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\StudentController;
 use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Tighten\Ziggy\Ziggy;
+
 
 
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
@@ -70,7 +70,8 @@ Route::get('/spot-report/print', function () {
         ],
     ]);
 });
-
+Route::post('/students/import', [StudentController::class, 'import']);
+Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
@@ -81,14 +82,6 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::post('/logout', function () {
-    Auth::logout();
-    request()->session()->invalidate();
-    request()->session()->regenerateToken();
-
-    return redirect('/');
-})->name('logout');
-
 Route::post('/otp/request', [CustomForgotPasswordController::class, 'sendOtp'])->name('otp.request');
 Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm'])->name('otp.form');
 Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
@@ -97,9 +90,5 @@ Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPas
 //Route::get('/usepass-otp', function () {
 //    return Inertia::render('Frontend/userOTP');
 //});
-
-Route::get('/js-routes', function () {
-    return response()->json(new Ziggy);
-});
 
 require __DIR__.'/auth.php';
