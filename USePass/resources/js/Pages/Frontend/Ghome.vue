@@ -25,9 +25,9 @@
                                 </div>
                             </div>
                             <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
-                                <Link :href="route('guard.ghome')" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</Link>
-                                <Link :href="route('scan')" class="text-white font-bold text-xs sm:text-sm hover:underline">SCANNER</Link>
-                                <Link :href="route('glog')" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGS</Link>
+                                <Link :href="route('guard.home')" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</Link>
+                                <a href="/scan" class="text-white font-bold text-xs sm:text-sm hover:underline">SCANNER</a>
+                                <a href="/glog" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGS</a>
                                 <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">LOGOUT</a>
                             </nav>
                         </div>
@@ -67,18 +67,18 @@
                     v-model="selectedDate"
                     class="border border-gray-400 rounded px-2 py-1 text-sm w-full sm:w-auto focus:outline-none"
                 />
-                <div class="relative w-full sm:w-64">
-                    <select class="no-default-arrow appearance-none border border-gray-400 rounded px-2 py-1 pr-8 text-sm w-full focus:outline-none">
+                <div class="relative w-full max-w-full sm:w-90">
+                    <select class="no-default-arrow appearance-none border border-gray-400 rounded px-2 py-1 pr-8 text-sm w-full focus:outline-none whitespace-normal">
                         <option>Bachelor of Science in Information Technology</option>
                         <option>Bachelor of Science in Computer Science</option>
                         <option>Bachelor of Science in Information Systems</option>
                     </select>
                     <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
                         </svg>
                     </div>
                 </div>
+
             </div>
         </div>
 
