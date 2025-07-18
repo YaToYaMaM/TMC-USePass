@@ -74,6 +74,7 @@ const fetchStudents = () => {
 
 onMounted(() => {
     fetchStudents();
+    setInterval(fetchStudents, 5000);
 });
 
 
@@ -125,6 +126,8 @@ async function submitForm() {
         alert('Student and parent saved!');
         showModal.value = false;
         showParentModal.value = false;
+
+        fetchStudents();
     }
     catch (error) {
         console.error(error);
