@@ -12,7 +12,7 @@ class StudentController extends Controller
 {
     public function store(Request $request)
     {
-        $validatedStudent = $request->validate([
+        $request->validate([
             'students_last_name' => 'required',
             'students_first_name' => 'required',
             'students_middle_initial' => 'nullable|string|max:1',
@@ -25,13 +25,36 @@ class StudentController extends Controller
             'students_phone_num' => 'required',
             'students_profile_image' => 'nullable|image|max:5120',
         ]);
+        $imagePath = null;
 
         if ($request->hasFile('students_profile_image')) {
-            $validatedStudent['students_profile_image'] = $request->file('students_profile_image')->store('students', 'public');
+            $image = $request->file('students_profile_image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $destinationPath = public_path('profile_pictures');
+
+            // Create the folder if it doesn't exist
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $image->move($destinationPath, $imageName);
+            $imagePath = 'profile_pictures/' . $imageName; // Relative path to store in DB
         }
 
         // Save student
-        $student = Student::create($validatedStudent);
+        $student = Student::create([
+            'students_id' => $request->students_id,
+            'students_first_name' => $request->students_first_name,
+            'students_middle_initial' => $request->students_middle_initial,
+            'students_last_name' => $request->students_last_name,
+            'students_gender' => $request->students_gender,
+            'students_program' => $request->students_program,
+            'students_major' => $request->students_major,
+            'students_unit' => $request->students_unit,
+            'students_email' => $request->students_email,
+            'students_phone_num' => $request->students_phone_num,
+            'students_profile_image' => $imagePath,
+        ]);
 
         // Validate parent data
         $validatedParent = $request->validate([
