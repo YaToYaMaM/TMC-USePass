@@ -59,7 +59,7 @@
             </div>
             <!--Back button-->
             <div class="fixed bottom-10 right-20 z-50">
-                <button class="text-white p-3 rounded-full hover:bg-white hover:bg-opacity-10 transition">
+                <Link :href="route('guard.ghome')" class="text-white p-3 rounded-full hover:bg-white hover:bg-opacity-10 transition inline-block">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -70,21 +70,23 @@
                     >
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l-7 7 7 7M22 12H3" />
                     </svg>
-                </button>
+                </Link>
             </div>
 
 
         </div>
     </div>
+    <router-view />
 </template>
 
 <script>
+import { Link } from '@inertiajs/vue3'
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import TextInput from "@/Components/TextInput.vue";
 
 export default {
     name: "UserIDView",
-    components: {TextInput, StreamBarcodeReader },
+    components: { Link, TextInput, StreamBarcodeReader },
     data() {
         return {
             userId: ["", "", "", "", "", ""],
