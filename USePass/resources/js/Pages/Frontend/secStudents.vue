@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted  } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3'
 import axios from 'axios';
+
 
 
 const showModal = ref(false);
@@ -52,16 +53,30 @@ function handleImportFile(event: Event) {
     }
 }
 
+const students = ref<any[]>([]);
 
-const students = ref([
-    { id: 1, name: "Froilan Canete", title: "Information Technology" },
-    { id: 2, name: "Marvin Dela Cruz", title: "BS English" },
-    { id: 3, name: "Carlos Reyes", title: "BS Math" },
-    { id: 4, name: "Ronald Sison", title: "Information Technology" },
-    { id: 5, name: "Elmer Santos", title: "BS Math" },
-    { id: 6, name: "Benjie Ramos", title: "BS English" },
-    { id: 7, name: "Jake Garcia", title: "BS English" },
-]);
+const fetchStudents = () => {
+    axios.get('/students/list')
+        .then((response) => {
+            students.value = response.data.map((student: any) => ({
+                students_id: student.students_id,
+                students_first_name: student.students_first_name,
+                students_middle_initial: student.students_middle_initial,
+                students_last_name: student.students_last_name,
+                students_program: student.students_program,
+                students_profile_image: student.students_profile_image,
+            }));
+        })
+        .catch((error) => {
+            console.error('Error fetching students:', error);
+        });
+};
+
+onMounted(() => {
+    fetchStudents();
+    setInterval(fetchStudents, 5000);
+});
+
 
 const form = ref({
     students_last_name: '',
@@ -111,6 +126,8 @@ async function submitForm() {
         alert('Student and parent saved!');
         showModal.value = false;
         showParentModal.value = false;
+
+        fetchStudents();
     }
     catch (error) {
         console.error(error);
@@ -123,9 +140,11 @@ async function submitForm() {
 const currentPage = ref(1);
 const studentsPerPage = 4;
 
-const paginatedstudents = computed(() => {
+
+const paginatedStudents = computed(() => {
     const start = (currentPage.value - 1) * studentsPerPage;
-    return students.value.slice(start, start + studentsPerPage);
+    const end = start + studentsPerPage;
+    return filteredStudents.value.slice(start, end);
 });
 
 const totalPages = computed(() =>
@@ -147,6 +166,31 @@ function backToStudentForm() {
     showParentModal.value = false;
     showModal.value = true;
 }
+
+const selectedProgram = ref('');
+const searchQuery = ref('');
+const filteredStudents = computed(() => {
+    let result = students.value;
+
+    // Filter by selected program
+    if (selectedProgram.value) {
+        result = result.filter(student =>
+            student.students_program === selectedProgram.value
+        );
+    }
+
+    // Filter by search query
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        result = result.filter(student =>
+            student.students_first_name.toLowerCase().includes(query) ||
+            student.students_last_name.toLowerCase().includes(query)
+        );
+    }
+
+    return result;
+});
+
 </script>
 
 <template>
@@ -211,6 +255,7 @@ function backToStudentForm() {
 
                     <div class="relative w-full md:w-64">
                         <input
+                            v-model="searchQuery"
                             type="text"
                             placeholder="Search a student..."
                             class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
@@ -224,19 +269,24 @@ function backToStudentForm() {
                             </svg>
                         </div>
                     </div>
-                    <select class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
-                        <option class="whitespace-nowrap">Bachelor of Science in Information Technology</option>
-                        <option class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
+                    <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
+                        <option value="">All Programs</option>
+                        <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
+                        <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
                     </select>
                 </div>
             </div>
             <!-- student Card -->
-            <div v-for="student in paginatedstudents" :key="student.id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
+            <div v-for="student in paginatedStudents" :key="student.students_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
                 <div class="flex items-center gap-4">
-                    <img src="@/Icons/students.png" alt="student Image" class="h-14 w-14 rounded-full border" />
+                    <img :src="`/${student.students_profile_image}`" class="h-14 w-14 rounded-full border" alt="Student Image" />
                     <div>
-                        <h2 class="text-[18px] font-bold">{{ student.name }}</h2>
-                        <p class="text-sm text-gray-600">{{ student.title }}</p>
+                        <h2 class="text-[18px] font-bold">
+                            {{ student.students_first_name }} {{student.student_middle_initial}} {{ student.students_last_name }}
+                        </h2>
+                        <p class="text-sm text-gray-600">
+                            {{ student.students_program }}
+                        </p>
                     </div>
                 </div>
 

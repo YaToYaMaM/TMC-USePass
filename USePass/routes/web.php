@@ -77,6 +77,7 @@ Route::get('/spot-report/print', function () {
 });
 Route::post('/students/import', [StudentController::class, 'import']);
 Route::post('/students', [StudentController::class, 'store'])->name('students.store');
+Route::get('/students/list', [StudentController::class, 'index']);
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
