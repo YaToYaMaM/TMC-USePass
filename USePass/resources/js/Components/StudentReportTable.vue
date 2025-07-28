@@ -14,19 +14,23 @@ const currentPage = ref(1);
 const itemsPerPage = 7;
 
 const fetchStudentRecords = () => {
-    if (!props.selectedDate) return; // Skip if date is empty
-
-    axios.get('/student-records')
+    axios.get('/student-records', {
+        params: {
+            date: props.selectedDate,
+            program: props.selectedProgram || undefined
+        }
+    })
         .then((response) => {
             studentRecords.value = response.data.map((record: any) => ({
                 id: record.student_id,
                 name: record.name,
-                program: record.program,
-                major: record.major,
+                program: record.students_program,
+                major: record.students_major,
                 date: record.date,
                 time_in: record.record_in,
                 time_out: record.record_out,
             }));
+            console.log("Fetched records:", studentRecords.value);
         })
         .catch((error) => {
             console.error('Error fetching student records:', error);
@@ -37,17 +41,24 @@ const fetchStudentRecords = () => {
 watch(() => props.selectedDate, fetchStudentRecords, { immediate: true });
 
 
+let intervalId: ReturnType<typeof setInterval>;
+
 onMounted(() => {
-    // intervalId = setInterval(fetchStudentRecords, 3000); // Refresh every 3 seconds
+    fetchStudentRecords();
+    intervalId = setInterval(fetchStudentRecords, 3000);
+});
+
+onBeforeUnmount(() => {
+    clearInterval(intervalId);
 });
 
 const filteredRecords = computed(() => {
     let records = studentRecords.value;
 
     if (attendanceFilter.value === "time_in") {
-        records = records.filter((s) => s.time_in); // <-- corrected
+        records = records.filter((s) => s.time_in);
     } else if (attendanceFilter.value === "time_out") {
-        records = records.filter((s) => s.time_out); // <-- corrected
+        records = records.filter((s) => s.time_out);
     }
 
     return records;
@@ -80,9 +91,9 @@ const totalPages = computed(() =>
             </thead>
             <tbody class="divide-y divide-gray-100 text-gray-700">
             <tr
-                v-for="(item, index)
+                v-for="item
                 in paginatedRecords"
-                :key="index">
+                :key="item.id">
                 <td class="px-6 py-4 font-semibold whitespace-nowrap">{{ item.name }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.program }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.major }}</td>
@@ -116,9 +127,5 @@ const totalPages = computed(() =>
             </button>
         </div>
     </div>
-
-    <!-- View Modal -->
-
-
 </template>
 

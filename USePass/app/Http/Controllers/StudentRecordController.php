@@ -5,14 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\StudentRecord;
+use Illuminate\Support\Facades\Log;
 
 class StudentRecordController extends Controller
 {
     public function fetchRecords(Request $request)
     {
-        $date = $request->input('date');
-
-        $records = DB::table('students_records')
+        $query = DB::table('students_records')
             ->join('students', 'students.students_id', '=', 'students_records.students_id')
             ->select(
                 'students.students_id as student_id',
@@ -22,16 +21,21 @@ class StudentRecordController extends Controller
                 DB::raw('DATE(students_records.created_at) as date'),
                 'students_records.record_in',
                 'students_records.record_out'
-            )
-            ->when($date, function ($query) use ($date) {
-                $query->whereDate('students_records.created_at', $date);
-            })
-            ->get();
-        Log::info('Fetched student records:', ['records' => $records]);
+            );
+
+        if ($request->filled('date')) {
+            $query->whereDate('students_records.created_at', $request->date);
+        }
+
+        if ($request->filled('program')) {
+            $query->where('students.students_program', $request->program);
+        }
+
+        $records = $query->get();
 
         return response()->json($records);
-
     }
+
     public function index(Request $request)
     {
         $date = $request->query('date');
