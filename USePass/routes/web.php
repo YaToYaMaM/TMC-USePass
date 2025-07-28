@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\GuardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -81,6 +82,11 @@ Route::get('/spot-report/print', function () {
 Route::post('/students/import', [StudentController::class, 'import']);
 Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 Route::get('/students/list', [StudentController::class, 'index']);
+Route::post('/users', [GuardController::class, 'store']);
+Route::get('/guard/list', [GuardController::class, 'index']);
+Route::put('/guard/{id}', [GuardController::class, 'update']);
+
+
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
