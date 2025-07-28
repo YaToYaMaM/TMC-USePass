@@ -198,6 +198,7 @@ async function updateGuard() {
 </script>
 
 <template>
+    <Head title="USePass" />
     <Frontend>
         <Head title="Guard Page" />
         <div class="flex flex-col p-3">

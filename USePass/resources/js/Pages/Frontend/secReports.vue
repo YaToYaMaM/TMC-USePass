@@ -14,7 +14,7 @@ const selectedDate = ref<string>('');
 
 <template>
     <Frontend>
-        <Head title="student Page" />
+        <Head title="Attendance Page" />
         <div class="flex flex-col p-3 ">
 
             <!-- Top Control Buttons -->

@@ -1,4 +1,5 @@
 <template>
+    <Head title="USePass" />
    <Frontend>
        <div class="h-full flex flex-col">
            <!-- Header Bar -->
@@ -138,6 +139,7 @@
 </template>
 <script setup>
 import Frontend from '@/Layouts/FrontendLayout.vue'
+import {Head} from "@inertiajs/vue3";
 
 </script>
 <script>
