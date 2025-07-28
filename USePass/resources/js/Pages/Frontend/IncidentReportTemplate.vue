@@ -22,6 +22,7 @@ onMounted(() => {
 </script>
 
 <template>
+    <Head title="USePass" />
     <Head title="Print Report"/>
     <div v-if="props.report"  class="p-10 text-sm font-sans leading-relaxed text-black max-w-3xl mx-auto bg-white">
         <img src="/images/usep-logo-small.png" alt="Logo" class="mx-auto mb-2 w-20 h-auto">

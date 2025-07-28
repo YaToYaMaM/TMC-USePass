@@ -1,4 +1,5 @@
 <template>
+    <Head title="Dashboard" />
   <Frontend>
   <div class="px-3 pt-6 min-h-screen overflow-auto space-y-6">
     <div class="flex justify-between items-center">
@@ -52,6 +53,7 @@ import StudentsList from '../../Components/StudentList.vue'
 import BarChart from '../../Components/BarChart.vue'
 import Frontend from '@/Layouts/FrontendLayout.vue'
 import {ref} from "vue";
+import {Head} from "@inertiajs/vue3";
 // const selectedLocation = ref('Tagum');
 const selectedUnit = ref('Tagum')
 function selectUnit(unit) {
