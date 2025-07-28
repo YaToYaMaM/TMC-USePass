@@ -7,7 +7,13 @@ import StudentReportTable from "@/Components/StudentReportTable.vue";
 
 const selectedLocation = ref('Tagum');
 const selectedDate = ref<string>('');
+const selectedProgram = ref('');
 
+const props = defineProps<{
+    selectedDate: string;
+    selectedLocation?: string;
+    selectedProgram?: string;
+}>();
 
 
 </script>
@@ -63,14 +69,17 @@ const selectedDate = ref<string>('');
                         class="border border-gray-300 p-2 rounded w-full sm:w-36 text-sm"
                         v-model="selectedDate"
                     />
-                    <select class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
-                        <option class="whitespace-nowrap">Bachelor of Science in Information Technology</option>
-                        <option class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
+                    <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
+                        <option value="">All Programs</option>
+                        <option value="Bachelor of Science in Information Technology" class="whitespace-nowrap">Bachelor of Science in Information Technology</option>
+                        <option value="Bachelor of Science in Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
                     </select>
                 </div>
 
             </div>
-            <StudentReportTable :selectedDate="selectedDate" />
+            <StudentReportTable :selectedDate="selectedDate"
+                                :selectedProgram="selectedProgram"
+            />
         </div>
     </Frontend>
 </template>

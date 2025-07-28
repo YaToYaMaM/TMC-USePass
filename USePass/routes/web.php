@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
+use App\Http\Controllers\StudentRecordController;
 
 
 
@@ -86,6 +87,7 @@ Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
 
+Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
