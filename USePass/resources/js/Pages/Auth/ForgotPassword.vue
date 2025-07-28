@@ -6,6 +6,7 @@ import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import ForgotPassLayout from "@/Layouts/ForgotPassLayout.vue";
+import { ref } from 'vue';
 
 defineProps({
     status: {
@@ -17,8 +18,16 @@ const form = useForm({
     email: '',
 });
 
+const isLoading = ref(false);
+
 const submit = () => {
-    form.post(route('otp.request'));
+    isLoading.value = true;
+
+    form.post(route('otp.request'), {
+        onFinish: () => {
+            isLoading.value = false;
+        },
+    });
 };
 </script>
 
@@ -40,6 +49,9 @@ const submit = () => {
         >
             {{ status }}
         </div>
+            <div v-if="form.errors.email" class="mb-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm text-center">
+                {{ form.errors.email }}
+            </div>
 
         <form @submit.prevent="submit">
             <div class="mb-8">
@@ -57,18 +69,23 @@ const submit = () => {
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+<!--                <InputError class="mt-2" :message="form.errors.email" />-->
             </div>
 
             <div class="mt-20 flex items-center justify-end">
                 <button
-                    :class="[
-                    'block w-60 mx-auto bg-red-900 hover:bg-red-700 text-white font-semibold py-2 rounded shadow',
-                    { 'opacity-25': form.processing }
-                    ]"
-                    :disabled="form.processing"
+                    type="submit"
+                    :disabled="form.processing || isLoading"
+                    class="block w-60 mx-auto bg-[#760000] hover:bg-red-700 text-white font-semibold py-2 rounded shadow flex justify-center items-center gap-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    Email Password Reset Link
+                    <template v-if="!isLoading">
+                        <i class="fas fa-paper-plane"></i>
+                        Email Password Reset Link
+                    </template>
+                    <template v-else>
+                        <i class="fas fa-spinner fa-spin" style="color: white; font-size: 18px;"></i>
+                        Sending...
+                    </template>
                 </button>
 
             </div>

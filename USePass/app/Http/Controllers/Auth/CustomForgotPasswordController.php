@@ -15,13 +15,15 @@ class CustomForgotPasswordController extends Controller
     public function sendOtp(Request $request)
     {
         $request->validate([
-            'email' => ['required', 'email'],
+            'email' => ['required', 'email', 'exists:users,email'],
+            ], [
+                'email.exists' => 'The email address is not registered in the system.',
         ]);
 
         $otp = rand(100000, 999999);
         Session::put('otp', $otp);
         Session::put('otp_email', $request->email);
-        Session::put('otp_start_time', now()); // ← This line tracks when timer began
+        Session::put('otp_start_time', now());
 
         // Send the OTP using PHPMailer
         $mail = new PHPMailer(true);
