@@ -282,7 +282,7 @@ const filteredStudents = computed(() => {
                     <img :src="`/${student.students_profile_image}`" class="h-14 w-14 rounded-full border" alt="Student Image" />
                     <div>
                         <h2 class="text-[18px] font-bold">
-                            {{ student.students_first_name }} {{student.student_middle_initial}} {{ student.students_last_name }}
+                            {{ student.students_first_name }} {{student.students_middle_initial}} {{ student.students_last_name }}
                         </h2>
                         <p class="text-sm text-gray-600">
                             {{ student.students_program }}
