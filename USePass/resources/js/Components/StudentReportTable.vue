@@ -2,7 +2,11 @@
 import axios from "axios";
 import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 
-const props = defineProps<{ selectedDate: string }>();
+const props = defineProps<{
+    selectedDate: string;
+    selectedProgram?: string;
+}>();
+
 
 const studentRecords = ref([]);
 const attendanceFilter = ref("");
@@ -10,9 +14,9 @@ const currentPage = ref(1);
 const itemsPerPage = 7;
 
 const fetchStudentRecords = () => {
-    axios.get('/student-records', {
-        params: { date: props.selectedDate }
-    })
+    if (!props.selectedDate) return; // Skip if date is empty
+
+    axios.get('/student-records')
         .then((response) => {
             studentRecords.value = response.data.map((record: any) => ({
                 id: record.student_id,
@@ -29,24 +33,21 @@ const fetchStudentRecords = () => {
         });
 };
 
+
 watch(() => props.selectedDate, fetchStudentRecords, { immediate: true });
 
-let intervalId: number;
 
 onMounted(() => {
-    intervalId = setInterval(fetchStudentRecords, 3000); // Refresh every 3 seconds
+    // intervalId = setInterval(fetchStudentRecords, 3000); // Refresh every 3 seconds
 });
 
-onBeforeUnmount(() => {
-    clearInterval(intervalId); // Clean up to avoid memory leaks
-});
 const filteredRecords = computed(() => {
     let records = studentRecords.value;
 
     if (attendanceFilter.value === "time_in") {
-        records = records.filter((s) => s.record_in);
+        records = records.filter((s) => s.time_in); // <-- corrected
     } else if (attendanceFilter.value === "time_out") {
-        records = records.filter((s) => s.record_out);
+        records = records.filter((s) => s.time_out); // <-- corrected
     }
 
     return records;

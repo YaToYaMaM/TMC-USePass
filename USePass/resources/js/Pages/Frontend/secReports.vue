@@ -9,13 +9,6 @@ const selectedLocation = ref('Tagum');
 const selectedDate = ref<string>('');
 const selectedProgram = ref('');
 
-const props = defineProps<{
-    selectedDate: string;
-    selectedLocation?: string;
-    selectedProgram?: string;
-}>();
-
-
 </script>
 
 <template>

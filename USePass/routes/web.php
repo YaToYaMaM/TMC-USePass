@@ -89,6 +89,7 @@ Route::put('/guard/{id}', [GuardController::class, 'update']);
 
 Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
 
+
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
