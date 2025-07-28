@@ -81,7 +81,8 @@ Route::post('/students', [StudentController::class, 'store'])->name('students.st
 Route::get('/students/list', [StudentController::class, 'index']);
 Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
-Route::put('/guards/{id}', [GuardController::class, 'update']);
+Route::put('/guard/{id}', [GuardController::class, 'update']);
+
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');

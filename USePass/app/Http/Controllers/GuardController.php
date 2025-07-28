@@ -54,19 +54,24 @@ class GuardController extends Controller
     }
     public function update(Request $request, $id)
     {
-        $guard = Guard::findOrFail($id);
+        $guard = Guard::where('role', 'guard')->findOrFail($id);
 
         $request->validate([
             'first_name' => 'required|string',
             'last_name' => 'required|string',
             'contact_number' => 'required|string',
-
         ]);
 
-        $guard->update($request->all());
+        $guard->update([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'contact_number' => $request->contact_number,
+        ]);
 
         return response()->json(['message' => 'Guard updated successfully.']);
     }
+
+
 
 
 
