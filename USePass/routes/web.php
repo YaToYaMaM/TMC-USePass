@@ -33,7 +33,6 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
-    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 });
 
 // User Guard Dashboard
@@ -50,7 +49,9 @@ Route::middleware(['auth', 'can:isGuard'])->group(function () {
 //        'phpVersion' => PHP_VERSION,
 //    ]);
 //});
-
+Route::middleware(['auth'])->group(function () {
+    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
+});
 Route::get('/incident-report/print', function () {
     return Inertia::render('Frontend/IncidentReportTemplate', [
         'report' => [

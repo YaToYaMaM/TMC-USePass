@@ -1,8 +1,10 @@
 <script setup lang="ts">
 
+import {Head} from "@inertiajs/vue3";
 </script>
 
 <template>
+    <Head title="USePass" />
     <div
         class="relative min-h-screen bg-cover bg-center px-4 py-8"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"

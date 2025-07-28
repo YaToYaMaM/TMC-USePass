@@ -1,4 +1,5 @@
 <template>
+    <Head title="USePass" />
     <div
         class="relative min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
@@ -80,13 +81,13 @@
 </template>
 
 <script>
-import { Link } from '@inertiajs/vue3'
+import {Head, Link} from '@inertiajs/vue3'
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import TextInput from "@/Components/TextInput.vue";
 
 export default {
     name: "UserIDView",
-    components: { Link, TextInput, StreamBarcodeReader },
+    components: {Head, Link, TextInput, StreamBarcodeReader },
     data() {
         return {
             userId: ["", "", "", "", "", ""],

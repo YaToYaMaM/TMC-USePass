@@ -1,4 +1,5 @@
 <template>
+    <Head title="Statistics" />
     <Frontend>
         <h1 class="font-bold text-2xl pt-10 pb-4">Statistics</h1>
 

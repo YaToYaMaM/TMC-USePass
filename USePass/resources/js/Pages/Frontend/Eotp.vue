@@ -1,4 +1,5 @@
 <template>
+    <Head title="USePass" />
     <div
         class="relative min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
@@ -107,8 +108,11 @@
 </template>
 
 <script>
+import {Head} from "@inertiajs/vue3";
+
 export default {
     name: "UserIDView",
+    components: {Head},
     data() {
         return {
             userId: ["", "", "", "", "", ""],

@@ -195,7 +195,7 @@ const filteredStudents = computed(() => {
 
 <template>
     <Frontend>
-        <Head title="student Page" />
+        <Head title="Student Page" />
         <div class="flex flex-col p-3 ">
 
             <!-- Top Control Buttons -->

@@ -1,4 +1,5 @@
 <template>
+    <Head title="Logs" />
     <Frontend>
         <div class="px-3 pt-6 min-h-screen overflow-auto space-y-6">
             <div class="flex justify-between items-center">

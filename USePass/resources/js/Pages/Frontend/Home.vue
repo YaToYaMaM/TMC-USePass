@@ -1,4 +1,5 @@
 <template>
+    <Head title="USePass" />
     <FrontendLayout>
         <div class="p-4">
             <!-- Add the target SVG elements -->
@@ -12,6 +13,7 @@
 import { ref, onMounted } from 'vue';
 import FrontendLayout from "@/Layouts/FrontendLayout.vue";
 import JsBarcode from 'jsbarcode';
+import {Head} from "@inertiajs/vue3";
 
 // Sidebar toggle state
 const isCollapsed = ref(false);

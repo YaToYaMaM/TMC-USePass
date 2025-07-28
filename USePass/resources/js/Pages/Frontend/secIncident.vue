@@ -14,6 +14,7 @@ const selectedDate = ref<string>('');
 </script>
 
 <template>
+    <Head title="USePass" />
     <Frontend>
         <Head title="Incident Report" />
         <div class="flex flex-col p-3 ">
@@ -21,7 +22,6 @@ const selectedDate = ref<string>('');
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <span></span>
                 <div class="flex flex-wrap items-center gap-2">
-
                     <!-- Button Group -->
                     <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
