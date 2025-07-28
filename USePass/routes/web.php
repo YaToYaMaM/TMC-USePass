@@ -4,6 +4,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\FrontendControllers;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\GuardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
@@ -31,7 +32,6 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
-    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 });
 
 // User Guard Dashboard
@@ -48,7 +48,9 @@ Route::middleware(['auth', 'can:isGuard'])->group(function () {
 //        'phpVersion' => PHP_VERSION,
 //    ]);
 //});
-
+Route::middleware(['auth'])->group(function () {
+    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
+});
 Route::get('/incident-report/print', function () {
     return Inertia::render('Frontend/IncidentReportTemplate', [
         'report' => [
@@ -81,6 +83,11 @@ Route::get('/spot-report/print', function () {
 Route::post('/students/import', [StudentController::class, 'import']);
 Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 Route::get('/students/list', [StudentController::class, 'index']);
+Route::post('/users', [GuardController::class, 'store']);
+Route::get('/guard/list', [GuardController::class, 'index']);
+Route::put('/guard/{id}', [GuardController::class, 'update']);
+
+
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
