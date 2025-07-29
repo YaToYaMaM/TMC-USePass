@@ -18,6 +18,7 @@ class StudentRecordController extends Controller
                 DB::raw("CONCAT(students.students_first_name, ' ', students.students_middle_initial, '. ', students.students_last_name) as name"),
                 'students.students_program',
                 'students.students_major',
+                'students_unit',
                 DB::raw('DATE(students_records.created_at) as date'),
                 'students_records.record_in',
                 'students_records.record_out'

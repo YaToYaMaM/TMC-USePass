@@ -5,8 +5,6 @@ import { Head } from "@inertiajs/vue3";
 import { router } from '@inertiajs/vue3'
 import axios from 'axios';
 
-
-
 const showModal = ref(false);
 const selectedImage = ref<File | null>(null);
 const imagePreview = ref<string | null>(null);
@@ -26,6 +24,7 @@ function handleImageUpload(event: Event) {
 function triggerImport() {
     importFileInput.value?.click();
 }
+
 function handleImportFile(event: Event) {
     const file = (event.target as HTMLInputElement).files?.[0];
 
@@ -40,7 +39,6 @@ function handleImportFile(event: Event) {
         })
             .then(response => {
                 alert('Import successful: ' + response.data.message);
-
             })
             .catch(error => {
                 console.error('Import error:', error);
@@ -65,6 +63,7 @@ const fetchStudents = () => {
                 students_last_name: student.students_last_name,
                 students_program: student.students_program,
                 students_profile_image: student.students_profile_image,
+                students_unit: student.students_unit, // Make sure this is included
             }));
         })
         .catch((error) => {
@@ -76,7 +75,6 @@ onMounted(() => {
     fetchStudents();
     setInterval(fetchStudents, 5000);
 });
-
 
 const form = ref({
     students_last_name: '',
@@ -98,6 +96,7 @@ const form = ref({
     parent_email: '',
     parent_relation: '',
 });
+
 async function submitForm() {
     const formData = new FormData();
     for (const key in form.value) {
@@ -133,44 +132,24 @@ async function submitForm() {
         console.error(error);
         alert('Something went wrong.');
     }
-
-
 }
 
 const currentPage = ref(1);
 const studentsPerPage = 4;
 
-
-const paginatedStudents = computed(() => {
-    const start = (currentPage.value - 1) * studentsPerPage;
-    const end = start + studentsPerPage;
-    return filteredStudents.value.slice(start, end);
-});
-
-const totalPages = computed(() =>
-    Math.ceil(students.value.length / studentsPerPage)
-);
-
-function goToPage(page: number) {
-    if (page >= 1 && page <= totalPages.value) {
-        currentPage.value = page;
-    }
-}
-
-function goToParentInfo() {
-    showModal.value = false;
-    showParentModal.value = true;
-}
-
-function backToStudentForm() {
-    showParentModal.value = false;
-    showModal.value = true;
-}
-
 const selectedProgram = ref('');
 const searchQuery = ref('');
+
+// Fixed filteredStudents to include unit filtering
 const filteredStudents = computed(() => {
     let result = students.value;
+
+    // Filter by selected unit (location)
+    if (selectedLocation.value) {
+        result = result.filter(student =>
+            student.students_unit === selectedLocation.value
+        );
+    }
 
     // Filter by selected program
     if (selectedProgram.value) {
@@ -191,6 +170,31 @@ const filteredStudents = computed(() => {
     return result;
 });
 
+const paginatedStudents = computed(() => {
+    const start = (currentPage.value - 1) * studentsPerPage;
+    const end = start + studentsPerPage;
+    return filteredStudents.value.slice(start, end);
+});
+
+const totalPages = computed(() =>
+    Math.ceil(filteredStudents.value.length / studentsPerPage) // Fixed to use filteredStudents
+);
+
+function goToPage(page: number) {
+    if (page >= 1 && page <= totalPages.value) {
+        currentPage.value = page;
+    }
+}
+
+function goToParentInfo() {
+    showModal.value = false;
+    showParentModal.value = true;
+}
+
+function backToStudentForm() {
+    showParentModal.value = false;
+    showModal.value = true;
+}
 </script>
 
 <template>
@@ -206,11 +210,11 @@ const filteredStudents = computed(() => {
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
 
                     <!-- Button Group -->
-                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
+                    <div class="inline-flex px-1 py-1 justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-        'px-3 py-1 text-sm border-r border-gray-300',
+        'px-3 py-1 text-sm border-r rounded-[5px] border-gray-300',
         selectedLocation === 'Tagum'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -221,7 +225,7 @@ const filteredStudents = computed(() => {
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-        'px-3 py-1 text-sm',
+        'px-3 py-1 text-sm rounded-[5px]',
         selectedLocation === 'Mabini'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -277,12 +281,19 @@ const filteredStudents = computed(() => {
                 </div>
             </div>
             <!-- student Card -->
-            <div v-for="student in paginatedStudents" :key="student.students_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
-                <div class="flex items-center gap-4">
-                    <img :src="`/${student.students_profile_image}`" class="h-14 w-14 rounded-full border" alt="Student Image" />
-                    <div>
-                        <h2 class="text-[18px] font-bold">
-                            {{ student.students_first_name }} {{student.students_middle_initial}} {{ student.students_last_name }}
+            <!-- Student Card - Fixed Design -->
+            <div v-for="student in paginatedStudents" :key="student.students_id"
+                 class="bg-white rounded-lg shadow-md border border-gray-100 p-5 flex flex-col md:flex-row items-center justify-between mt-4 gap-4 hover:shadow-lg transition-shadow duration-200">
+
+                <div class="flex items-center gap-4 flex-1">
+                    <img
+                        :src="`/${student.students_profile_image}`"
+                        class="h-16 w-16 rounded-full border-2 border-gray-200 object-cover flex-shrink-0"
+                        alt="Student Image"
+                    />
+                    <div class="flex-1 min-w-0">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-1">
+                            {{ student.students_first_name }} {{ student.students_middle_initial }} {{ student.students_last_name }}
                         </h2>
                         <p class="text-sm text-gray-600">
                             {{ student.students_program }}
@@ -290,14 +301,20 @@ const filteredStudents = computed(() => {
                     </div>
                 </div>
 
-                <div class="flex space-x-2">
-                    <button class="bg-red-500 text-sm text-white px-4 py-2 rounded">Disable</button>
+                <div class="flex space-x-2 flex-shrink-0">
+                    <button class="bg-red-500 hover:bg-red-600 text-sm text-white px-4 py-2 rounded transition-colors duration-200">
+                        Disable
+                    </button>
                 </div>
             </div>
 
+            <!-- Show message when no students found -->
+            <div v-if="filteredStudents.length === 0" class="text-center py-8 text-gray-500">
+                No students found for the selected filters.
+            </div>
 
             <!-- Pagination Controls -->
-            <div class="flex justify-center items-center mt-6 space-x-2">
+            <div v-if="totalPages > 1" class="flex justify-center items-center mt-6 space-x-2">
                 <button
                     @click="goToPage(currentPage - 1)"
                     :disabled="currentPage === 1"
@@ -326,7 +343,6 @@ const filteredStudents = computed(() => {
                     Next
                 </button>
             </div>
-
 
             <!-- Modal -->
             <form @submit.prevent="submitForm">
@@ -439,12 +455,9 @@ const filteredStudents = computed(() => {
                             </div>
                         </div>
 
-
                         <div class="flex justify-end space-x-2">
                             <button type="button" @click="goToParentInfo" class="px-10 py-3 bg-blue-500 text-white rounded">Next</button>
                         </div>
-
-
 
                     </div>
                 </div>
@@ -498,8 +511,6 @@ const filteredStudents = computed(() => {
 
             </form>
 
-
         </div>
     </Frontend>
 </template>
-
