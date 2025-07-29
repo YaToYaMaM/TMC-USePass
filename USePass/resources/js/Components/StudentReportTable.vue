@@ -11,8 +11,35 @@ const props = defineProps<{
 const studentRecords = ref([]);
 const attendanceFilter = ref("");
 const currentPage = ref(1);
-const itemsPerPage = 7;
+const itemsPerPage = 6;
 
+function formatTime(timeString: string): string {
+    const date = new Date(`1970-01-01T${timeString}`);
+    if (isNaN(date.getTime())) return timeString;
+
+    let hours = date.getHours();
+    const minutes = date.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const minutesStr = minutes < 10 ? '0' + minutes : minutes.toString();
+
+    return `${hours}:${minutesStr} ${ampm}`;
+}
+
+function formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const pad = (n: number) => (n < 10 ? '0' + n : '' + n);
+
+    const mm = pad(date.getMonth() + 1);
+    const dd = pad(date.getDate());
+    const yy = date.getFullYear().toString();
+
+    return `${mm}-${dd}-${yy}`;
+}
 const fetchStudentRecords = () => {
     axios.get('/student-records', {
         params: {
@@ -45,7 +72,7 @@ let intervalId: ReturnType<typeof setInterval>;
 
 onMounted(() => {
     fetchStudentRecords();
-    intervalId = setInterval(fetchStudentRecords, 3000);
+    intervalId = setInterval(fetchStudentRecords, 2000);
 });
 
 onBeforeUnmount(() => {
@@ -97,35 +124,42 @@ const totalPages = computed(() =>
                 <td class="px-6 py-4 font-semibold whitespace-nowrap">{{ item.name }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.program }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.major }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.time_in}}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.time_out}}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.date }}</td>
+                <td class="px-6 py-4 font-semibold">{{ formatTime(item.time_in)}}</td>
+                <td class="px-6 py-4 font-semibold">{{ formatTime(item.time_out)}}</td>
+                <td class="px-6 py-4 font-semibold">{{ formatDate(item.date)}}</td>
             </tr>
 
             </tbody>
 
         </table>
-        <div class="flex justify-center mt-1 gap-2">
+        <div class="no-print flex justify-center mt-1 gap-2 ">
             <button
                 :disabled="currentPage === 1"
                 @click="currentPage--"
-                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 "
             >
                 Prev
             </button>
 
-            <span class="px-4 py-1 text-sm text-gray-700">
+            <span class="px-4 py-1 text-sm text-gray-700 ">
     Page {{ currentPage }} of {{ totalPages }}
   </span>
 
             <button
                 :disabled="currentPage === totalPages"
                 @click="currentPage++"
-                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50"
+                class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50 "
             >
                 Next
             </button>
         </div>
     </div>
 </template>
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 

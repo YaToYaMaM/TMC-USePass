@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import html2pdf from 'html2pdf.js';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
 import StudentReportTable from "@/Components/StudentReportTable.vue";
@@ -8,6 +9,24 @@ import StudentReportTable from "@/Components/StudentReportTable.vue";
 const selectedLocation = ref('Tagum');
 const selectedDate = ref<string>('');
 const selectedProgram = ref('');
+const pdfContent = ref(null);
+const downloadPDF = () => {
+    const element = document.getElementById('pdf-content');
+    if (!element) return;
+
+    html2pdf()
+        .set({
+            margin: 0.5,
+            filename: 'attendance-report.pdf',
+            html2canvas: {
+                scale: 2,
+                ignoreElements: (el) => el.classList.contains('no-print'),
+            },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        })
+        .from(element)
+        .save();
+};
 
 </script>
 
@@ -20,7 +39,7 @@ const selectedProgram = ref('');
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                <span></span>
                 <div class="flex flex-wrap items-center gap-2">
-                    <button @click="" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Download as PDF</button>
+                    <button  @click="downloadPDF" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Download as PDF</button>
 
                     <!-- Button Group -->
                     <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
@@ -70,10 +89,23 @@ const selectedProgram = ref('');
                 </div>
 
             </div>
+            <div id="pdf-content" ref="pdfContent" class="bg-white p-6 mt-2 rounded-lg shadow-md">
+                <div class="mb-4 text-center">
+                    <h1 class="text-2xl font-bold">TMC Attendance Report</h1>
+                    <p class="text-sm">{{ selectedLocation }} | {{ selectedDate || 'All' }} |  {{ selectedProgram || 'All' }}</p>
+                </div>
             <StudentReportTable :selectedDate="selectedDate"
                                 :selectedProgram="selectedProgram"
             />
+            </div>
         </div>
     </Frontend>
 </template>
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+</style>
 
