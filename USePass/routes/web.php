@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
 use App\Http\Controllers\StudentRecordController;
+use App\Http\Controllers\DashboardController;
 
 
 
@@ -89,6 +90,9 @@ Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
 
 Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
+Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
+Route::get('/getCounts', [DashboardController::class, 'getCounts']);
+Route::get('/getCountsByCategory', [DashboardController::class, 'getCountsByCategory']);
 
 
 //Route::get('/dashboard', function () {

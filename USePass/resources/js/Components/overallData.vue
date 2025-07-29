@@ -12,10 +12,26 @@
 </template>
 
 <script setup>
-const overalls = [
-    { dataSubject: 'STUDENTS', count: 3435 },
-    { dataSubject: 'TEACHERS', count: 58 },
-    { dataSubject: 'VISITORS', count: 0 },
-    { dataSubject: 'ALUMNI', count: 0 },
-]
+import { ref, onMounted } from 'vue'
+import axios from 'axios'
+
+const overalls = ref([])
+
+const fetchCounts = async () => {
+    try {
+        const response = await axios.get('/getCounts')
+        const data = response.data
+
+        overalls.value = [
+            { dataSubject: 'STUDENTS', count: data.students },
+            { dataSubject: 'TEACHERS', count: data.teachers ?? 0 },
+            { dataSubject: 'VISITORS', count: data.visitors ?? 0 },
+            { dataSubject: 'ALUMNI', count: data.alumni ?? 0 },
+        ]
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error)
+    }
+}
+
+onMounted(fetchCounts)
 </script>
