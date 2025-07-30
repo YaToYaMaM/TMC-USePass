@@ -98,6 +98,36 @@ const form = ref({
     parent_email: '',
     parent_relation: '',
 });
+
+const majorsByProgram = {
+    'Information Technology': ['Information Security'],
+    'Education': [
+        'Elementary Education',
+        'Early Childhood Education',
+        'Special Needs Education',
+
+    ],
+    'Secondary Education':[
+        'English',
+        'Mathematics',
+        'Filipino',
+    ],
+    'Engeneering': [
+        'Land and Water Resources',
+        'Machinery and Power',
+        'Process Engineering',
+        'Structures and Environment',
+    ],
+    'TVL Teacher Education':[
+        'Agricultural Crops Technology',
+        'Animal Production',
+    ],
+};
+
+const filteredMajors = computed(() => {
+    return majorsByProgram[form.value.students_program] || [];
+});
+
 async function submitForm() {
     const formData = new FormData();
     for (const key in form.value) {
@@ -380,15 +410,19 @@ const filteredStudents = computed(() => {
                                     <option value="Information Technology">Information Technology</option>
                                     <option value="Education">Education</option>
                                     <option value="Engeneering">Engeneering</option>
+                                    <option value="TVL Teacher Education">TVL Teacher Education</option>
                                 </select>
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Major</label>
-                                <select v-model="form.students_major" class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
+                                <select v-model="form.students_major"
+                                        class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded"
+                                        :disabled="!form.students_program" required>
                                     <option  value="" disabled selected>Select Major</option>
-                                    <option value="Information Security">Information Security</option>
-                                    <option value="Elementary Education">Elementary Education</option>
-                                    <option value="Early Childhood Education">Early Childhood Education</option>
+                                    <option v-for="major in filteredMajors" :key="major" :value="major">
+                                        {{ major }}
+                                    </option>
+
                                 </select>
                             </div>
                             <div class="w-1/3">
