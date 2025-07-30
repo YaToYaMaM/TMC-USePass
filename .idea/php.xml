@@ -152,6 +152,12 @@
       <path value="$PROJECT_DIR$/USePass/vendor/laravel/sanctum" />
       <path value="$PROJECT_DIR$/USePass/vendor/monolog/monolog" />
       <path value="$PROJECT_DIR$/USePass/vendor/phpmailer/phpmailer" />
+      <path value="$PROJECT_DIR$/USePass/vendor/markbaker/matrix" />
+      <path value="$PROJECT_DIR$/USePass/vendor/markbaker/complex" />
+      <path value="$PROJECT_DIR$/USePass/vendor/ezyang/htmlpurifier" />
+      <path value="$PROJECT_DIR$/USePass/vendor/phpoffice/phpspreadsheet" />
+      <path value="$PROJECT_DIR$/USePass/vendor/maennchen/zipstream-php" />
+      <path value="$PROJECT_DIR$/USePass/vendor/maatwebsite/excel" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />

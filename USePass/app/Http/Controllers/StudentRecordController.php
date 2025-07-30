@@ -37,6 +37,7 @@ class StudentRecordController extends Controller
         return response()->json($records);
     }
 
+
     public function index(Request $request)
     {
         $date = $request->query('date');
