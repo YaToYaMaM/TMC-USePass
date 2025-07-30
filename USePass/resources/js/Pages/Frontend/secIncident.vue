@@ -48,11 +48,11 @@ const navigateToSpot = () => {
                 <span></span>
                 <div class="flex flex-wrap items-center gap-2">
                     <!-- Button Group -->
-                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
+                    <div class="inline-flex px-1 py-1 justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-        'px-3 py-1 text-sm border-r border-gray-300',
+        'px-3 py-1 text-sm border-r border-gray-300 rounded-[5px]',
         selectedLocation === 'Tagum'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -63,7 +63,7 @@ const navigateToSpot = () => {
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-        'px-3 py-1 text-sm',
+        'px-3 py-1 text-sm rounded-[5px]',
         selectedLocation === 'Mabini'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
