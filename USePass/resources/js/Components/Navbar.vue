@@ -44,7 +44,6 @@ const user = page.props.auth.user as User;
                             </div>
                         </div>
                         <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
-                            <Link :href="route('guard.ghome')" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</Link>
                             <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
                             <button @click="logout" class="text-white font-bold text-xs sm:text-sm hover:underline text-left">LOGOUT</button>
                         </nav>
