@@ -83,8 +83,12 @@ const downloadPDF = () => {
                     />
                     <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
                         <option value="">All Programs</option>
-                        <option value="Information Technology" class="whitespace-nowrap">Bachelor of Science in Information Technology</option>
+                        <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
                         <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
+                        <option value="Elementary Education" class="whitespace-nowrap">Bachelor of Elementary Eduction</option>
+                        <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>
+                        <option value="TVL Teacher Educaton" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
+                        <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>
                     </select>
                 </div>
 
