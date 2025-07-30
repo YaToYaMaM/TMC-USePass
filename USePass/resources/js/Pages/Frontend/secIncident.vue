@@ -76,7 +76,7 @@ const navigateToSpot = () => {
 
             </div>
 
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4">
                 <!-- Title on the left -->
                 <h1 class="text-2xl font-extrabold mb-2 md:mb-0">Incident Report</h1>
 
@@ -106,7 +106,7 @@ const navigateToSpot = () => {
                         <button
                             @click="navigateToIncident"
                             :class="[
-        'px-3 py-1 text-sm border-r border-gray-300',
+        'px-3 py-1 text-sm border-r border-gray-300 rounded-[5px]',
         selectedIncident === 'Incident'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -117,7 +117,7 @@ const navigateToSpot = () => {
                         <button
                             @click="navigateToSpot"
                             :class="[
-        'px-3 py-1 text-sm',
+        'px-3 py-1 text-sm rounded-[5px]',
         selectedIncident === 'Spot'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'

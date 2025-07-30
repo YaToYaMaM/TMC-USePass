@@ -16,7 +16,7 @@ const downloadPDF = () => {
 
     html2pdf()
         .set({
-            margin: 0.5,
+            margin: 0.1,
             filename: 'attendance-report.pdf',
             html2canvas: {
                 scale: 2,
