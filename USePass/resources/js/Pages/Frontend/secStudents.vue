@@ -2,8 +2,8 @@
 import { ref, computed, onMounted  } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { router } from '@inertiajs/vue3'
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 
 
@@ -153,15 +153,41 @@ async function submitForm() {
                     console.error("Other error:", error);
                 }
             });
-        alert('Student and parent saved!');
+        await Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Student and parent have been saved successfully.',
+            confirmButtonColor: '#760000'
+        });
+
         showModal.value = false;
         showParentModal.value = false;
 
         fetchStudents();
     }
     catch (error) {
-        console.error(error);
-        alert('Something went wrong.');
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            const errorMessages = Object.keys(errors)
+                .map(field => `${field}: ${errors[field].join(', ')}`)
+                .join('\n');
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation Error',
+                html: `<pre class="text-left whitespace-pre-wrap">${errorMessages}</pre>`,
+                confirmButtonColor: '#760000'
+            });
+        }
+        else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Something went wrong!',
+                text: 'Please try again later.',
+                confirmButtonColor: '#760000'
+            });
+        }
+
     }
 
 
@@ -200,25 +226,26 @@ function backToStudentForm() {
 const selectedProgram = ref('');
 const searchQuery = ref('');
 
-const programMap = {
+const programGroups = {
     'Information Technology': ['Information Technology'],
     'Early Childhood Education': ['Early Childhood Education'],
     'Elementary Education': ['Elementary Education'],
     'Secondary Education': ['English', 'Mathematics', 'Filipino'],
-    'Technical Vocational Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
+    'TVL Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
     'Engineering': ['Land and Water Resources', 'Machinery and Power', 'Process Engineering', 'Structure and Environment'],
 }
+
 
 const filteredStudents = computed(() => {
     let result = students.value;
 
     // Filter by selected program
 
-    if (selectedProgram.value) {
-        const validPrograms = programMap[selectedProgram.value] || []
+    if (selectedProgram.value && programGroups[selectedProgram.value]) {
+        const validPrograms = programGroups[selectedProgram.value];
         result = result.filter(student =>
             validPrograms.includes(student.students_program)
-        )
+        );
     }
 
     // Filter by search query
