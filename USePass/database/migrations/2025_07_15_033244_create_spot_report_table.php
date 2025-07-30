@@ -12,12 +12,27 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('spot_reports', function (Blueprint $table) {
-            $table->id('spot_id');
-            $table->string('findings')->nullable();
-            $table->string('team_leader')->nullable();
-            $table->string('guard_name')->nullable();
-            $table->string('action_taken')->nullable();
-            $table->string('department_representative')->nullable();
+            $table->id(); // This creates an 'id' column as primary key
+
+            // Foreign key to users table
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('cascade');
+
+            // Report fields
+            $table->text('findings');
+            $table->string('team_leader');
+            $table->string('guard_name');
+            $table->text('action_taken');
+            $table->string('department_representative');
+            $table->string('location')->nullable();
+            $table->time('time')->nullable();
+            $table->date('date')->nullable();
+            // Printing tracking
+            $table->boolean('is_printed')->default(false);
+            $table->timestamp('printed_at')->nullable();
+
             $table->timestamps();
         });
     }

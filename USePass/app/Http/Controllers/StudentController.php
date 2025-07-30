@@ -86,7 +86,7 @@ class StudentController extends Controller
     }
     public function index()
     {
-        $students = Student::all(); // You can paginate here if needed
+        $students = Student::all();
         return response()->json($students);
     }
 
@@ -146,6 +146,27 @@ class StudentController extends Controller
                 'message' => 'Server error'
             ], 500);
         }
+    }
+    public function getCountsByCategory()
+    {
+        $categories = [
+            'BSED' => ['Special Needs Education', 'Elementary Education', 'Early Childhood Education','English', 'Mathematics', 'Filipino'],
+            'BSIT' => ['Information Technology'],
+            'BSABE' => ['Land and Water Resources', 'Machinery and Power', 'Process Engineering','Structure and Environment'],
+            'BTVTED' => ['Agricultural Crops Technology', 'Animal Production'],
+        ];
+
+        $results = [];
+
+        foreach ($categories as $label => $programs) {
+            $count = Student::whereIn('students_program', $programs)->count();
+            $results[] = [
+                'course' => $label,
+                'count' => $count,
+            ];
+        }
+
+        return response()->json($results);
     }
 
 

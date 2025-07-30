@@ -201,18 +201,18 @@ async function updateGuard() {
     <Head title="USePass" />
     <Frontend>
         <Head title="Guard Page" />
-        <div class="flex flex-col p-3">
+        <div class="flex flex-col p-3 px-12 pt-10">
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>
 
                 <div class="flex flex-wrap items-center gap-2">
 
-                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
+                    <div class="inline-flex py-1 px-1 justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-                                    'px-3 py-1 text-sm border-r border-gray-300',
+                                    'px-3 py-1 text-sm border-r rounded-[5px] border-gray-300',
                                     selectedLocation === 'Tagum'
                                       ? 'bg-white text-black shadow'
                                       : 'bg-transparent text-black'
@@ -223,7 +223,7 @@ async function updateGuard() {
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-                                'px-3 py-1 text-sm',
+                                'px-3 py-1 text-sm rounded-[5px]',
                                 selectedLocation === 'Mabini'
                                   ? 'bg-white text-black shadow'
                                   : 'bg-transparent text-black'

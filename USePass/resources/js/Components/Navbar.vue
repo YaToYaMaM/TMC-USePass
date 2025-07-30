@@ -1,13 +1,26 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { router } from "@inertiajs/vue3";
+import {router, usePage} from "@inertiajs/vue3";
 import { route } from 'ziggy-js';
+import { Link } from '@inertiajs/vue3';
 
 const menuOpen = ref(false);
 
 const logout = () => {
     router.post(route('logout'))
 }
+interface User {
+    id: number;
+    name: string;
+    email?: string;
+    role: 'admin' | 'guard' | 'user';
+    first_name: string;
+    last_name: string;
+}
+
+const page = usePage();
+const user = page.props.auth.user as User;
+
 </script>
 
 <template>
@@ -26,12 +39,11 @@ const logout = () => {
                         <div class="flex items-center space-x-2 sm:space-x-3 px-3 py-2 border-b border-[#a00000]">
                             <img src="/images/profile.png" alt="Profile" class="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white" />
                             <div>
-                                <div class="text-white font-extrabold text-xs sm:text-sm">JOHN DOE</div>
-                                <div class="text-white text-opacity-80 italic text-[10px] sm:text-xs -mt-1">Security Guard</div>
+                                <div class="text-white font-extrabold text-xs sm:text-sm">{{ user.first_name }} {{ user.last_name}}</div>
+                                <div class="text-white text-opacity-80 italic text-[10px] sm:text-xs -mt-1">{{ user.role }}</div>
                             </div>
                         </div>
                         <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
-                            <Link :href="route('guard.ghome')" class="text-white font-bold text-xs sm:text-sm hover:underline">HOME</Link>
                             <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
                             <button @click="logout" class="text-white font-bold text-xs sm:text-sm hover:underline text-left">LOGOUT</button>
                         </nav>

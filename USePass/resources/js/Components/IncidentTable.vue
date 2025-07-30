@@ -2,6 +2,9 @@
 import { ref, computed, watch } from "vue";
 import { usePage } from "@inertiajs/vue3";
 
+// Import Inertia's form helper for adding new reports
+import { useForm } from '@inertiajs/vue3';
+
 // Define the User interface with role property
 interface User {
     id: number;
@@ -20,72 +23,37 @@ interface PageProps {
 const page = usePage();
 const currentUser = computed(() => page.props.auth.user as User & { role: string });
 
-const reports = ref([
-    {
-        id: 1,
-        name: "Froilan Canete",
-        guardId: 2,
-        description: "Burning Computer",
-        type: "Incident Report",
-        date: "2025-07-08",
-        what: "Computer suddenly caught fire.",
-        who: "IT personnel",
-        where: "Lab 3",
-        when: "2:30 PM, July 8, 2025",
-        how: "Possibly due to overheating power supply",
-        why: "Lack of regular maintenance",
-        recommendation: "Install cooling systems and perform regular checkups",
-    },
-    {
-        id: 2,
-        name: "Carlos Reyes",
-        guardId: 3,
-        description: "Unauthorized access",
-        type: "Spot Report",
-        date: "2025-07-07",
-        what: "Individual accessed server room without clearance.",
-        who: "Unknown person",
-        where: "Main Building Server Room",
-        when: "1:00 AM",
-        how: "By bypassing security keycard",
-        why: "Possible lapse in guard supervision",
-        recommendation: "Install CCTV, review access logs",
-    },
-    {
-        id: 3,
-        name: "John Robert Paler",
-        guardId: 4,
-        description: "Unauthorized access",
-        type: "Spot Report",
-        date: "2025-07-06",
-        what: "Suga wa napalong.",
-        who: "Unknown person",
-        where: "SOM Building",
-        when: "9:00 PM",
-        how: "By bypassing security keycard",
-        why: "Possible lapse in guard supervision",
-        recommendation: "Check the room before you leave",
-    },
-    {
-        id: 4,
-        name: "Froilan Canete",
-        guardId: 2,
-        description: "Equipment Malfunction",
-        type: "Incident Report",
-        date: "2025-07-05",
-        what: "Security camera malfunctioned during night shift.",
-        who: "Security team",
-        where: "Entrance Gate",
-        when: "11:00 PM",
-        how: "Camera stopped recording",
-        why: "Power fluctuation",
-        recommendation: "Install UPS backup for cameras",
-    },
-]);
-
 const props = defineProps<{
+    reports: any[];
     selectedDate?: string;
 }>();
+
+const reports = ref(props.reports);
+const filteredReports = computed(() => {
+    return props.reports?.filter(report => {
+        // your filtering condition
+        return true; // modify as needed
+    }) ?? [];
+});
+
+// Utility function to format date as "Date | Time"
+function formatDateTime(dateString: string): string {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    // Format date as YYYY-MM-DD
+    const formattedDate = date.toISOString().split('T')[0];
+
+    // Format time as 12-Hour format with AM/PM
+    const formattedTime = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+
+    return `${formattedDate} | ${formattedTime}`;
+}
 
 const showViewModal = ref(false);
 const showAddModal = ref(false);
@@ -108,7 +76,6 @@ const newReport = ref({
 // Form validation errors
 const formErrors = ref<Record<string, string>>({});
 
-// Check if user can view a specific report
 function canViewReport(report: any): boolean {
     if (!currentUser.value) {
         return false;
@@ -119,7 +86,7 @@ function canViewReport(report: any): boolean {
     }
 
     if (currentUser.value.role === "guard") {
-        return report.guardId === currentUser.value.id;
+        return report.user_id === currentUser.value.id;
     }
 
     return false;
@@ -216,7 +183,7 @@ function submitReport() {
     const reportToAdd = {
         id: Math.max(...reports.value.map(r => r.id)) + 1,
         name: currentUser.value.name,
-        guardId: currentUser.value.id,
+        user_id: currentUser.value.id,
         ...newReport.value
     };
 
@@ -299,6 +266,9 @@ watch(filteredReport, () => {
         currentPage.value = 1;
     }
 });
+
+console.log('Reports received:', props.reports);
+
 </script>
 
 <template>
@@ -307,7 +277,7 @@ watch(filteredReport, () => {
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.name }}</h3>
-                <p class="text-sm text-blue-700">Role: {{ getRoleDisplayName }}</p>
+                <p class="text-sm text-blue-700">{{ getRoleDisplayName }}</p>
             </div>
             <div class="text-sm text-blue-600">
                 <span v-if="currentUser.role === 'guard'">
@@ -333,9 +303,10 @@ watch(filteredReport, () => {
             <thead class="bg-gray-50">
             <tr class="text-gray-600 uppercase text-xs tracking-wider">
                 <th class="px-6 py-3 text-left">Guard on Duty</th>
+                <th class="px-6 py-3 text-left">What</th>
                 <th class="px-6 py-3 text-left">Description</th>
-                <th class="px-6 py-3 text-left">Type of Report</th>
-                <th class="px-6 py-3 text-left">Date</th>
+                <th class="px-6 py-3 text-left">Where</th>
+                <th class="px-6 py-3 text-left">Date | Time</th>
                 <th class="px-6 py-3 text-center">Action</th>
             </tr>
             </thead>
@@ -348,15 +319,16 @@ watch(filteredReport, () => {
                 }"
             >
                 <td class="px-6 py-4 font-medium whitespace-nowrap">
-                    {{ item.name }}
+                    {{ item.guard_name }}
                     <span
                         v-if="currentUser && item.guardId === currentUser.id && currentUser.role === 'guard'"
                         class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
                     >Your Report</span>
                 </td>
                 <td class="px-6 py-4 font-semibold">{{ item.what }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.type }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.date }}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.description }}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.where }}</td>
+                <td class="px-6 py-4 font-semibold">{{ formatDateTime(item.created_at) }}</td>
                 <td class="px-6 py-4 text-center">
                     <button
                         @click="openEditModal(item)"
@@ -390,7 +362,7 @@ watch(filteredReport, () => {
             </tr>
 
             <tr v-if="paginatedIncident.length === 0">
-                <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
                     <div class="flex flex-col items-center">
                         <svg
                             class="w-12 h-12 mb-2 text-gray-400"
@@ -517,7 +489,7 @@ watch(filteredReport, () => {
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Who? <span class="text-red-500">*</span>
+                                Who was involved? <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -531,7 +503,7 @@ watch(filteredReport, () => {
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">
-                                Where? <span class="text-red-500">*</span>
+                                Where did it happen? <span class="text-red-500">*</span>
                             </label>
                             <input
                                 type="text"
@@ -547,7 +519,7 @@ watch(filteredReport, () => {
                     <!-- When -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            When? <span class="text-red-500">*</span>
+                            When did it happen? <span class="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
@@ -562,7 +534,7 @@ watch(filteredReport, () => {
                     <!-- How -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            How? <span class="text-red-500">*</span>
+                            How did it happen? <span class="text-red-500">*</span>
                         </label>
                         <textarea
                             v-model="newReport.how"
@@ -577,7 +549,7 @@ watch(filteredReport, () => {
                     <!-- Why -->
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">
-                            Why? <span class="text-red-500">*</span>
+                            Why did it happen? <span class="text-red-500">*</span>
                         </label>
                         <textarea
                             v-model="newReport.why"

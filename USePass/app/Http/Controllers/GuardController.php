@@ -49,7 +49,7 @@ class GuardController extends Controller
     }
     public function index()
     {
-        $guards = Guard::where('role', 'guard')->get(); // fetch only users with role 'guard'
+        $guards = Guard::where('role', 'guard')->get();
         return response()->json($guards);
     }
     public function update(Request $request, $id)

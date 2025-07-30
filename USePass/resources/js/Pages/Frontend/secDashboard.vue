@@ -1,14 +1,14 @@
 <template>
     <Head title="Dashboard" />
   <Frontend>
-  <div class="px-3 pt-6 min-h-screen overflow-auto space-y-6">
+  <div class="px-3 pt-6 min-h-screen overflow-auto space-y-6 px-12">
     <div class="flex justify-between items-center">
       <h1 class="text-2xl font-bold">Dashboard</h1>
-        <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit max-h-8">
+        <div class="inline-flex px-1 py-1 justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit max-h-10">
             <button
                 @click="selectUnit('Tagum')"
                 :class="[
-                    'px-2 py-1 rounded-[5px] font-semibold transition text-center',
+                    'px-3 py-1 rounded-[5px] font-semibold transition text-center',
                     selectedUnit === 'Tagum'
                       ? 'bg-white text-black shadow'
                       : 'bg-transparent text-black'
@@ -19,7 +19,7 @@
             <button
                 @click="selectUnit('Mabini')"
                 :class="[
-                    'px-2 py-1 rounded-[5px] font-semibold transition text-center',
+                    'px-3 py-1 rounded-[5px] font-semibold transition text-center',
                     selectedUnit === 'Mabini'
                       ? 'bg-white text-black shadow'
                       : 'bg-transparent text-black'
@@ -36,11 +36,11 @@
       <StatCard title="Alumni" value="0" subtitle="Alumni on the campus" />
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
-      <div class="md:col-span-2">
+    <div class="grid grid-cols-1">
+      <div class="grid grid-cols-2 md:col-span-2 gap-5">
         <BarChart />
+        <StudentsList />
       </div>
-      <StudentsList />
     </div>
   </div>
   </Frontend>

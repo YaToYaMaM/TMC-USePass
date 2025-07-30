@@ -12,11 +12,14 @@
 </template>
 
 <script setup>
-const students = [
-    { course: 'BSIT', count: 689 },
-    { course: 'BEED', count: 343 },
-    { course: 'BSED', count: 543 },
-    { course: 'BTVTED', count: 793 },
-    { course: 'BSABE', count: 1120 },
-]
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+
+const students = ref([]);
+
+onMounted(async () => {
+    const res = await axios.get('/students-by-category');
+    students.value = res.data;
+});
+
 </script>
