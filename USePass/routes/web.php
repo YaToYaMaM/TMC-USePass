@@ -11,6 +11,15 @@ use Illuminate\Support\Facades\Route;
 use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
 
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SpotController;
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/incident', [ReportController::class, 'incident'])->name('incident.index');
+});
+
+Route::get('/spot-reports', [SpotController::class, 'spot']);
 
 
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
@@ -48,9 +57,12 @@ Route::middleware(['auth', 'can:isGuard'])->group(function () {
 //        'phpVersion' => PHP_VERSION,
 //    ]);
 //});
-Route::middleware(['auth'])->group(function () {
-    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
-});
+
+//axl forda try
+//Route::middleware(['auth'])->group(function () {
+//    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
+//});
+
 Route::get('/incident-report/print', function () {
     return Inertia::render('Frontend/IncidentReportTemplate', [
         'report' => [

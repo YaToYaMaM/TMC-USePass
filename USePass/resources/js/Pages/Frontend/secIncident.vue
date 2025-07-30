@@ -1,24 +1,49 @@
 <script setup lang="ts">
-import { ref} from 'vue';
-import  Frontend from "@/Layouts/FrontendLayout.vue";
-import { Head } from "@inertiajs/vue3";
+import { ref, computed } from 'vue';
+import Frontend from "@/Layouts/FrontendLayout.vue";
+import { Head, router } from "@inertiajs/vue3";
 import IncidentTable from "@/Components/IncidentTable.vue";
 import SpotTable from "@/Components/SpotTable.vue";
 
-
 const selectedLocation = ref('Tagum');
-const selectedIncident = ref('Incident');
 const selectedDate = ref<string>('');
 
+const props = defineProps<{
+    reports: any[];
+    spot?: any[];
+    auth: any;
+}>();
 
+// Check if user is admin
+const isAdmin = computed(() => {
+    return props.auth?.user?.role === 'admin' || props.auth?.user?.is_admin || false;
+});
+
+// Determine current route based on URL
+const currentRoute = computed(() => {
+    return window.location.pathname;
+});
+
+const selectedIncident = computed(() => {
+    return currentRoute.value === '/spot-reports' ? 'Spot' : 'Incident';
+});
+
+// Navigation functions
+const navigateToIncident = () => {
+    router.visit('/incident');
+};
+
+const navigateToSpot = () => {
+    router.visit('/spot-reports');
+};
 </script>
 
 <template>
     <Frontend>
         <Head title="Incident Report" />
         <div class="flex flex-col p-3 ">
-            <!-- Top Control Buttons -->
-            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <!-- Top Control Buttons (Admin Only) -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4" v-if="isAdmin">
                 <span></span>
                 <div class="flex flex-wrap items-center gap-2">
                     <!-- Button Group -->
@@ -78,7 +103,7 @@ const selectedDate = ref<string>('');
                     />
                     <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
-                            @click="selectedIncident = 'Incident'"
+                            @click="navigateToIncident"
                             :class="[
         'px-3 py-1 text-sm border-r border-gray-300',
         selectedIncident === 'Incident'
@@ -89,7 +114,7 @@ const selectedDate = ref<string>('');
                             Incident Report
                         </button>
                         <button
-                            @click="selectedIncident = 'Spot'"
+                            @click="navigateToSpot"
                             :class="[
         'px-3 py-1 text-sm',
         selectedIncident === 'Spot'
@@ -101,16 +126,13 @@ const selectedDate = ref<string>('');
                         </button>
                     </div>
 
-
                 </div>
 
             </div>
             <div>
-                <IncidentTable v-if="selectedIncident === 'Incident'"  :selectedDate="selectedDate" />
-                <SpotTable v-else-if="selectedIncident === 'Spot'" :selectedDate="selectedDate"/>
+                <IncidentTable :reports="props.reports" v-if="selectedIncident === 'Incident'"  :selectedDate="selectedDate" />
+                <SpotTable :reports="props.reports" :spot="props.spot || []" v-else-if="selectedIncident === 'Spot'" :selectedDate="selectedDate"/>
             </div>
         </div>
     </Frontend>
 </template>
-
-
