@@ -199,14 +199,26 @@ function backToStudentForm() {
 
 const selectedProgram = ref('');
 const searchQuery = ref('');
+
+const programMap = {
+    'Information Technology': ['Information Technology'],
+    'Early Childhood Education': ['Early Childhood Education'],
+    'Elementary Education': ['Elementary Education'],
+    'Secondary Education': ['English', 'Mathematics', 'Filipino'],
+    'Technical Vocational Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
+    'Engineering': ['Land and Water Resources', 'Machinery and Power', 'Process Engineering', 'Structure and Environment'],
+}
+
 const filteredStudents = computed(() => {
     let result = students.value;
 
     // Filter by selected program
+
     if (selectedProgram.value) {
+        const validPrograms = programMap[selectedProgram.value] || []
         result = result.filter(student =>
-            student.students_program === selectedProgram.value
-        );
+            validPrograms.includes(student.students_program)
+        )
     }
 
     // Filter by search query
@@ -303,8 +315,18 @@ const filteredStudents = computed(() => {
                         <option value="">All Programs</option>
                         <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
                         <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
+                        <option value="Elementary Education" class="whitespace-nowrap">Bachelor of Elementary Eduction</option>
+                        <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>
+                        <option value="TVL Teacher Educaton" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
+                        <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>
                     </select>
                 </div>
+            </div>
+            <div v-if="filteredStudents.length === 0" class="text-gray-500 p-4 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                No records found.
             </div>
             <!-- student Card -->
             <div v-for="student in paginatedStudents" :key="student.students_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
