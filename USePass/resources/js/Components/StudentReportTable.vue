@@ -1,50 +1,78 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import axios from "axios";
+import { onMounted, onBeforeUnmount, ref, computed, watch } from "vue";
 
 const props = defineProps<{
     selectedDate: string;
+    selectedProgram?: string;
 }>();
 
-const student = ref([
-    {
-        id: "2022-00381",
-        name: "Froilan Canete",
-        program: "BSIT",
-        major: "Information Security",
-        date: "2025-07-08",
-    },
-    {
-        id: "2022-00280",
-        name: "Joan Malintad",
-        program: "BSIT",
-        major: "Information Security",
-        date: "2025-07-07",
-    },
-    {
-        id: "2022-00291",
-        name: "Miralie Lyka Borjal",
-        program: "BSIT",
-        major: "Information Security",
-        date: "2025-07-08",
-    },
-]);
 
+const studentRecords = ref([]);
+const attendanceFilter = ref("");
 const currentPage = ref(1);
 const itemsPerPage = 7;
 
-const filteredStudents = computed(() => {
-    if (!props.selectedDate) return student.value;
-    return student.value.filter((s) => s.date === props.selectedDate);
+const fetchStudentRecords = () => {
+    axios.get('/student-records', {
+        params: {
+            date: props.selectedDate,
+            program: props.selectedProgram || undefined
+        }
+    })
+        .then((response) => {
+            studentRecords.value = response.data.map((record: any) => ({
+                id: record.student_id,
+                name: record.name,
+                program: record.students_program,
+                major: record.students_major,
+                date: record.date,
+                time_in: record.record_in,
+                time_out: record.record_out,
+            }));
+            console.log("Fetched records:", studentRecords.value);
+        })
+        .catch((error) => {
+            console.error('Error fetching student records:', error);
+        });
+};
+
+
+watch(() => props.selectedDate, fetchStudentRecords, { immediate: true });
+
+
+let intervalId: ReturnType<typeof setInterval>;
+
+onMounted(() => {
+    fetchStudentRecords();
+    intervalId = setInterval(fetchStudentRecords, 3000);
 });
 
-const paginatedIncident = computed(() => {
+onBeforeUnmount(() => {
+    clearInterval(intervalId);
+});
+
+const filteredRecords = computed(() => {
+    let records = studentRecords.value;
+
+    if (attendanceFilter.value === "time_in") {
+        records = records.filter((s) => s.time_in);
+    } else if (attendanceFilter.value === "time_out") {
+        records = records.filter((s) => s.time_out);
+    }
+
+    return records;
+});
+
+const paginatedRecords = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
-    return filteredStudents.value.slice(start, start + itemsPerPage);
+    return filteredRecords.value.slice(start, start + itemsPerPage);
 });
 
 const totalPages = computed(() =>
-    Math.ceil(filteredStudents.value.length / itemsPerPage)
+    Math.ceil(filteredRecords.value.length / itemsPerPage)
 );
+
 </script>
 
 
@@ -56,19 +84,22 @@ const totalPages = computed(() =>
                 <th class="px-6 py-3 text-left">Name</th>
                 <th class="px-6 py-3 text-left">Program</th>
                 <th class="px-6 py-3 text-left">Major</th>
+                <th class="px-6 py-3 text-left">Time In</th>
+                <th class="px-6 py-3 text-left">Time Out</th>
                 <th class="px-6 py-3 text-left">Date</th>
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-100 text-gray-700">
             <tr
-                v-for="(item, index)
-                in paginatedIncident"
-                :key="index">
+                v-for="item
+                in paginatedRecords"
+                :key="item.id">
                 <td class="px-6 py-4 font-semibold whitespace-nowrap">{{ item.name }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.program }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.major }}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.time_in}}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.time_out}}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.date }}</td>
-
             </tr>
 
             </tbody>
@@ -96,9 +127,5 @@ const totalPages = computed(() =>
             </button>
         </div>
     </div>
-
-    <!-- View Modal -->
-
-
 </template>
 

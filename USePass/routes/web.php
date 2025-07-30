@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
+use App\Http\Controllers\StudentRecordController;
 
 
 
@@ -22,6 +23,12 @@ Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->
 
 Route::post('/student/get-data', [StudentController::class, 'getStudentData']);
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
+
+Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendStudentOtp'])->name('student.otp.send');
+Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
+Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
+Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
 
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
@@ -86,6 +93,8 @@ Route::get('/students/list', [StudentController::class, 'index']);
 Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
+
+Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
 
 
 //Route::get('/dashboard', function () {

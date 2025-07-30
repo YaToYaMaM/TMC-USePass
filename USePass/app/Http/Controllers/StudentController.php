@@ -92,29 +92,60 @@ class StudentController extends Controller
 
     public function getStudentData(Request $request)
     {
+        try {
+            $request->validate(['students_id' => 'required|string']);
 
-        $request->validate([
-            'students_id' => 'required|string'
-        ]);
+            $student = Student::with('parentInfo')
+                ->where('students_id', $request->students_id)
+                ->firstOrFail();
 
-        $student = Student::with('parentInfo')
-            ->where('students_id', $request->students_id)
-            ->first();
+            $parent = $student->parentInfo;
 
-        if (!$student) {
+            // Check if student and parent already have complete contact info
+            $studentHasContact = !empty($student->students_email) && !empty($student->students_phone_num);
+            $parentHasContact = false;
+
+            if ($parent) {
+                $parentHasContact = !empty($parent->parent_email) && !empty($parent->parent_phone_num);
+            }
+
+            // Determine what step to redirect to
+            $redirectStep = 1; // Default
+            $message = "Please complete your contact information.";
+
+            if ($studentHasContact && $parentHasContact) {
+                $redirectStep = 3;
+                $message = "Your information is complete! Generating your barcode...";
+            } elseif ($studentHasContact && !$parentHasContact) {
+                $redirectStep = 2;
+                $message = "Please update your parent/guardian contact information.";
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'student' => $student,
+                    'parent' => $parent
+                ],
+                'status' => [
+                    'student_has_contact' => $studentHasContact,
+                    'parent_has_contact' => $parentHasContact,
+                    'redirect_step' => $redirectStep,
+                    'message' => $message
+                ]
+            ]);
+
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Student not found'
             ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Server error'
+            ], 500);
         }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'student' => $student,
-                'parent' => $student->parentInfo
-            ]
-        ]);
     }
 
 
