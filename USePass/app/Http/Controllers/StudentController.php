@@ -169,5 +169,12 @@ class StudentController extends Controller
         return response()->json($results);
     }
 
+    public function checkStudentExists($students_id)
+    {
+        $exists = \App\Models\Student::where('students_id', $students_id)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
+
 
 }

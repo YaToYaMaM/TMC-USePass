@@ -36,6 +36,10 @@ Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendSt
 Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
+//guard scan
+Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
+
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 //    Route::get('/', [FrontendControllers::class, 'index'])->name('home');
