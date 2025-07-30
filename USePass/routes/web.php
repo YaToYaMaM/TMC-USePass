@@ -34,6 +34,9 @@ Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->
 Route::post('/student/get-data', [StudentController::class, 'getStudentData']);
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 
+//guard scan
+Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
+
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 //    Route::get('/', [FrontendControllers::class, 'index'])->name('home');
