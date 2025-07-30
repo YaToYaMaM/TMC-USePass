@@ -151,7 +151,7 @@ class StudentController extends Controller
     {
         $categories = [
             'BSED' => ['Special Needs Education', 'Elementary Education', 'Early Childhood Education','English', 'Mathematics', 'Filipino'],
-            'BSIT' => ['Information Technology'],
+            'BSIT' => ['Information Security'],
             'BSABE' => ['Land and Water Resources', 'Machinery and Power', 'Process Engineering','Structure and Environment'],
             'BTVTED' => ['Agricultural Crops Technology', 'Animal Production'],
         ];
@@ -159,7 +159,7 @@ class StudentController extends Controller
         $results = [];
 
         foreach ($categories as $label => $programs) {
-            $count = Student::whereIn('students_program', $programs)->count();
+            $count = Student::whereIn('students_major', $programs)->count();
             $results[] = [
                 'course' => $label,
                 'count' => $count,
@@ -168,6 +168,13 @@ class StudentController extends Controller
 
         return response()->json($results);
     }
+
+    public function checkStudentExists($students_id)
+    {
+        $exists = \App\Models\Student::where('students_id', $students_id)->exists();
+        return response()->json(['exists' => $exists]);
+    }
+
 
 
 }

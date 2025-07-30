@@ -1,4 +1,3 @@
-
 <template xmlns="http://www.w3.org/1999/html">
     <Head title="USePass" />
     <Frontend>
@@ -7,38 +6,16 @@
             <div class="bg-white shadow-sm border-b sticky top-0 z-20">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
-                        <h1 class="text-2xl font-bold text-gray-900">Campus Access Logs</h1>
+                        <h1 class="text-2xl font-bold text-gray-900">Activity Logs</h1>
 
-                        <!-- Filters -->
-                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                            <div class="flex items-center space-x-2">
-                                <label class="text-sm font-medium text-gray-700">Date:</label>
-                                <input
-                                    type="date"
-                                    v-model="selectedDate"
-                                    class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
-
-                            <div class="flex items-center space-x-2">
-                                <label class="text-sm font-medium text-gray-700">Programs:</label>
-                                <div class="relative">
-                                    <select
-                                        v-model="selectedProgram"
-                                        class="appearance-none border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[250px]"
-                                    >
-                                        <option value="">All Programs</option>
-                                        <option value="BSIT">Bachelor of Science in Information Technology</option>
-                                        <option value="BSCS">Bachelor of Science in Computer Science</option>
-                                        <option value="BSIS">Bachelor of Science in Information Systems</option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
+                        <!-- Date Filter Only -->
+                        <div class="flex items-center space-x-2">
+                            <label class="text-sm font-medium text-gray-700">Date:</label>
+                            <input
+                                type="date"
+                                v-model="selectedDate"
+                                class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            />
                         </div>
                     </div>
                 </div>
@@ -47,11 +24,10 @@
             <!-- Main Content Area -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-
                 <!-- Logs Table -->
                 <div class="bg-white shadow rounded-lg overflow-hidden">
                     <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-medium text-gray-900">Recent Access Logs</h3>
+                        <h3 class="text-lg font-medium text-gray-900">Recent Activity Logs</h3>
                     </div>
 
                     <div class="overflow-x-auto">
@@ -59,10 +35,11 @@
                             <table class="min-w-full divide-y divide-gray-200">
                                 <thead class="bg-gray-50 sticky top-0">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Student</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date | Time</th>
                                 </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
@@ -73,23 +50,21 @@
                                 >
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0">
-                                                <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
                                             <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900">{{ log.student }}</div>
-                                                <div class="text-sm text-gray-500">{{ log.program }}</div>
+                                                <div class="text-sm font-medium text-gray-900">{{ log.user }}</div>
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                      <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
-                        {{ log.action }}
-                      </span>
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full"
+                                              :class="log.role === 'Admin' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'">
+                                            {{ log.role }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                            {{ log.action }}
+                                        </span>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div class="text-sm text-gray-900">{{ log.description }}</div>
@@ -145,8 +120,8 @@
                                         </svg>
                                     </button>
                                     <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
-                    Page {{ currentPage }} of {{ totalPages }}
-                  </span>
+                                        Page {{ currentPage }} of {{ totalPages }}
+                                    </span>
                                     <button
                                         @click="nextPage"
                                         :disabled="currentPage === totalPages"
@@ -164,7 +139,6 @@
             </div>
         </div>
     </Frontend>
-
 </template>
 
 <script setup>
@@ -185,19 +159,17 @@ export default {
             menuOpen: false,
             currentPage: 1,
             itemsPerPage: 10,
-            searchText: '',
             selectedDate: '2025-06-27',
-            selectedProgram: '',
             logs: [
-                { time: "06/27/2025|11:35 AM", student: "Froilan Canete", program: "Bachelor of Science in Information Technology", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:36 AM", student: "Maria Santos", program: "Bachelor of Science in Computer Science", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:37 AM", student: "Jose Rivera", program: "Bachelor of Science in Information Systems", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:38 AM", student: "Anna Cruz", program: "Bachelor of Science in Information Technology", action: "Barcode Scan", description: "Exit the Campus" },
-                { time: "06/27/2025|11:39 AM", student: "Mark Lopez", program: "Bachelor of Science in Computer Science", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:40 AM", student: "Lisa Garcia", program: "Bachelor of Science in Information Systems", action: "Barcode Scan", description: "Exit the Campus" },
-                { time: "06/27/2025|11:41 AM", student: "Tom Anderson", program: "Bachelor of Science in Information Technology", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:42 AM", student: "Amy Gonzalez", program: "Bachelor of Science in Computer Science", action: "Barcode Scan", description: "Enter the Campus" },
-                { time: "06/27/2025|11:43 AM", student: "Chris Martinez", program: "Bachelor of Science in Information Systems", action: "Barcode Scan", description: "Exit the Campus" }
+                { time: "06/27/2025|11:35 AM", user: "Froilan Canete", role: "Security Guard", action: "Barcode Scan", description: "Scanning Barcode" },
+                { time: "06/27/2025|11:36 AM", user: "Maria Santos", role: "Admin", action: "Log In", description: "Logging In" },
+                { time: "06/27/2025|11:37 AM", user: "Jose Rivera", role: "Security Guard", action: "Barcode Scan", description: "Scanning Barcode" },
+                { time: "06/27/2025|11:38 AM", user: "Anna Cruz", role: "Security Guard", action: "Barcode Scan", description: "Scanning Barcode" },
+                { time: "06/27/2025|11:39 AM", user: "Mark Lopez", role: "Admin", action: "Log Out", description: "Logging Out" },
+                { time: "06/27/2025|11:40 AM", user: "Lisa Garcia", role: "Security Guard", action: "Barcode Scan", description: "Scanning Barcode" },
+                { time: "06/27/2025|11:41 AM", user: "Tom Anderson", role: "Admin", action: "Log Out", description: "Logging Out" },
+                { time: "06/27/2025|11:42 AM", user: "Amy Gonzalez", role: "Admin", action: "Log In", description: "Logging In" },
+                { time: "06/27/2025|11:43 AM", user: "Chris Martinez", role: "Security Guard", action: "Barcode Scan", description: "Scanning Barcode" }
             ]
         };
     },
@@ -205,22 +177,16 @@ export default {
     computed: {
         filteredLogs() {
             const date = this.selectedDate;
-            const program = this.selectedProgram;
-
-            // Create a mapping for program codes to full names
-            const programMapping = {
-                'BSIT': 'Bachelor of Science in Information Technology',
-                'BSCS': 'Bachelor of Science in Computer Science',
-                'BSIS': 'Bachelor of Science in Information Systems'
-            };
 
             return this.logs.filter(log => {
-                const matchesDate = !date || log.time.includes(date.replace(/-/g, '/').slice(5));
+                // Only filter by date if a date is selected
+                if (!date) return true;
 
-                // Fix the program matching logic
-                const matchesProgram = !program || log.program === programMapping[program];
+                // Extract date from log.time (format: "06/27/2025|11:35 AM")
+                const logDate = log.time.split('|')[0]; // Gets "06/27/2025"
+                const selectedDateFormatted = this.formatDateForComparison(date); // Convert "2025-06-27" to "06/27/2025"
 
-                return matchesDate && matchesProgram;
+                return logDate === selectedDateFormatted;
             });
         },
 
@@ -231,24 +197,28 @@ export default {
         paginatedLogs() {
             const start = (this.currentPage - 1) * this.itemsPerPage;
             return this.filteredLogs.slice(start, start + this.itemsPerPage);
-        },
-
-        uniqueUsers() {
-            const students = new Set(this.filteredLogs.map(log => log.student));
-            return students.size;
         }
     },
 
     methods: {
         formatTime(timeString) {
-            // Convert "06/27/2025|11:35 AM" to "11:35 AM | 06/27/2025"
+            // Convert "06/27/2025|11:35 AM" to "06/27/2025 | 11:35 AM"
             const parts = timeString.split('|');
             if (parts.length > 1) {
-                const time = parts[1]; // "11:35 AM"
                 const date = parts[0]; // "06/27/2025"
-                return `${time} | ${date}`;
+                const time = parts[1]; // "11:35 AM"
+                return `${date} | ${time}`;
             }
             return timeString;
+        },
+
+        formatDateForComparison(dateString) {
+            // Convert "2025-06-27" to "06/27/2025" for comparison
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}/${day}/${year}`;
         },
 
         prevPage() {
@@ -269,17 +239,10 @@ export default {
     },
 
     watch: {
-        searchText() {
-            this.currentPage = 1;
-        },
         selectedDate() {
             this.currentPage = 1;
-        },
-        selectedProgram() {
-            this.currentPage = 1;
         }
-    },
-
+    }
 };
 </script>
 

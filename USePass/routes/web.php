@@ -36,6 +36,10 @@ Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendSt
 Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
+//guard scan
+
+
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 //    Route::get('/', [FrontendControllers::class, 'index'])->name('home');
@@ -104,7 +108,7 @@ Route::get('/student-records', [StudentRecordController::class, 'fetchRecords'])
 Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
-
+Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');

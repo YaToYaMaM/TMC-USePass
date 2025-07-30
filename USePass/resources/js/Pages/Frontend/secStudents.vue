@@ -2,8 +2,8 @@
 import { ref, computed, onMounted  } from 'vue';
 import  Frontend from "@/Layouts/FrontendLayout.vue";
 import { Head } from "@inertiajs/vue3";
-import { router } from '@inertiajs/vue3'
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 
 
@@ -64,6 +64,7 @@ const fetchStudents = () => {
                 students_middle_initial: student.students_middle_initial,
                 students_last_name: student.students_last_name,
                 students_program: student.students_program,
+                students_major: student.students_major,
                 students_profile_image: student.students_profile_image,
             }));
         })
@@ -112,7 +113,7 @@ const majorsByProgram = {
         'Mathematics',
         'Filipino',
     ],
-    'Engeneering': [
+    'Engineering': [
         'Land and Water Resources',
         'Machinery and Power',
         'Process Engineering',
@@ -153,15 +154,41 @@ async function submitForm() {
                     console.error("Other error:", error);
                 }
             });
-        alert('Student and parent saved!');
+        await Swal.fire({
+            icon: 'success',
+            title: 'Saved!',
+            text: 'Student and parent have been saved successfully.',
+            confirmButtonColor: '#760000'
+        });
+
         showModal.value = false;
         showParentModal.value = false;
 
         fetchStudents();
     }
     catch (error) {
-        console.error(error);
-        alert('Something went wrong.');
+        if (error.response && error.response.status === 422) {
+            const errors = error.response.data.errors;
+            const errorMessages = Object.keys(errors)
+                .map(field => `${field}: ${errors[field].join(', ')}`)
+                .join('\n');
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Validation Error',
+                html: `<pre class="text-left whitespace-pre-wrap">${errorMessages}</pre>`,
+                confirmButtonColor: '#760000'
+            });
+        }
+        else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Something went wrong!',
+                text: 'Please try again later.',
+                confirmButtonColor: '#760000'
+            });
+        }
+
     }
 
 
@@ -200,25 +227,15 @@ function backToStudentForm() {
 const selectedProgram = ref('');
 const searchQuery = ref('');
 
-const programMap = {
-    'Information Technology': ['Information Technology'],
-    'Early Childhood Education': ['Early Childhood Education'],
-    'Elementary Education': ['Elementary Education'],
-    'Secondary Education': ['English', 'Mathematics', 'Filipino'],
-    'Technical Vocational Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
-    'Engineering': ['Land and Water Resources', 'Machinery and Power', 'Process Engineering', 'Structure and Environment'],
-}
 
 const filteredStudents = computed(() => {
     let result = students.value;
 
-    // Filter by selected program
-
     if (selectedProgram.value) {
-        const validPrograms = programMap[selectedProgram.value] || []
+        const majors = majorsByProgram[selectedProgram.value] || [];
         result = result.filter(student =>
-            validPrograms.includes(student.students_program)
-        )
+            majors.includes(student.students_major)
+        );
     }
 
     // Filter by search query
@@ -238,7 +255,7 @@ const filteredStudents = computed(() => {
 <template>
     <Frontend>
         <Head title="Student Page" />
-        <div class="flex flex-col p-3 ">
+        <div class="flex flex-col p-3 px-12 pt-8">
 
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
@@ -248,11 +265,11 @@ const filteredStudents = computed(() => {
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
 
                     <!-- Button Group -->
-                    <div class="inline-flex justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
+                    <div class="inline-flex px-1 py-1 justify-center text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
                         <button
                             @click="selectedLocation = 'Tagum'"
                             :class="[
-        'px-3 py-1 text-sm border-r border-gray-300',
+        'px-3 py-1 text-sm border-r border-gray-300 rounded-[5px]',
         selectedLocation === 'Tagum'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -263,7 +280,7 @@ const filteredStudents = computed(() => {
                         <button
                             @click="selectedLocation = 'Mabini'"
                             :class="[
-        'px-3 py-1 text-sm',
+        'px-3 py-1 text-sm rounded-[5px]',
         selectedLocation === 'Mabini'
           ? 'bg-white text-black shadow'
           : 'bg-transparent text-black'
@@ -314,10 +331,9 @@ const filteredStudents = computed(() => {
                     <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
                         <option value="">All Programs</option>
                         <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
-                        <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
-                        <option value="Elementary Education" class="whitespace-nowrap">Bachelor of Elementary Eduction</option>
+                        <option value="Education" class="whitespace-nowrap">Bachelor of Education</option>
                         <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>
-                        <option value="TVL Teacher Educaton" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
+                        <option value="TVL Teacher Education" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
                         <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>
                     </select>
                 </div>
@@ -337,7 +353,8 @@ const filteredStudents = computed(() => {
                             {{ student.students_first_name }} {{student.students_middle_initial}} {{ student.students_last_name }}
                         </h2>
                         <p class="text-sm text-gray-600">
-                            {{ student.students_program }}
+                            Bachelor of {{ student.students_program }} Major in
+                            {{student.students_major}}
                         </p>
                     </div>
                 </div>
@@ -431,7 +448,8 @@ const filteredStudents = computed(() => {
                                     <option value="" disabled selected>Select Program</option>
                                     <option value="Information Technology">Information Technology</option>
                                     <option value="Education">Education</option>
-                                    <option value="Engeneering">Engeneering</option>
+                                    <option value="Secondary Education">Secondary Education</option>
+                                    <option value="Engineering">Engineering</option>
                                     <option value="TVL Teacher Education">TVL Teacher Education</option>
                                 </select>
                             </div>
