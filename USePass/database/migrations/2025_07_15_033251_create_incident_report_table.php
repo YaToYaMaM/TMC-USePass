@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('incident_reports', function (Blueprint $table) {
             $table->id('incident_id');
+            // Foreign key to users table
+            $table->unsignedBigInteger('user_id');
+            $table->foreign('user_id')
+                ->references('id')->on('users')
+                ->onDelete('cascade');
             $table->string('guard_name')->nullable();
             $table->text('description')->nullable();
             $table->text('what')->nullable();

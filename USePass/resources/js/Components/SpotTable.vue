@@ -20,51 +20,30 @@ interface PageProps {
 const page = usePage();
 const currentUser = computed(() => page.props.auth.user as User & { role: string });
 
-const reports = ref([
-    {
-        id: 1,
-        guardId: 2,
-        guardName: "Froilan Canete",
-        findings: "Turn on lights",
-        time: "8:25 PM",
-        date: "2025-07-09",
-        location: "SOM Building",
-        actionTaken: "Switch Off the lights",
-        teamLeader: "Joan Malintad",
-        departmentRepresentative: "Chai",
-        Rtype: "Spot Report",
-    },
-    {
-        id: 2,
-        guardId: 3,
-        guardName: "Carlos Reyes",
-        findings: "Door left unlocked",
-        time: "10:30 PM",
-        date: "2025-07-08",
-        location: "Main Building",
-        actionTaken: "Secured the door and logged incident",
-        teamLeader: "Maria Santos",
-        departmentRepresentative: "John",
-        Rtype: "Spot Report",
-    },
-    {
-        id: 3,
-        guardId: 4,
-        guardName: "John Robert Paler",
-        findings: "Suspicious individual near premises",
-        time: "11:45 PM",
-        date: "2025-07-07",
-        location: "Parking Area",
-        actionTaken: "Approached and verified identity",
-        teamLeader: "Lisa Garcia",
-        departmentRepresentative: "Mike",
-        Rtype: "Spot Report",
-    },
-]);
-
 const props = defineProps<{
+    reports: any[];
+    spot: any[];
     selectedDate?: string;
 }>();
+
+const reports = ref(props.reports);
+
+function formatDateTime(dateString: string): string {
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+
+    // Format date as YYYY-MM-DD
+    const formattedDate = date.toISOString().split('T')[0];
+
+    // Format time as 12-Hour format with AM/PM
+    const formattedTime = date.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+    return `${formattedDate} | ${formattedTime}`;
+}
 
 const showViewModal = ref(false);
 const showAddModal = ref(false);
@@ -96,7 +75,7 @@ function canViewReport(report: any): boolean {
     }
 
     if (currentUser.value.role === "guard") {
-        return report.guardId === currentUser.value.id;
+        return report.user_id === currentUser.value.id;
     }
 
     return false;
@@ -182,7 +161,7 @@ function submitReport() {
     // Create new report object
     const reportToAdd = {
         id: Math.max(...reports.value.map(r => r.id)) + 1,
-        guardId: currentUser.value.id,
+        user_id: currentUser.value.id,
         guardName: currentUser.value.name,
         ...newReport.value
     };
@@ -235,6 +214,7 @@ const filteredReport = computed(() => {
 
     return filtered;
 });
+
 
 const paginatedIncident = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
@@ -310,19 +290,19 @@ watch(filteredReport, () => {
                 v-for="(item, index) in paginatedIncident"
                 :key="item.id || index"
                 :class="{
-                    'bg-green-50': currentUser && item.guardId === currentUser.id && currentUser.role === 'guard',
+                    'bg-green-50': currentUser && item.user_id === currentUser.id && currentUser.role === 'guard',
                 }"
             >
                 <td class="px-6 py-4 font-medium whitespace-nowrap">
-                    {{ item.guardName }}
+                    {{ item.guard_name }}
                     <span
-                        v-if="currentUser && item.guardId === currentUser.id && currentUser.role === 'guard'"
+                        v-if="currentUser && item.user_id === currentUser.id && currentUser.role === 'guard'"
                         class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
                     >Your Report</span>
                 </td>
                 <td class="px-6 py-4 font-semibold">{{ item.findings }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.Rtype }}</td>
-                <td class="px-6 py-4 font-semibold">{{ item.date }}</td>
+                <td class="px-6 py-4 font-semibold">{{ item.action_taken }}</td>
+                <td class="px-6 py-4 font-semibold">{{formatDateTime(item.created_at)}}</td>
                 <td class="px-6 py-4 text-center">
                     <button
                         @click="openEditModal(item)"
@@ -580,7 +560,7 @@ watch(filteredReport, () => {
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 pr-8">
                 Spot Report Details
                 <span
-                    v-if="currentUser && selectedReport.guardId === currentUser.id && currentUser.role === 'guard'"
+                    v-if="currentUser && selectedReport.user_id === currentUser.id && currentUser.role === 'guard'"
                     class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded ml-2"
                 >Your Report</span>
             </h2>
@@ -634,7 +614,7 @@ watch(filteredReport, () => {
                     Close
                 </button>
                 <button
-                    v-if="currentUser && currentUser.role === 'guard' && selectedReport.guardId === currentUser.id"
+                    v-if="currentUser && currentUser.role === 'guard' && selectedReport.user_id === currentUser.id"
                     @click="printReport"
                     class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition text-sm"
                 >
