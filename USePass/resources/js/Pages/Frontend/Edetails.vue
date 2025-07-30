@@ -18,9 +18,14 @@ const studentId = ref(props.studentData?.students_id || '');
 const currentStep = ref(initialStep);
 const studentEmail = ref("");
 const studentPhone = ref("");
+
 const loading = ref(false);
 
 // Parent verification
+const guardianFirstName = ref("");
+const guardianMiddleInitial = ref("");
+const guardianLastName = ref("");
+const guardianRelation = ref("");
 const guardianEmail = ref("");
 const guardianPhone = ref("");
 const parentVerified = ref(false);
@@ -70,10 +75,24 @@ const authenticateStudent = async () => {
     }
 };
 
+const isParentFormValid = computed(() => {
+    return guardianFirstName.value.trim() !== "" &&
+        guardianLastName.value.trim() !== "" &&
+        guardianRelation.value.trim() !== "" &&
+        guardianEmail.value.trim() !== "" &&
+        guardianPhone.value.trim() !== "";
+});
+
+
 // Parent verification and data saving
 const verifyParent = async () => {
     if (guardianEmail.value.trim() === "" || guardianPhone.value.trim() === "") {
         alert("Please enter both guardian email and phone number.");
+        return;
+    }
+
+    if (!isParentFormValid.value) {
+        alert("Please fill in all required fields (First Name, Last Name, Relationship, Email, and Phone Number).");
         return;
     }
 
@@ -88,8 +107,12 @@ const verifyParent = async () => {
     try {
         const response = await axios.post('/student/save-data', {
             student_id: props.studentData.students_id,
-            parent_email: guardianEmail.value,
-            parent_phone: guardianPhone.value
+            parent_first_name: guardianFirstName.value.trim(),
+            parent_middle_initial: guardianMiddleInitial.value.trim() || null,
+            parent_last_name: guardianLastName.value.trim(),
+            parent_relation: guardianRelation.value.trim(),
+            parent_email: guardianEmail.value.trim(),
+            parent_phone: guardianPhone.value.trim()
         });
 
         if (response.data.success) {
@@ -102,7 +125,6 @@ const verifyParent = async () => {
         console.error('Save data error:', error);
 
         if (error.response?.data) {
-            // Server responded with error
             if (error.response.status === 422) {
                 const errors = error.response.data.errors || {};
                 let errorMessage = 'Validation failed:\n';
@@ -251,11 +273,13 @@ onMounted(() => {
 
     if (currentStep.value === 2) {
         // Pre-fill parent email if available
-        if (props.parentData?.parent_email) {
-            guardianEmail.value = props.parentData.parent_email;
-        }
-        if (props.parentData?.parent_phone_num) {
-            guardianPhone.value = props.parentData.parent_phone_num;
+        if (props.parentData) {
+            guardianFirstName.value = props.parentData.parent_first_name || "";
+            guardianMiddleInitial.value = props.parentData.parent_middle_initial || "";
+            guardianLastName.value = props.parentData.parent_last_name || "";
+            guardianRelation.value = props.parentData.parent_relation || "";
+            guardianEmail.value = props.parentData.parent_email || "";
+            guardianPhone.value = props.parentData.parent_phone_num || "";
         }
     }
     if (currentStep.value === 3) {
@@ -373,59 +397,103 @@ onMounted(() => {
             <div v-if="currentStep === 2">
                 <h2 class="text-black font-semibold text-lg mb-4">Step 2: Parent/Guardian Information</h2>
 
-                <div v-if="parentData" class="mb-6">
-                    <h3 class="font-bold mb-2">Parent/Guardian Details</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm bg-gray-50 p-4 rounded">
-                        <div><strong>First Name:</strong> {{ parentData.parent_first_name || 'N/A' }}</div>
-                        <div><strong>Middle Name:</strong> {{ parentData.parent_middle_initial || 'N/A' }}</div>
-                        <div><strong>Surname:</strong> {{ parentData.parent_last_name || 'N/A' }}</div>
-                        <div><strong>Relation:</strong> {{ parentData.parent_relation || 'N/A' }}</div>
-                    </div>
-                </div>
+                <div>
+                    <h3 class="font-bold mb-4 text-red-600">Please Fill Parent/Guardian Information</h3>
 
-                <div class="border-t pt-4">
-                    <h3 class="font-bold mb-4 text-red-600">Update Parent/Guardian Contact Information</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Parent Name Fields -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                         <div>
-                            <label class="block text-sm font-medium mb-1">Parent/Guardian Email*</label>
+                            <label class="block text-sm font-medium mb-1">First Name*</label>
+                            <input
+                                type="text"
+                                v-model="guardianFirstName"
+                                :placeholder="parentData?.parent_first_name || 'Enter first name'"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
+                                required
+                                :disabled="savingData"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Middle Initial</label>
+                            <input
+                                type="text"
+                                v-model="guardianMiddleInitial"
+                                :placeholder="parentData?.parent_middle_initial || 'M.I.'"
+                                maxlength="1"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
+                                :disabled="savingData"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Last Name*</label>
+                            <input
+                                type="text"
+                                v-model="guardianLastName"
+                                :placeholder="parentData?.parent_last_name || 'Enter last name'"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
+                                required
+                                :disabled="savingData"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- Relation Field -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Relationship*</label>
+                            <select
+                                v-model="guardianRelation"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
+                                required
+                                :disabled="savingData"
+                            >
+                                <option value="">Select relationship</option>
+                                <option value="Father">Father</option>
+                                <option value="Mother">Mother</option>
+                                <option value="Guardian">Guardian</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1">Email Address*</label>
                             <input
                                 type="email"
                                 v-model="guardianEmail"
-                                :placeholder="parentData?.parent_email || 'Enter parent/guardian email'"
-                                class="w-full px-3 py-2 border border-gray-400 focus:outline-none focus:border-red-600"
+                                :placeholder="parentData?.parent_email || 'Enter email address'"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
                                 required
                                 :disabled="savingData"
                             />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium mb-1">Parent/Guardian Phone*</label>
+                            <label class="block text-sm font-medium mb-1">Phone Number*</label>
                             <input
                                 type="tel"
                                 v-model="guardianPhone"
-                                :placeholder="parentData?.parent_phone_num || 'Enter parent/guardian phone'"
-                                class="w-full px-3 py-2 border border-gray-400 rounded-sm focus:outline-none focus:border-red-600"
+                                :placeholder="parentData?.parent_phone_num || 'Enter phone number'"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
                                 required
                                 :disabled="savingData"
                             />
                         </div>
                     </div>
 
-                    <div class="mt-4 flex space-x-4">
-                        <!--                        <button-->
-                        <!--                            @click="goBackToStep1"-->
-                        <!--                            class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm"-->
-                        <!--                            :disabled="savingData"-->
-                        <!--                        >-->
-                        <!--                            Back-->
-                        <!--                        </button>-->
+                    <div class="mt-6 flex space-x-4">
                         <button
                             @click="verifyParent"
-                            :disabled="savingData || !guardianEmail.trim() || !guardianPhone.trim()"
+                            :disabled="savingData || !isParentFormValid"
                             class="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-6 py-2 rounded text-sm font-medium"
                         >
                             {{ savingData ? 'Saving...' : 'Save & Continue' }}
                         </button>
                     </div>
+
+                    <p class="text-sm text-gray-600 mt-2">
+                        All fields marked with * are required.
+                    </p>
                 </div>
             </div>
 

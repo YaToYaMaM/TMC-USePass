@@ -118,11 +118,25 @@ export default {
                     this.parentHasContact = status.parent_has_contact;
                     this.redirectStep = status.redirect_step;
 
-                    // Set status message
                     this.statusMessage = status.message;
-                    this.setStatusDisplay();
 
-                    this.canProceed = true;
+                    // Auto-redirect if no contact info
+                    if (!this.studentHasContact && !this.parentHasContact) {
+                        this.redirectStep = 1;
+                        this.$inertia.visit(`/Details?step=${this.redirectStep}`, {
+                            data: {
+                                studentData: this.studentData,
+                                parentData: this.parentData,
+                                studentHasContact: this.studentHasContact,
+                                parentHasContact: this.parentHasContact
+                            },
+                            method: 'get'
+                        });
+                    } else {
+                        // Display status info for partial or complete data
+                        this.setStatusDisplay();
+                        this.canProceed = true;
+                    }
                 }
             } catch (error) {
                 if (error.response?.status === 404) {
