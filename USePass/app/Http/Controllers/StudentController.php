@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ParentCredential;
+use App\Models\ActivityLog;
 use App\Imports\StudentsImport;
+
 class StudentController extends Controller
 {
     public function store(Request $request)
@@ -25,6 +26,7 @@ class StudentController extends Controller
             'students_phone_num' => 'required',
             'students_profile_image' => 'nullable|image|max:5120',
         ]);
+
         $imagePath = null;
 
         if ($request->hasFile('students_profile_image')) {
@@ -41,49 +43,111 @@ class StudentController extends Controller
             $imagePath = 'profile_pictures/' . $imageName; // Relative path to store in DB
         }
 
-        // Save student
-        $student = Student::create([
-            'students_id' => $request->students_id,
-            'students_first_name' => $request->students_first_name,
-            'students_middle_initial' => $request->students_middle_initial,
-            'students_last_name' => $request->students_last_name,
-            'students_gender' => $request->students_gender,
-            'students_program' => $request->students_program,
-            'students_major' => $request->students_major,
-            'students_unit' => $request->students_unit,
-            'students_email' => $request->students_email,
-            'students_phone_num' => $request->students_phone_num,
-            'students_profile_image' => $imagePath,
-        ]);
+        try {
+            // Save student
+            $student = Student::create([
+                'students_id' => $request->students_id,
+                'students_first_name' => $request->students_first_name,
+                'students_middle_initial' => $request->students_middle_initial,
+                'students_last_name' => $request->students_last_name,
+                'students_gender' => $request->students_gender,
+                'students_program' => $request->students_program,
+                'students_major' => $request->students_major,
+                'students_unit' => $request->students_unit,
+                'students_email' => $request->students_email,
+                'students_phone_num' => $request->students_phone_num,
+                'students_profile_image' => $imagePath,
+            ]);
 
-        // Validate parent data
-        $validatedParent = $request->validate([
-            'parent_last_name' => 'required',
-            'parent_first_name' => 'required',
-            'parent_middle_initial' => 'nullable|string|max:1',
-            'parent_phone_num' => 'required',
-            'parent_email' => 'required|email|unique:parents,parent_email',
-            'parent_relation' => 'required',
-        ]);
+            // Validate parent data
+            $validatedParent = $request->validate([
+                'parent_last_name' => 'required',
+                'parent_first_name' => 'required',
+                'parent_middle_initial' => 'nullable|string|max:1',
+                'parent_phone_num' => 'required',
+                'parent_email' => 'required|email|unique:parents,parent_email',
+                'parent_relation' => 'required',
+            ]);
 
-        // Link student to parent using students_id
-        $validatedParent['students_id'] = $student->students_id;
+            // Link student to parent using students_id
+            $validatedParent['students_id'] = $student->students_id;
 
-        // Save parent
-        ParentCredential::create($validatedParent);
+            // Save parent
+            $parent = ParentCredential::create($validatedParent);
 
-        return response()->json(['message' => 'Saved successfully.']);
+            // Log the activity after successful creation
+            $this->logActivity(
+                $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+                $request->user()->role ?? 'System', // Get user role or default to 'System'
+                'Student Created',
+                "New Student Added: {$student->students_first_name} {$student->students_last_name} (ID: {$student->students_id}) with parent/guardian: {$parent->parent_first_name} {$parent->parent_last_name}"
+            );
+
+            return response()->json(['message' => 'Saved successfully.']);
+
+        } catch (\Exception $e) {
+            // Log the error activity
+            $this->logActivity(
+                $request->user()->id ?? null,
+                $request->user()->role ?? 'System',
+                'Student Creation Failed',
+                "Failed to create student record for: {$request->students_first_name} {$request->students_last_name} (ID: {$request->students_id}). Error: {$e->getMessage()}"
+            );
+
+            return response()->json(['message' => 'Failed to save student record.'], 500);
+        }
     }
+
+    /**
+     * Helper method to log activities
+     */
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
+    }
+
     public function import(Request $request)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv'
         ]);
 
-        Excel::import(new StudentsImport, $request->file('file'));
+        try {
+            Excel::import(new StudentsImport, $request->file('file'));
 
-        return response()->json(['message' => 'Import successful']);
+            // Log the import activity
+            $this->logActivity(
+                $request->user()->id ?? null,
+                $request->user()->role ?? 'System',
+                'Students Import',
+                "Students imported from file: {$request->file('file')->getClientOriginalName()}"
+            );
+
+            return response()->json(['message' => 'Import successful']);
+
+        } catch (\Exception $e) {
+            // Log the failed import
+            $this->logActivity(
+                $request->user()->id ?? null,
+                $request->user()->role ?? 'System',
+                'Students Import Failed',
+                "Failed to import students from file: {$request->file('file')->getClientOriginalName()}. Error: {$e->getMessage()}"
+            );
+
+            return response()->json(['message' => 'Import failed'], 500);
+        }
     }
+
     public function index()
     {
         $students = Student::all();
@@ -147,6 +211,7 @@ class StudentController extends Controller
             ], 500);
         }
     }
+
     public function getCountsByCategory()
     {
         $categories = [
@@ -174,7 +239,4 @@ class StudentController extends Controller
         $exists = \App\Models\Student::where('students_id', $students_id)->exists();
         return response()->json(['exists' => $exists]);
     }
-
-
-
 }
