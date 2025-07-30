@@ -39,6 +39,7 @@ const navigateToSpot = () => {
 </script>
 
 <template>
+    <Head title="USePass" />
     <Frontend>
         <Head title="Incident Report" />
         <div class="flex flex-col p-3 ">

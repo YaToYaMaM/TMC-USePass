@@ -277,7 +277,7 @@ console.log('Reports received:', props.reports);
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.name }}</h3>
-                <p class="text-sm text-blue-700">Role: {{ getRoleDisplayName }}</p>
+                <p class="text-sm text-blue-700">{{ getRoleDisplayName }}</p>
             </div>
             <div class="text-sm text-blue-600">
                 <span v-if="currentUser.role === 'guard'">

@@ -1,4 +1,6 @@
-<template>
+
+<template xmlns="http://www.w3.org/1999/html">
+    <Head title="USePass" />
     <Frontend>
         <div class="min-h-screen bg-gray-50">
             <!-- Header Section with Controls -->
@@ -162,10 +164,12 @@
             </div>
         </div>
     </Frontend>
+
 </template>
 
 <script setup>
 import Frontend from '@/Layouts/FrontendLayout.vue'
+import { Head } from '@inertiajs/vue3'
 </script>
 
 <script>

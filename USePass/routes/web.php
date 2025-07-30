@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
+use App\Http\Controllers\StudentRecordController;
+use App\Http\Controllers\DashboardController;
 
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
@@ -29,7 +31,7 @@ Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
 
-
+Route::post('/student/get-data', [StudentController::class, 'getStudentData']);
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 
 // Admin Dashboard
@@ -98,6 +100,12 @@ Route::get('/students/list', [StudentController::class, 'index']);
 Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
+
+Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
+Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
+Route::get('/getCounts', [DashboardController::class, 'getCounts']);
+Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
+
 
 
 //Route::get('/dashboard', function () {

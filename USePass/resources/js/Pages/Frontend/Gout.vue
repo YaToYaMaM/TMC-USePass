@@ -1,4 +1,5 @@
 <template>
+    <Head title="USePass" />
     <div
         class="relative min-h-screen bg-cover bg-center flex items-center justify-center"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
@@ -59,8 +60,11 @@
 </template>
 
 <script>
+import {Head} from "@inertiajs/vue3";
+
 export default {
     name: "USePassCardView",
+    components: {Head},
     data() {
         return {
             profileImage: "/images/profile.png",

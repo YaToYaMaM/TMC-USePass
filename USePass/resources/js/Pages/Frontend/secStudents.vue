@@ -98,6 +98,36 @@ const form = ref({
     parent_email: '',
     parent_relation: '',
 });
+
+const majorsByProgram = {
+    'Information Technology': ['Information Security'],
+    'Education': [
+        'Elementary Education',
+        'Early Childhood Education',
+        'Special Needs Education',
+
+    ],
+    'Secondary Education':[
+        'English',
+        'Mathematics',
+        'Filipino',
+    ],
+    'Engeneering': [
+        'Land and Water Resources',
+        'Machinery and Power',
+        'Process Engineering',
+        'Structures and Environment',
+    ],
+    'TVL Teacher Education':[
+        'Agricultural Crops Technology',
+        'Animal Production',
+    ],
+};
+
+const filteredMajors = computed(() => {
+    return majorsByProgram[form.value.students_program] || [];
+});
+
 async function submitForm() {
     const formData = new FormData();
     for (const key in form.value) {
@@ -169,14 +199,26 @@ function backToStudentForm() {
 
 const selectedProgram = ref('');
 const searchQuery = ref('');
+
+const programMap = {
+    'Information Technology': ['Information Technology'],
+    'Early Childhood Education': ['Early Childhood Education'],
+    'Elementary Education': ['Elementary Education'],
+    'Secondary Education': ['English', 'Mathematics', 'Filipino'],
+    'Technical Vocational Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
+    'Engineering': ['Land and Water Resources', 'Machinery and Power', 'Process Engineering', 'Structure and Environment'],
+}
+
 const filteredStudents = computed(() => {
     let result = students.value;
 
     // Filter by selected program
+
     if (selectedProgram.value) {
+        const validPrograms = programMap[selectedProgram.value] || []
         result = result.filter(student =>
-            student.students_program === selectedProgram.value
-        );
+            validPrograms.includes(student.students_program)
+        )
     }
 
     // Filter by search query
@@ -195,7 +237,7 @@ const filteredStudents = computed(() => {
 
 <template>
     <Frontend>
-        <Head title="student Page" />
+        <Head title="Student Page" />
         <div class="flex flex-col p-3 ">
 
             <!-- Top Control Buttons -->
@@ -273,8 +315,18 @@ const filteredStudents = computed(() => {
                         <option value="">All Programs</option>
                         <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
                         <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
+                        <option value="Elementary Education" class="whitespace-nowrap">Bachelor of Elementary Eduction</option>
+                        <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>
+                        <option value="TVL Teacher Educaton" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
+                        <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>
                     </select>
                 </div>
+            </div>
+            <div v-if="filteredStudents.length === 0" class="text-gray-500 p-4 text-center">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                No records found.
             </div>
             <!-- student Card -->
             <div v-for="student in paginatedStudents" :key="student.students_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
@@ -380,15 +432,19 @@ const filteredStudents = computed(() => {
                                     <option value="Information Technology">Information Technology</option>
                                     <option value="Education">Education</option>
                                     <option value="Engeneering">Engeneering</option>
+                                    <option value="TVL Teacher Education">TVL Teacher Education</option>
                                 </select>
                             </div>
                             <div class="w-1/3">
                                 <label class="block text-sm font-medium mb-1">Major</label>
-                                <select v-model="form.students_major" class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded" required>
+                                <select v-model="form.students_major"
+                                        class="w-full border border-gray-300 p-2 w-fit min-w-[155px] rounded"
+                                        :disabled="!form.students_program" required>
                                     <option  value="" disabled selected>Select Major</option>
-                                    <option value="Information Security">Information Security</option>
-                                    <option value="Elementary Education">Elementary Education</option>
-                                    <option value="Early Childhood Education">Early Childhood Education</option>
+                                    <option v-for="major in filteredMajors" :key="major" :value="major">
+                                        {{ major }}
+                                    </option>
+
                                 </select>
                             </div>
                             <div class="w-1/3">

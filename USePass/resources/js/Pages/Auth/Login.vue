@@ -39,6 +39,7 @@ const submit = () => {
 </script>
 
 <template>
+    <Head title="USePass" />
     <GuestLayout>
         <div class="relative bg-white rounded-xl drop-shadow-[0px_4px_34px_rgba(118,0,0,0.06)] w-full max-w-md px-8 pt-28 pb-8 min-h-[500px]">
             <div class="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white w-[200px] max-w-100 h-[70px]  rounded-full shadow-md px-8">
