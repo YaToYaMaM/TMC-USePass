@@ -59,9 +59,33 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/Glogs');
     }
 
-    public function deets()
+    public function deets(Request $request)
     {
-        return Inertia::render('Frontend/Edetails');
+        $studentData = $request->studentData;
+        $parentData = $request->parentData;
+        $studentHasContact = $request->boolean('studentHasContact', false);
+        $parentHasContact = $request->boolean('parentHasContact', false);
+
+
+        if (!$studentData && Session::get('verified_student_id')) {
+            $student = Student::where('students_id', Session::get('verified_student_id'))->first();
+            $studentData = $student;
+            $parentData = $student ? $student->parentInfo : null;
+
+            if ($studentData) {
+                $studentHasContact = !empty($studentData->students_email) && !empty($studentData->students_phone_num);
+            }
+            if ($parentData) {
+                $parentHasContact = !empty($parentData->parent_email) && !empty($parentData->parent_phone_num);
+            }
+        }
+
+        return Inertia::render('Frontend/Edetails', [
+            'studentData' => $request->studentData,
+            'parentData' => $request->parentData,
+            'studentHasContact' => $studentHasContact,
+            'parentHasContact' => $parentHasContact,
+        ]);
     }
 
     public function dashboard()

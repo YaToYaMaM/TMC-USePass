@@ -9,6 +9,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Student extends Model
 {
     use HasFactory;
+    protected $table = 'students';
+    protected $primaryKey = 'students_id';
+    public $incrementing = false; // Add this line since students_id is not auto-increment
+    protected $keyType = 'string'; // Add this line since students_id is string
 
     protected $fillable = [
         'students_last_name',
@@ -24,8 +28,8 @@ class Student extends Model
         'students_profile_image',
     ];
 
-    public function parentInfo()
-    {
-        return $this->hasOne(ParentCredential::class);
+    public function parentInfo() {
+        return $this->hasOne(ParentCredential::class, 'students_id', 'students_id');
     }
+
 }

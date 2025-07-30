@@ -23,7 +23,8 @@ return new class extends Migration
             $table->string('parent_last_name', 100)->nullable();
             $table->string('parent_middle_initial', 50)->nullable();
             $table->string('parent_relation', 50)->nullable();
-            $table->string('parent_email', 100)->unique();
+
+            $table->string('parent_email', 100)->nullable();
             $table->string('parent_phone_num', 20)->nullable();
             $table->timestamps();
         });
