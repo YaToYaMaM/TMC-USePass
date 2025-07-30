@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('students_major', 100)->nullable();
             $table->enum('students_unit', ['Tagum', 'Mabini'])->default('Tagum');
 
-            $table->string('students_email', 100)->unique();
+            $table->string('students_email', 100)->nullable();
             $table->string('students_phone_num', 20)->nullable();
             $table->string('students_profile_image')->nullable();
             $table->timestamps();

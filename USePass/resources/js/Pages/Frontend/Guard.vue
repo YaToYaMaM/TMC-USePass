@@ -201,7 +201,7 @@ async function updateGuard() {
     <Head title="USePass" />
     <Frontend>
         <Head title="Guard Page" />
-        <div class="flex flex-col p-3">
+        <div class="flex flex-col p-3 px-12 pt-10">
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
                 <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Guard</button>

@@ -42,7 +42,7 @@ const navigateToSpot = () => {
     <Head title="USePass" />
     <Frontend>
         <Head title="Incident Report" />
-        <div class="flex flex-col p-3 ">
+        <div class="flex flex-col p-3 px-12">
             <!-- Top Control Buttons (Admin Only) -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4" v-if="isAdmin">
                 <span></span>
