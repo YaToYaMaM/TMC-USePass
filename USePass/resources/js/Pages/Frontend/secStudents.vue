@@ -64,6 +64,7 @@ const fetchStudents = () => {
                 students_middle_initial: student.students_middle_initial,
                 students_last_name: student.students_last_name,
                 students_program: student.students_program,
+                students_major: student.students_major,
                 students_profile_image: student.students_profile_image,
             }));
         })
@@ -112,7 +113,7 @@ const majorsByProgram = {
         'Mathematics',
         'Filipino',
     ],
-    'Engeneering': [
+    'Engineering': [
         'Land and Water Resources',
         'Machinery and Power',
         'Process Engineering',
@@ -226,25 +227,14 @@ function backToStudentForm() {
 const selectedProgram = ref('');
 const searchQuery = ref('');
 
-const programGroups = {
-    'Information Technology': ['Information Technology'],
-    'Early Childhood Education': ['Early Childhood Education'],
-    'Elementary Education': ['Elementary Education'],
-    'Secondary Education': ['English', 'Mathematics', 'Filipino'],
-    'TVL Teacher Education': ['Agricultural Crops Technology', 'Animal Production'],
-    'Engineering': ['Land and Water Resources', 'Machinery and Power', 'Process Engineering', 'Structure and Environment'],
-}
-
 
 const filteredStudents = computed(() => {
     let result = students.value;
 
-    // Filter by selected program
-
-    if (selectedProgram.value && programGroups[selectedProgram.value]) {
-        const validPrograms = programGroups[selectedProgram.value];
+    if (selectedProgram.value) {
+        const majors = majorsByProgram[selectedProgram.value] || [];
         result = result.filter(student =>
-            validPrograms.includes(student.students_program)
+            majors.includes(student.students_major)
         );
     }
 
@@ -341,10 +331,9 @@ const filteredStudents = computed(() => {
                     <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">
                         <option value="">All Programs</option>
                         <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>
-                        <option value="Early Childhood Education" class="whitespace-nowrap">Bachelor of Science in Early Childhood Education</option>
-                        <option value="Elementary Education" class="whitespace-nowrap">Bachelor of Elementary Eduction</option>
+                        <option value="Education" class="whitespace-nowrap">Bachelor of Education</option>
                         <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>
-                        <option value="TVL Teacher Educaton" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
+                        <option value="TVL Teacher Education" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>
                         <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>
                     </select>
                 </div>
@@ -364,7 +353,8 @@ const filteredStudents = computed(() => {
                             {{ student.students_first_name }} {{student.students_middle_initial}} {{ student.students_last_name }}
                         </h2>
                         <p class="text-sm text-gray-600">
-                            {{ student.students_program }}
+                            Bachelor of {{ student.students_program }} Major in
+                            {{student.students_major}}
                         </p>
                     </div>
                 </div>
@@ -458,7 +448,8 @@ const filteredStudents = computed(() => {
                                     <option value="" disabled selected>Select Program</option>
                                     <option value="Information Technology">Information Technology</option>
                                     <option value="Education">Education</option>
-                                    <option value="Engeneering">Engeneering</option>
+                                    <option value="Secondary Education">Secondary Education</option>
+                                    <option value="Engineering">Engineering</option>
                                     <option value="TVL Teacher Education">TVL Teacher Education</option>
                                 </select>
                             </div>
