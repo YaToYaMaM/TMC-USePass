@@ -28,6 +28,33 @@ const downloadPDF = () => {
         .save();
 };
 
+
+const majorsByProgram = {
+    'Information Technology': ['Information Security'],
+    'Education': [
+        'Elementary Education',
+        'Early Childhood Education',
+        'Special Needs Education',
+
+    ],
+    'Secondary Education':[
+        'English',
+        'Mathematics',
+        'Filipino',
+    ],
+    'Engineering': [
+        'Land and Water Resources',
+        'Machinery and Power',
+        'Process Engineering',
+        'Structures and Environment',
+    ],
+    'TVL Teacher Education':[
+        'Agricultural Crops Technology',
+        'Animal Production',
+    ],
+};
+
+
 </script>
 
 <template>
