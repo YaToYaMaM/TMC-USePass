@@ -40,6 +40,7 @@ Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveS
 //guard scan
 
 
+
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 //    Route::get('/', [FrontendControllers::class, 'index'])->name('home');
@@ -109,7 +110,7 @@ Route::get('/students-by-category', [StudentController::class, 'getCountsByCateg
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
-
+Route::get('/students/{id}', [StudentController::class, 'show']);
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');

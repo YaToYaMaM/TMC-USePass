@@ -4,16 +4,13 @@
         class="relative min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
     >
-        <!-- Overlay layer -->
+        <!-- Overlay -->
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
 
         <div class="relative z-10 p-4 rounded-lg text-center max-w-lg w-full">
+            <!-- Logo + Motto -->
             <div class="relative inline-block mx-auto max-w-[600px] w-full">
-                <img
-                    src="/images/logo4.png"
-                    alt="USePass Logo"
-                    class="mx-auto w-full h-auto"
-                />
+                <img src="/images/logo4.png" alt="USePass Logo" class="mx-auto w-full h-auto" />
                 <p class="text-white italic text-base md:text-lg lg:text-xl mb-6">
                     "Track Student. Ensure Safety. USePass."
                 </p>
@@ -25,43 +22,25 @@
                 </div>
             </div>
 
-            <!-- Barcode Scanner Camera (hidden) -->
-            <div v-show="false" class="mt-8 max-w-[600px] mx-auto rounded-lg overflow-hidden shadow-lg">
-                <StreamBarcodeReader
-                    @decode="onDecode"
-                    @init="onInit"
-                    class="w-full h-64 rounded-lg object-cover"
-                />
-                <p class="mt-2 text-yellow-300 font-semibold select-text break-words">
-                    Scanned Code: {{ scannedCode || 'No code detected yet' }}
-                </p>
-            </div>
-
-            <!-- Input user id -->
+            <!-- User ID input -->
             <div class="flex items-center justify-center pt-5">
                 <div class="relative w-full max-w-xs text-center">
                     <input
                         type="text"
                         v-model="userIdInput"
+                        @keyup.enter="checkStudent(false)"
                         class="max-w-100 px-4 py-1 text-center rounded-[10px] bg-black bg-opacity-40 border border-white border-opacity-40 text-white placeholder-white placeholder-opacity-60 focus:outline-none"
                         placeholder=" "
                     />
-                    <p class="text-white mt-2">User ID</p>
-                    <p v-if="studentFound === true" class="text-green-400 mt-2">
-                        Student ID found.
-                    </p>
-                    <p v-else-if="studentFound === false" class="text-red-400 mt-2">
-                        Student ID not found.
-                    </p>
-                </div>
+                     </div>
             </div>
 
-            <!-- Checking button -->
+            <!-- Check button -->
             <div class="fixed bottom-10 left-20 z-50">
                 <button
-                    @click="checkStudent"
                     :disabled="checking"
-                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow"
+                    @click="checkStudent(true)"
+                    class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded shadow cursor-not-allowed"
                 >
                     {{ checking ? "Checking..." : "Check" }}
                 </button>
@@ -81,264 +60,221 @@
                         stroke-width="2"
                         class="w-8 h-8"
                     >
-                        <path
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            d="M9 5l-7 7 7 7M22 12H3"
-                        />
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l-7 7 7 7M22 12H3" />
                     </svg>
                 </Link>
             </div>
         </div>
     </div>
+
+    <transition name="fade"  v-if="!triggeredByButton">
+        <div
+            v-if="showProfileModal"
+            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4"
+        >
+            <div
+                class="relative z-10 flex flex-col items-center
+                px-4 sm:px-8 md:px-12 lg:px-20
+                py-6 md:py-10
+                w-full
+                max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl
+                space-y-6 md:space-y-8
+                bg-white rounded-xl shadow-lg text-center"
+            >
+                <!-- Close Button -->
+                <button
+                    @click="showProfileModal = false"
+                    class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl"
+                >cd
+                </button>
+
+                <!-- Logo -->
+                <img
+                    src="/images/Logo2.png"
+                    alt="USePass Logo"
+                    class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto"
+                />
+
+                <!-- If student found -->
+                <div v-if="studentFound" class="flex flex-col items-center space-y-4">
+                    <div
+                        class="rounded-lg overflow-hidden shadow border-4 border-white
+                        w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64"
+                    >
+                        <img
+                            :src="getProfileImageUrl(studentProfile.profileImage)"
+                            alt="Profile"
+                            class="object-cover w-full h-full"
+                        />
+                    </div>
+                    <div class="text-gray-800 text-center">
+                        <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
+                            {{ studentProfile.fullName }}
+                        </div>
+                        <div class="text-sm md:text-base lg:text-lg font-medium italic">
+                            {{ studentProfile.course }}
+                        </div>
+                        <div class="text-base md:text-lg mt-2 font-mono tracking-widest">
+                            {{ studentProfile.idNumber }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- If student not found -->
+                <div v-else class="text-red-600 text-xl font-semibold">
+                    No Student ID Found.
+                </div>
+            </div>
+        </div>
+    </transition>
+    <div
+        v-else-if="showProfileModal"
+        class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4"
+    >
+        <div
+            class="relative z-10 flex flex-col items-center
+                px-4 sm:px-8 md:px-12 lg:px-20
+                py-6 md:py-10
+                w-full
+                max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl
+                space-y-6 md:space-y-8
+                bg-white rounded-xl shadow-lg text-center"
+        >
+            <!-- Close Button -->
+            <button
+                @click="showProfileModal = false"
+                class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl"
+            >
+                ×
+            </button>
+
+            <!-- Logo -->
+            <img
+                src="/images/Logo2.png"
+                alt="USePass Logo"
+                class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto"
+            />
+
+            <!-- If student found -->
+            <div v-if="studentFound" class="flex flex-col items-center space-y-4">
+                <div
+                    class="rounded-lg overflow-hidden shadow border-4 border-white
+                        w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64"
+                >
+                    <img
+                        :src="getProfileImageUrl(studentProfile.profileImage)"
+                        alt="Profile"
+                        class="object-cover w-full h-full"
+                    />
+                </div>
+                <div class="text-gray-800 text-center">
+                    <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
+                        {{ studentProfile.fullName }}
+                    </div>
+                    <div class="text-sm md:text-base lg:text-lg font-medium italic">
+                        {{ studentProfile.course }}
+                    </div>
+                    <div class="text-base md:text-lg mt-2 font-mono tracking-widest">
+                        {{ studentProfile.idNumber }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- If student not found -->
+            <div v-else class="text-red-600 text-xl font-semibold">
+                No Student ID Found.
+            </div>
+        </div>
+    </div>
+
     <router-view />
 </template>
 
 <script>
 import { Head, Link } from "@inertiajs/vue3";
-import { StreamBarcodeReader } from "vue-barcode-reader";
 import axios from "axios";
-import TextInput from "@/Components/TextInput.vue";
 
 export default {
-    name: "UserIDView",
-    components: { Head, Link, TextInput, StreamBarcodeReader },
+    name: "Gscan",
+    components: { Head, Link },
     data() {
         return {
-            userId: ["", "", "", "", "", ""],
-            timer: 120,
-            timerInterval: null,
-            timeoutMessageVisible: false,
-            isResending: false,
-            scannedCode: null,
             userIdInput: "",
             studentFound: null,
             checking: false,
+            showProfileModal: false,
+            triggeredByButton: false,
+            studentProfile: {
+                fullName: "",
+                course: "",
+                idNumber: "",
+                profileImage: "",
+            },
         };
     },
-    computed: {
-        formattedTime() {
-            const minutes = Math.floor(this.timer / 60).toString().padStart(2, "0");
-            const seconds = (this.timer % 60).toString().padStart(2, "0");
-            return `${minutes}:${seconds}`;
-        },
-    },
     methods: {
-        onInput(index) {
-            this.userId[index] = this.userId[index].replace(/\D/g, "");
-            if (this.userId[index].length > 1) {
-                this.userId[index] = this.userId[index].slice(0, 1);
+        getProfileImageUrl(filename) {
+            if (!filename) {
+                return '/images/profile.png';
             }
-            if (this.userId[index] && index < this.userId.length - 1) {
-                const nextInput = this.$refs["input" + (index + 1)];
-                if (nextInput && nextInput[0]) {
-                    nextInput[0].focus();
-                }
+            if (filename.startsWith('http') || filename.startsWith('/')) {
+                return filename;
             }
+            return `/profile_pictures/${filename}`;
         },
-        onBackspace(index, event) {
-            if (this.userId[index] === "" && index > 0) {
-                const prevInput = this.$refs["input" + (index - 1)];
-                if (prevInput && prevInput[0]) {
-                    prevInput[0].focus();
-                    event.preventDefault();
-                }
-            }
-        },
-        getUserIdString() {
-            return this.userId.join("");
-        },
-        startTimer() {
-            if (this.timerInterval) clearInterval(this.timerInterval);
-            this.timer = 120;
-            this.timeoutMessageVisible = false;
-            this.isResending = false;
-            this.timerInterval = setInterval(() => {
-                if (this.timer > 0) {
-                    this.timer--;
-                } else {
-                    clearInterval(this.timerInterval);
-                    this.timerInterval = null;
-                    this.timeoutMessageVisible = true;
-                }
-            }, 1000);
-        },
-        resendOtp() {
-            this.isResending = true;
-            setTimeout(() => {
-                window.location.reload();
-            }, 3000);
-        },
-        onDecode(result) {
-            this.scannedCode = result;
-            // (Optional: Auto-fill or trigger actions here)
-        },
-        onInit(promise) {
-            promise.catch((error) => {
-                console.error("Camera initialization failed:", error);
-            });
-        },
-        async checkStudent() {
-            if (!this.userIdInput) {
+
+
+        async checkStudent(fromButton = false) {
+            this.triggeredByButton = fromButton;
+            const trimmedId = this.userIdInput.trim();
+
+            if (!trimmedId) {
                 this.studentFound = false;
+                this.showModalTemporary();
                 return;
             }
+
             this.checking = true;
             this.studentFound = null;
 
             try {
-                // Call your backend API route. If you put the Laravel route in 'web.php', use '/students/...'
-                const response = await axios.get(
-                    `/students/${this.userIdInput.trim()}`
-                );
-                this.studentFound = response.data.exists;
+                const response = await axios.get(`/students/${trimmedId}`);
+                if (response.data.exists) {
+                    this.studentFound = true;
+                    const student = response.data.student;
+                    this.studentProfile.fullName = student.full_name;
+                    this.studentProfile.course = student.course;
+                    this.studentProfile.idNumber = student.id_number;
+                    this.studentProfile.profileImage = student.profile_image;
+                } else {
+                    this.studentFound = false;
+                }
             } catch (error) {
-                console.error("Error checking student:", error);
+                console.error("Error fetching student data:", error);
                 this.studentFound = false;
             } finally {
                 this.checking = false;
+                this.showModalTemporary();
             }
         },
-    },
-    mounted() {
-        this.startTimer();
-    },
-    beforeUnmount() {
-        if (this.timerInterval) clearInterval(this.timerInterval);
+
+        showModalTemporary() {
+            this.showProfileModal = true;
+            setTimeout(() => {
+                this.showProfileModal = false;
+            }, 3000);
+        },
     },
 };
 </script>
 
 <style scoped>
-body {
-    margin: 0;
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
 }
-.scanner-bar {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 60px;
-    height: 60px;
-    overflow: hidden;
-    background-color: transparent;
-    transform: translate(-50%, -50%);
-}
-.scanner-bar::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-    background: repeating-linear-gradient(
-        to right,
-        white 0px,
-        white 2px,
-        transparent 2px,
-        transparent 4px,
-        white 4px,
-        white 5px,
-        transparent 5px,
-        transparent 8px,
-        white 8px,
-        white 12px,
-        transparent 12px,
-        transparent 14px,
-        white 14px,
-        white 15px,
-        transparent 15px,
-        transparent 18px,
-        white 18px,
-        white 21px,
-        transparent 21px,
-        transparent 24px,
-        white 24px,
-        white 26px,
-        transparent 26px,
-        transparent 29px,
-        white 29px,
-        white 31px,
-        transparent 31px,
-        transparent 34px,
-        white 34px,
-        white 40px,
-        transparent 40px
-    );
-    opacity: 1;
-}
-.corner-border {
-    position: relative;
-    width: 85px;
-    height: 85px;
-    margin: 0 auto;
-}
-.corner-border::before,
-.corner-border::after,
-.corner-border > div::before,
-.corner-border > div::after {
-    content: "";
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    border: 3px solid white;
-    border-radius: 3px;
-}
-.corner-border::before {
-    top: 0;
-    left: 0;
-    border-right: none;
-    border-bottom: none;
-}
-.corner-border::after {
-    top: 0;
-    right: 0;
-    border-left: none;
-    border-bottom: none;
-}
-.corner-border > div::before {
-    bottom: 0;
-    left: 0;
-    border-top: none;
-    border-right: none;
-}
-.corner-border > div::after {
-    bottom: 0;
-    right: 0;
-    border-top: none;
-    border-left: none;
-}
-@keyframes barcode-scan-move {
-    0% {
-        left: -300%;
-    }
-    100% {
-        left: 0;
-    }
-}
-.scan-line {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
-    background-color: white;
-    animation: scan-vertical 2.5s ease-in-out infinite;
-    z-index: 5;
-    opacity: 0.8;
-    border-radius: 1px;
-}
-@keyframes scan-vertical {
-    0% { top: 0%; }
-    50% { top: 90%; }
-    100% { top: 0%; }
-}
-@keyframes scan {
-    0% {
-        transform: translateX(-100%);
-    }
-    100% {
-        transform: translateX(100%);
-    }
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
 }
 </style>
