@@ -224,8 +224,19 @@ class CustomForgotPasswordController extends Controller
         try {
             $request->validate([
                 'student_id' => 'required|string',
-                'parent_email' => 'required|email',
-                'parent_phone' => 'required|string'
+                'parent_first_name' => 'required|string|max:100',
+                'parent_middle_initial' => 'nullable|string|max:1',
+                'parent_last_name' => 'required|string|max:100',
+                'parent_relation' => 'required|string|max:50',
+                'parent_email' => 'required|email|max:100',
+                'parent_phone' => 'required|string|max:20'
+            ], [
+                'parent_first_name.required' => 'Parent first name is required',
+                'parent_last_name.required' => 'Parent last name is required',
+                'parent_relation.required' => 'Parent relationship is required',
+                'parent_email.required' => 'Parent email is required',
+                'parent_email.email' => 'Please enter a valid email address',
+                'parent_phone.required' => 'Parent phone number is required'
             ]);
 
             // Debug logging
@@ -260,6 +271,10 @@ class CustomForgotPasswordController extends Controller
             // Handle parent data
             $parentData = [
                 'students_id' => $request->student_id,
+                'parent_first_name' => $request->parent_first_name,
+                'parent_middle_initial' => $request->parent_middle_initial,
+                'parent_last_name' => $request->parent_last_name,
+                'parent_relation' => $request->parent_relation,
                 'parent_email' => $request->parent_email,
                 'parent_phone_num' => $request->parent_phone,
             ];
