@@ -26,32 +26,26 @@ function handleImageUpload(event: Event) {
 function triggerImport() {
     importFileInput.value?.click();
 }
-function handleImportFile(event: Event) {
-    const file = (event.target as HTMLInputElement).files?.[0];
 
-    if (file) {
-        const formData = new FormData();
-        formData.append('file', file);
+const handleImportFile = async () => {
+    if (!importFileInput.value?.files?.length) return;
 
-        axios.post('/students/import', formData, {
+    const formData = new FormData();
+    formData.append('file', importFileInput.value.files[0]); // must be 'file'
+
+    try {
+        await axios.post('/students/import', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
-        })
-            .then(response => {
-                alert('Import successful: ' + response.data.message);
-
-            })
-            .catch(error => {
-                console.error('Import error:', error);
-                if (error.response?.status === 422) {
-                    alert('Validation error: Invalid file format or content.');
-                } else {
-                    alert('Something went wrong during import.');
-                }
-            });
+        });
+        alert('Import successful');
+    } catch (error) {
+        console.error("Import error:", error);
+        alert('Unexpected error during import');
     }
-}
+};
+
 
 const students = ref<any[]>([]);
 
