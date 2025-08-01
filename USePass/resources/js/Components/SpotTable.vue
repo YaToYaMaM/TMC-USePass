@@ -26,6 +26,15 @@ const props = defineProps<{
     selectedDate?: string;
 }>();
 
+// const props = withDefaults(defineProps<{
+//     reports: any[];
+//     spot: any[];
+//     selectedDate?: string;
+// }>(), {
+//     spot: () => [],
+// });
+
+
 const reports = ref(props.reports);
 
 function formatDateTime(dateString: string): string {
@@ -204,7 +213,7 @@ const currentPage = ref(1);
 const itemsPerPage = 7;
 
 const filteredReport = computed(() => {
-    let filtered = reports.value;
+    let filtered = reports.value || [];
 
     if (props.selectedDate) {
         filtered = filtered.filter((s) => s.date === props.selectedDate);
@@ -214,6 +223,7 @@ const filteredReport = computed(() => {
 
     return filtered;
 });
+
 
 
 const paginatedIncident = computed(() => {

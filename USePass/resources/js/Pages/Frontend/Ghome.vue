@@ -1,72 +1,109 @@
 <template>
     <Head title="USePass" />
-    <Frontend>
         <div class="min-h-screen bg-gray-50">
-            <!-- Header Section with Controls -->
-            <div class="bg-white shadow-sm border-b sticky top-0 z-20">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div class="flex items-center justify-between">
-                        <h1 class="font-bold text-lg sm:text-xl text-gray-800">Home</h1>
-                        <div class="inline-flex text-sm bg-gray-100 p-1 rounded-lg shadow-sm">
-                            <button @click="selectUnit('Tagum')" :class="buttonClass('Tagum')">Tagum</button>
-                            <button @click="selectUnit('Mabini')" :class="buttonClass('Mabini')">Mabini</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             <!-- Filter Section -->
-            <div class="bg-white shadow-sm border-b">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between space-y-4 sm:space-y-0">
+            <div class="w-full px-3 sm:px-4 lg:px-8 py-4 sm:py-6">
+                <div class="bg-white shadow-sm border border-gray-200 rounded-lg">
+                    <div class="p-4 sm:p-6">
+                        <div class="space-y-4">
+                            <!-- Mobile: Stack everything vertically -->
+                            <!-- Desktop: Two-column layout -->
+                            <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
 
-                        <!-- Filters -->
-                        <div class="flex flex-col sm:flex-row sm:items-center space-y-3 sm:space-y-0 sm:space-x-4">
-                            <!-- Search Input -->
-                            <div class="relative">
-                                <input
-                                    type="text"
-                                    v-model="searchText"
-                                    placeholder="Search students..."
-                                    class="pl-9 pr-3 py-2 border border-gray-300 rounded-md text-sm w-full sm:w-60 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                                <svg class="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
-                                </svg>
-                            </div>
+                                <!-- LEFT SECTION: Date & Program -->
+                                <div class="flex flex-col space-y-4 lg:flex-1">
+                                    <!-- Date Input -->
+                                    <div class="flex flex-col xs:flex-row xs:items-center space-y-2 xs:space-y-0 xs:space-x-3">
+                                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Date:</label>
+                                        <input
+                                            type="date"
+                                            v-model="selectedDate"
+                                            class="w-full xs:w-auto border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                    </div>
 
-                            <div class="flex items-center space-x-2">
-                                <label class="text-sm font-medium text-gray-700">Date:</label>
-                                <input
-                                    type="date"
-                                    v-model="selectedDate"
-                                    class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                />
-                            </div>
+                                    <!-- Program Selector -->
+                                    <div class="flex flex-col xs:flex-row xs:items-center space-y-2 xs:space-y-0 xs:space-x-3">
+                                        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Program:</label>
+                                        <div class="relative w-full xs:w-auto xs:min-w-[200px]">
+                                            <select
+                                                v-model="selectedProgram"
+                                                class="w-full appearance-none border border-gray-300 rounded-md px-3 py-2.5 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white transition-colors"
+                                            >
+                                                <option value="">All Programs</option>
+                                                <option v-for="program in availablePrograms" :key="program" :value="program">
+                                                    {{ program }}
+                                                </option>
+                                            </select>
+                                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
 
-                            <div class="flex items-center space-x-2">
-                                <label class="text-sm font-medium text-gray-700">Program:</label>
-                                <div class="relative">
-                                    <select
-                                        v-model="selectedProgram"
-                                        class="appearance-none border border-gray-300 rounded-md px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white min-w-[200px]"
-                                    >
-                                        <option value="">All Programs</option>
-                                        <option v-for="program in availablePrograms" :key="program" :value="program">
-                                            {{ program }}
-                                        </option>
-                                    </select>
-                                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
-                                        <svg class="w-4 h-4" fill="none">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                <!-- RIGHT SECTION: Search & Unit -->
+                                <div class="flex flex-col space-y-4 lg:flex-1 lg:items-end">
+                                    <!-- Search Input -->
+                                    <div class="relative w-full lg:w-64">
+                                        <input
+                                            type="text"
+                                            v-model="searchText"
+                                            placeholder="Search students..."
+                                            class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                                        />
+                                        <svg class="absolute left-3 top-3 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
                                         </svg>
                                     </div>
+
+                                    <!-- Unit Selector -->
+                                    <div class="w-full lg:w-auto">
+                                        <div class="inline-flex w-full lg:w-auto text-sm bg-gray-100 p-1 rounded-lg shadow-sm">
+                                            <button
+                                                @click="selectUnit('Tagum')"
+                                                :class="buttonClass('Tagum')"
+                                                class="flex-1 lg:flex-none px-4 py-2 rounded-md font-medium transition-all duration-200"
+                                            >
+                                                Tagum
+                                            </button>
+                                            <button
+                                                @click="selectUnit('Mabini')"
+                                                :class="buttonClass('Mabini')"
+                                                class="flex-1 lg:flex-none px-4 py-2 rounded-md font-medium transition-all duration-200"
+                                            >
+                                                Mabini
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optional: Mobile-specific action buttons -->
+                            <div class="block sm:hidden pt-2 border-t border-gray-200">
+                                <div class="flex space-x-3">
+                                    <button
+                                        @click="clearFilters"
+                                        class="flex-1 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                                    >
+                                        Clear All
+                                    </button>
+                                    <button
+                                        @click="applyFilters"
+                                        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                                    >
+                                        Apply Filters
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
+
 
             <!-- Main Content Area -->
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -120,13 +157,6 @@
                                     <!-- Student Column -->
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
-                                            <div class="h-10 w-10 flex-shrink-0">
-                                                <div class="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                                                    </svg>
-                                                </div>
-                                            </div>
                                             <div class="ml-4">
                                                 <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
                                                 <div class="text-sm text-gray-500">{{ student.program }}</div>
@@ -226,7 +256,6 @@
                 </div>
             </div>
         </div>
-    </Frontend>
 </template>
 
 <script setup>
