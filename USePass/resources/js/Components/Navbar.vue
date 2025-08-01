@@ -98,7 +98,7 @@ const user = page.props.auth.user as User;
                             />
                             <div>
                                 <div class="text-white font-extrabold text-xs sm:text-sm">{{ user.first_name }} {{ user.last_name}}</div>
-                                <div class="text-white text-opacity-80 italic text-[10px] sm:text-xs -mt-1">{{ user.role }}</div>
+                                <div class="text-white text-opacity-80 italic text-[10px] sm:text-xs -mt-1">{{ user.role === 'admin' ? 'Admin' : 'Security Guard'}}</div>
                             </div>
                         </div>
                         <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
