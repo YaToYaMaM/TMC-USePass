@@ -12,9 +12,10 @@ use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
 use App\Http\Controllers\StudentRecordController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
+use App\Http\Controllers\StudentReportController;
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/incident', [ReportController::class, 'incident'])->name('incident.index');
@@ -36,6 +37,7 @@ Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendSt
 Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
 
 //guard scan
 
@@ -110,6 +112,8 @@ Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 
+//Route::post('/change-password', [UserController::class, 'changePassword']);
+//Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');
