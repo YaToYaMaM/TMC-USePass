@@ -194,28 +194,27 @@ class CustomForgotPasswordController extends Controller
                 // Original forgot password logic
                 $user = User::where('email', Session::get('otp_email'))->first();
                 if (!$user) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'No user found for this email'
-                    ], 422);
+                    return back()->withErrors(['otp' => 'No user found for this email']);
                 }
 
                 $token = Password::getRepository()->create($user);
+                Session::forget(['otp', 'otp_start_time', 'otp_purpose', 'otp_email']);
 
-                return response()->json([
-                    'success' => true,
-                    'redirect_url' => route('password.reset', [
-                        'token' => $token,
-                        'email' => $user->email,
-                    ])
+                return redirect()->route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->email,
                 ]);
             }
         }
 
-        return response()->json([
-            'success' => false,
-            'error' => 'Invalid OTP code'
-        ], 422);
+        if (Session::get('otp_purpose', 'forgot_password') === 'student_auth') {
+            return response()->json([
+                'success' => false,
+                'error' => 'Invalid OTP code'
+            ], 422);
+        } else {
+            return back()->withErrors(['otp' => 'Invalid OTP code']);
+        }
     }
 
     // Add method to save student and parent data
