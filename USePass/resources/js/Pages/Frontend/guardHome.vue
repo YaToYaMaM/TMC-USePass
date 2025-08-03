@@ -1,0 +1,1103 @@
+<template>
+    <Head title="USePass" />
+
+    <!-- Desktop Navbar (hidden on mobile) -->
+    <nav class="hidden md:flex fixed items-center justify-between bg-black bg-opacity-70 text-white px-6 py-3 shadow-md w-full z-50">
+        <!-- Left Buttons -->
+        <div class="flex items-center space-x-4">
+            <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                FOR CHECKING
+            </button>
+            <button @click="showIncidentModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Incident Report
+            </button>
+            <button @click="showSpotModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Spot Report
+            </button>
+            <button @click="showStudentAttendanceModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Students
+            </button>
+            <button @click="showFacultyAndStaffAttendanceModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Faculty & Staff
+            </button>
+            <button @click="showLogsModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Logs
+            </button>
+        </div>
+
+        <!-- Center Search -->
+        <div class="flex items-center space-x-6 justify-end">
+            <div class="flex items-center space-x-2 border-r-2">
+                <input type="text" placeholder="Search Attendance..." class="bg-black bg-opacity-40 text-white px-3 py-1 rounded-[10px] border border-white border-opacity-30 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-1 focus:ring-white" />
+                <button class="text-white pr-8">Search</button>
+            </div>
+            <!-- Right Profile -->
+            <div class="flex items-center space-x-3">
+                <div class="text-sm text-right">
+                    <div class="font-semibold uppercase">{{ user.first_name }} {{ user.last_name}}</div>
+                    <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
+                </div>
+                <img src="/images/profile.png" alt="Profile" class="w-10 h-10 rounded-full border border-white object-cover" />
+                <button @click="menuOpen = !menuOpen" class="focus:outline-none" aria-label="Toggle menu">
+                    <svg class="h-5 w-5 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </button>
+                <transition name="fade">
+                    <div v-if="menuOpen" class="absolute right-0 top-full mt-2 w-40 sm:w-48 bg-black rounded-lg shadow-lg border border-[#ffffff] z-[99999]">
+                        <div class="flex items-center space-x-2 sm:space-x-3 px-3 py-2 border-b border-[#ffffff]">
+                            <img src="/images/profile.png" alt="Profile" class="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white" />
+                            <div>
+                                <div class="font-semibold uppercase">{{ user.first_name }} {{ user.last_name}}</div>
+                                <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
+                            </div>
+                        </div>
+                        <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
+                            <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
+                            <button @click="logout" class="text-white font-bold text-xs sm:text-sm hover:underline text-left">LOGOUT</button>
+                        </nav>
+                    </div>
+                </transition>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Header -->
+    <div class="md:hidden bg-black bg-opacity-90 text-white px-4 py-3 flex items-center justify-between relative">
+        <div class="flex items-center space-x-3">
+            <img src="/images/profile.png" alt="Profile" class="w-8 h-8 rounded-full border border-white object-cover" />
+            <div>
+                <div class="font-semibold text-sm">{{ user.first_name }} {{ user.last_name}}</div>
+                <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
+            </div>
+        </div>
+        <button @click="menuOpen = !menuOpen" class="focus:outline-none">
+            <svg class="h-5 w-5 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+            </svg>
+        </button>
+
+        <!-- Mobile Dropdown Menu -->
+        <transition name="fade">
+            <div v-if="menuOpen" class="absolute right-0 top-full mt-2 w-40 sm:w-48 bg-black rounded-lg shadow-lg border border-[#ffffff] z-[99999]">
+                <div class="flex items-center space-x-2 sm:space-x-3 px-3 py-2 border-b border-[#ffffff]">
+                    <img src="/images/profile.png" alt="Profile" class="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white" />
+                    <div>
+                        <div class="font-semibold uppercase text-xs">{{ user.first_name }} {{ user.last_name}}</div>
+                        <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
+                    </div>
+                </div>
+                <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
+                    <a href="#" class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
+                    <button @click="logout" class="text-white font-bold text-xs sm:text-sm hover:underline text-left">LOGOUT</button>
+                </nav>
+            </div>
+        </transition>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="relative min-h-screen bg-cover bg-center flex flex-col" :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }">
+
+        <!-- Overlay -->
+        <div class="absolute inset-0 bg-black bg-opacity-60"></div>
+
+        <!-- Desktop Layout -->
+        <div class="hidden md:flex relative z-10 flex-col items-center justify-center px-4 pt-20 min-h-screen">
+            <div class="p-4 rounded-lg text-center max-w-lg w-full">
+                <!-- Logo + Motto -->
+                <div class="relative inline-block mx-auto max-w-[600px] w-full">
+                    <img src="/images/logo4.png" alt="USePass Logo" class="mx-auto w-full h-auto" />
+                    <p class="text-white italic text-base md:text-lg lg:text-xl mb-6">
+                        "Track Student. Ensure Safety. USePass."
+                    </p>
+                    <div class="corner-border relative">
+                        <div class="absolute origin-center w-full h-full">
+                            <div class="scanner-bar"></div>
+                            <div class="scan-line"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User ID input -->
+                <div class="flex items-center justify-center pt-5">
+                    <div class="relative w-full max-w-xs text-center">
+                        <input type="text" v-model="userIdInput" @keyup.enter="checkStudent(false)"
+                               class="max-w-100 px-4 py-2 text-center rounded-[10px] bg-black bg-opacity-40 border border-white border-opacity-40 text-white placeholder-white placeholder-opacity-60 focus:outline-none"
+                               placeholder="Enter Student ID" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Layout -->
+        <div class="md:hidden relative z-10 flex flex-col min-h-screen">
+            <!-- Logo Section -->
+            <div class="flex-shrink-0 text-center py-8 px-4">
+                <img src="/images/logo4.png" alt="USePass Logo" class="mx-auto w-48 h-auto mb-4" />
+                <p class="text-white italic text-sm">
+                    "Track Student. Ensure Safety. USePass."
+                </p>
+            </div>
+
+            <!-- Mobile Button Grid -->
+            <div class="flex-grow flex items-center justify-center px-6 pb-20">
+                <div class="w-full max-w-sm">
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Scan QR Button -->
+                        <button
+                            @click="openScanModal"
+                            class="bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3"
+                        >
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
+                                    <path d="M13 13h1.5v1.5H13zM14.5 14.5H16V16h-1.5zM16 13h1.5v1.5H16zM13 16h1.5v1.5H13zM14.5 17.5H16V19h-1.5zM16 16h1.5v1.5H16zM17.5 14.5H19V16h-1.5zM17.5 17.5H19V19h-1.5zM22 17.5h-1.5V19H22zM22 13h-1.5v1.5H22zM20.5 19H22v1.5h-1.5z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Scan QR</span>
+                        </button>
+
+                        <!-- Report Incident Button -->
+                        <button @click="showIncidentModal = true"
+                                class="mobile-btn bg-red-500 hover:bg-red-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2L1 21h22L12 2zm0 3.5L19.5 19h-15L12 5.5zm-1 5.5h2v4h-2v-4zm0 5h2v2h-2v-2z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Incident Report</span>
+                        </button>
+
+                        <!-- Spot Report Button -->
+                        <button @click="showSpotModal = true"
+                                class="mobile-btn bg-orange-500 hover:bg-orange-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Spot Report</span>
+                        </button>
+
+                        <!-- Student Attendance Button -->
+                        <button @click="showStudentAttendanceModal = true"
+                                class="mobile-btn bg-green-500 hover:bg-green-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Student Attendance</span>
+                        </button>
+
+                        <!-- Faculty and Staff Attendance Button -->
+                        <button @click="showFacultyAndStaffAttendanceModal = true"
+                                class="mobile-btn bg-green-500 hover:bg-green-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Faculty and Staff Attendance</span>
+                        </button>
+
+                        <!-- Logs Button -->
+                        <button @click="showLogsModal = true"
+                                class="mobile-btn bg-yellow-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Logs</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Scan Modal -->
+    <transition name="fade">
+        <div v-if="showScanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 px-4">
+            <div class="relative w-full max-w-sm bg-white rounded-xl p-6">
+                <!-- Close Button -->
+                <button @click="closeScanModal" class="absolute top-4 right-4 z-10 text-gray-600 hover:text-red-500 text-xl bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <div class="text-center">
+                    <h3 class="text-lg font-bold text-gray-800 mb-4">Scan</h3>
+
+                    <!-- QR Scanner Container -->
+                    <div class="qr-scanner mb-4" :class="{ 'camera-error': cameraError, 'scanning-success': scanSuccess }">
+                        <!-- Video element for camera feed -->
+                        <video ref="videoElement" class="w-full h-full object-cover"></video>
+
+                        <!-- Scanner overlay -->
+                        <div class="scanner-overlay">
+                            <div class="scanner-frame">
+                                <div class="scanner-corners">
+                                    <div class="scanner-corner top-left"></div>
+                                    <div class="scanner-corner top-right"></div>
+                                    <div class="scanner-corner bottom-left"></div>
+                                    <div class="scanner-corner bottom-right"></div>
+                                </div>
+                                <div v-if="isScanning" class="scanning-line"></div>
+                            </div>
+                        </div>
+
+                        <!-- Loading overlay -->
+                        <div v-if="isLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                            <div class="text-white text-center">
+                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+                                <p class="text-sm">Starting camera...</p>
+                            </div>
+                        </div>
+
+                        <!-- Error overlay -->
+                        <div v-if="cameraError" class="absolute inset-0 bg-red-50 flex items-center justify-center">
+                            <div class="text-red-600 text-center p-4">
+                                <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                                <p class="text-sm font-medium">{{ errorMessage }}</p>
+                                <button @click="retryCamera" class="mt-2 px-4 py-2 bg-red-500 text-white rounded-lg text-sm hover:bg-red-600">
+                                    Retry
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Success overlay -->
+                        <div v-if="scanSuccess" class="absolute inset-0 bg-green-50 flex items-center justify-center">
+                            <div class="text-green-600 text-center p-4">
+                                <svg class="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                                <p class="text-sm font-medium">QR Code Scanned!</p>
+                                <p class="text-xs text-gray-600 mt-1">{{ scannedResult }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="flex space-x-2 mt-5">
+                        <button
+                            @click="toggleScanner"
+                            :disabled="cameraError"
+                            class="flex-1 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                        >
+                            {{ isScanning ? 'Stop Scanner' : 'Start Scanner' }}
+                        </button>
+                        <button
+                            @click="switchCamera"
+                            v-if="hasMultipleCameras"
+                            class="p-2 bg-gray-200 rounded hover:bg-gray-300"
+                        >
+                            <i class="fas fa-camera-rotate"></i>
+                        </button>
+
+                    </div>
+
+                    <!-- Scanner Status -->
+                    <div v-if="isScanning" class="mt-4 text-sm text-gray-600">
+                        <p>Point your camera at a QR code</p>
+                        <p class="text-xs text-gray-400 mt-1">Scanner will automatically detect and read QR codes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Student Profile Modal -->
+    <transition name="fade">
+        <div v-if="showProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">
+                <!-- Close Button -->
+                <button @click="showProfileModal = false" class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl">
+                    ×
+                </button>
+
+                <!-- Logo -->
+                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />
+
+                <!-- If student found -->
+                <div v-if="studentFound" class="flex flex-col items-center space-y-4">
+                    <div class="rounded-lg overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
+                        <img :src="getProfileImageUrl(studentProfile.profileImage)" alt="Profile" class="object-cover w-full h-full" />
+                    </div>
+                    <div class="text-gray-800 text-center">
+                        <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
+                            {{ studentProfile.fullName }}
+                        </div>
+                        <div class="text-sm md:text-base lg:text-lg font-medium italic">
+                            {{ studentProfile.course }}
+                        </div>
+                        <div class="text-base md:text-lg mt-2 font-mono tracking-widest">
+                            {{ studentProfile.idNumber }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- If student not found -->
+                <div v-else class="text-red-600 text-xl font-semibold">
+                    No Student ID Found.
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Incident Report Modal -->
+    <transition name="fade">
+        <div v-if="showIncidentModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showIncidentModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Incident Report</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <IncidentTable :reports="incidentReports || []"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Spot Report Modal -->
+    <transition name="fade">
+        <div v-if="showSpotModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showSpotModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Spot Report</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <SpotTable :reports="reports || []" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Student Attendance Modal -->
+    <transition name="fade">
+        <div v-if="showStudentAttendanceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showStudentAttendanceModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Student Attendance Report</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <ghome/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Faculty And Staff Attendance Modal -->
+    <transition name="fade">
+        <div v-if="showFacultyAndStaffAttendanceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showFacultyAndStaffAttendanceModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Faculty And Staff Attendance Report</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <p>HELLOOO</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+
+    <!-- Logs Modal -->
+    <transition name="fade">
+        <div v-if="showLogsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showLogsModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Activity Logs</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <p>HELLOOO</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </transition>
+</template>
+
+<script>
+import { Head, Link, router, usePage } from "@inertiajs/vue3";
+import { StreamBarcodeReader } from "vue-barcode-reader";
+import axios from "axios";
+import TextInput from "@/Components/TextInput.vue";
+import IncidentTable from "@/Components/IncidentTable.vue";
+import SpotTable from "@/Components/SpotTable.vue";
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { route } from 'ziggy-js';
+import StudentReportTable from "@/Components/StudentReportTable.vue";
+import Ghome from "@/Pages/Frontend/Ghome.vue";
+
+// Move reactive data outside of component for proper composition API usage
+const menuOpen = ref(false);
+
+const logout = () => {
+    router.post(route('logout'))
+}
+
+export default {
+    name: "guardHome",
+    components: {
+        SpotTable,
+        Ghome,
+        StudentReportTable,
+        IncidentTable,
+        Head,
+        Link,
+        TextInput,
+        StreamBarcodeReader
+    },
+    setup() {
+        const page = usePage();
+        const user = computed(() => page.props.auth.user);
+
+        // QR Scanner reactive data
+        const showScanModal = ref(false);
+        const videoElement = ref(null);
+        const userIdInput = ref('');
+        const isLoading = ref(false);
+        const isScanning = ref(false);
+        const cameraError = ref(false);
+        const errorMessage = ref('');
+        const scanSuccess = ref(false);
+        const scannedResult = ref('');
+        const lastScannedCode = ref('');
+        const hasMultipleCameras = ref(false);
+
+        let qrScanner = null;
+        let currentCameraIndex = 0;
+        let availableCameras = [];
+
+        const startScanner = async () => {
+            if (!videoElement.value) return;
+
+            isLoading.value = true;
+            cameraError.value = false;
+
+            try {
+                // Check if QrScanner is available (from CDN)
+                if (typeof QrScanner === 'undefined') {
+                    throw new Error('QR Scanner library not loaded');
+                }
+
+                // Get available cameras
+                const cameras = await QrScanner.listCameras(true);
+                availableCameras = cameras;
+                hasMultipleCameras.value = cameras.length > 1;
+
+                // Initialize QR Scanner
+                qrScanner = new QrScanner(
+                    videoElement.value,
+                    result => onScanSuccess(result),
+                    {
+                        onDecodeError: error => {
+                            // Silent error handling for continuous scanning
+                            console.log('Scanning...', error.message);
+                        },
+                        highlightScanRegion: false,
+                        highlightCodeOutline: true,
+                        preferredCamera: cameras[currentCameraIndex]?.id || 'environment'
+                    }
+                );
+
+                await qrScanner.start();
+                isScanning.value = true;
+                isLoading.value = false;
+            } catch (error) {
+                console.error('Camera error:', error);
+                cameraError.value = true;
+                isLoading.value = false;
+
+                if (error.name === 'NotAllowedError') {
+                    errorMessage.value = 'Camera permission denied. Please allow camera access.';
+                } else if (error.name === 'NotFoundError') {
+                    errorMessage.value = 'No camera found on this device.';
+                } else if (error.name === 'NotSupportedError') {
+                    errorMessage.value = 'Camera not supported on this device.';
+                } else {
+                    errorMessage.value = 'Failed to access camera. Please try again.';
+                }
+            }
+        };
+
+        const stopScanner = () => {
+            if (qrScanner) {
+                qrScanner.stop();
+                qrScanner.destroy();
+                qrScanner = null;
+            }
+            isScanning.value = false;
+        };
+
+        const toggleScanner = () => {
+            if (isScanning.value) {
+                stopScanner();
+            } else {
+                startScanner();
+            }
+        };
+
+        const switchCamera = async () => {
+            if (availableCameras.length <= 1) return;
+
+            currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+
+            if (qrScanner) {
+                await qrScanner.setCamera(availableCameras[currentCameraIndex].id);
+            }
+        };
+
+        const onScanSuccess = (result) => {
+            console.log('QR Code scanned:', result.data);
+            scannedResult.value = result.data;
+            lastScannedCode.value = result.data;
+            userIdInput.value = result.data;
+
+            // Show success animation
+            scanSuccess.value = true;
+
+            // Auto-check student after a brief delay
+            setTimeout(() => {
+                // This will be handled by the main component's checkStudent method
+            }, 1000);
+        };
+
+        const retryCamera = () => {
+            cameraError.value = false;
+            errorMessage.value = '';
+            startScanner();
+        };
+
+        const closeScanModal = () => {
+            stopScanner();
+            showScanModal.value = false;
+            scanSuccess.value = false;
+            scannedResult.value = '';
+            userIdInput.value = '';
+        };
+
+        const openScanModal = () => {
+            showScanModal.value = true;
+            // Start scanner after DOM update
+            nextTick(() => {
+                setTimeout(() => {
+                    startScanner();
+                }, 100);
+            });
+        };
+
+        onUnmounted(() => {
+            stopScanner();
+        });
+
+        return {
+            menuOpen,
+            logout,
+            user,
+            // QR Scanner functions and data
+            showScanModal,
+            videoElement,
+            userIdInput,
+            isLoading,
+            isScanning,
+            cameraError,
+            errorMessage,
+            scanSuccess,
+            scannedResult,
+            lastScannedCode,
+            hasMultipleCameras,
+            startScanner,
+            stopScanner,
+            toggleScanner,
+            switchCamera,
+            retryCamera,
+            closeScanModal,
+            openScanModal
+        };
+    },
+    data() {
+        return {
+            userId: ["", "", "", "", "", ""],
+            timer: 120,
+            timerInterval: null,
+            timeoutMessageVisible: false,
+            isResending: false,
+            scannedCode: null,
+            studentFound: null,
+            studentProfile: {
+                fullName: '',
+                course: '',
+                idNumber: '',
+                profileImage: ''
+            },
+            checking: false,
+            showIncidentModal: false,
+            showSpotModal: false,
+            showStudentAttendanceModal: false,
+            showFacultyAndStaffAttendanceModal: false,
+            showLogsModal: false,
+            showProfileModal: false,
+            triggeredByButton: false,
+            currentUser: {
+                id: 1,
+                name: 'John Doe',
+                email: 'john@example.com',
+                role: 'guard' // or 'admin' or 'user'
+            },
+            incidentReports: []
+        };
+    },
+    computed: {
+        formattedTime() {
+            const minutes = Math.floor(this.timer / 60).toString().padStart(2, "0");
+            const seconds = (this.timer % 60).toString().padStart(2, "0");
+            return `${minutes}:${seconds}`;
+        },
+        getRoleDisplayName() {
+            if (!this.currentUser) {
+                return "User";
+            }
+
+            switch (this.currentUser.role) {
+                case "admin":
+                    return "Administrator";
+                case "guard":
+                    return "Security Guard";
+                default:
+                    return "User";
+            }
+        }
+    },
+    methods: {
+        onInput(index) {
+            this.userId[index] = this.userId[index].replace(/\D/g, "");
+            if (this.userId[index].length > 1) {
+                this.userId[index] = this.userId[index].slice(0, 1);
+            }
+            if (this.userId[index] && index < this.userId.length - 1) {
+                const nextInput = this.$refs["input" + (index + 1)];
+                if (nextInput && nextInput[0]) {
+                    nextInput[0].focus();
+                }
+            }
+        },
+        onBackspace(index, event) {
+            if (this.userId[index] === "" && index > 0) {
+                const prevInput = this.$refs["input" + (index - 1)];
+                if (prevInput && prevInput[0]) {
+                    prevInput[0].focus();
+                    event.preventDefault();
+                }
+            }
+        },
+        getUserIdString() {
+            return this.userId.join("");
+        },
+        startTimer() {
+            if (this.timerInterval) clearInterval(this.timerInterval);
+            this.timer = 120;
+            this.timeoutMessageVisible = false;
+            this.isResending = false;
+            this.timerInterval = setInterval(() => {
+                if (this.timer > 0) {
+                    this.timer--;
+                } else {
+                    clearInterval(this.timerInterval);
+                    this.timerInterval = null;
+                    this.timeoutMessageVisible = true;
+                }
+            }, 1000);
+        },
+        resendOtp() {
+            this.isResending = true;
+            setTimeout(() => {
+                window.location.reload();
+            }, 3000);
+        },
+        onDecode(result) {
+            this.scannedCode = result;
+            // (Optional: Auto-fill or trigger actions here)
+        },
+        onInit(promise) {
+            promise.catch((error) => {
+                console.error("Camera initialization failed:", error);
+            });
+        },
+        getProfileImageUrl(imagePath) {
+            // Add your logic here to return the full URL for the profile image
+            return imagePath ? `/images/profiles/${imagePath}` : '/images/default-profile.jpg';
+        },
+        async checkStudent() {
+            if (!this.userIdInput) {
+                this.studentFound = false;
+                this.showScanModal = false;
+                this.showProfileModal = true;
+                return;
+            }
+            this.checking = true;
+            this.studentFound = null;
+
+            try {
+                // Call your backend API route. If you put the Laravel route in 'web.php', use '/students/...'
+                const response = await axios.get(
+                    `/students/${this.userIdInput.trim()}`
+                );
+                this.studentFound = response.data.exists;
+                if (this.studentFound) {
+                    this.studentProfile = response.data.student;
+                }
+                this.showScanModal = false;
+                this.showProfileModal = true;
+            } catch (error) {
+                console.error("Error checking student:", error);
+                this.studentFound = false;
+                this.showScanModal = false;
+                this.showProfileModal = true;
+            } finally {
+                this.checking = false;
+            }
+        },
+        // Method to load incident reports from backend
+        async loadIncidentReports() {
+            try {
+                const response = await axios.get('/api/incident-reports');
+                this.incidentReports = response.data;
+            } catch (error) {
+                console.error("Error loading incident reports:", error);
+            }
+        },
+    },
+    mounted() {
+        this.startTimer();
+        // Load incident reports when component mounts
+        this.loadIncidentReports(); // Uncomment when you have the backend endpoint ready
+
+        // Load QR Scanner library dynamically if not already loaded
+        if (typeof QrScanner === 'undefined') {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/qr-scanner/1.4.2/qr-scanner.umd.min.js';
+            script.onload = () => {
+                console.log('QR Scanner library loaded');
+            };
+            document.head.appendChild(script);
+        }
+    },
+    beforeUnmount() {
+        if (this.timerInterval) clearInterval(this.timerInterval);
+    },
+};
+</script>
+
+<style scoped>
+body {
+    margin: 0;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Fade transition for modals */
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+}
+
+.scanner-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60px;
+    height: 60px;
+    overflow: hidden;
+    background-color: transparent;
+    transform: translate(-50%, -50%);
+}
+.scanner-bar::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: repeating-linear-gradient(
+        to right,
+        white 0px,
+        white 2px,
+        transparent 2px,
+        transparent 4px,
+        white 4px,
+        white 5px,
+        transparent 5px,
+        transparent 8px,
+        white 8px,
+        white 12px,
+        transparent 12px,
+        transparent 14px,
+        white 14px,
+        white 15px,
+        transparent 15px,
+        transparent 18px,
+        white 18px,
+        white 21px,
+        transparent 21px,
+        transparent 24px,
+        white 24px,
+        white 26px,
+        transparent 26px,
+        transparent 29px,
+        white 29px,
+        white 31px,
+        transparent 31px,
+        transparent 34px,
+        white 34px,
+        white 40px,
+        transparent 40px
+    );
+    opacity: 1;
+}
+.corner-border {
+    position: relative;
+    width: 85px;
+    height: 85px;
+    margin: 0 auto;
+}
+.corner-border::before,
+.corner-border::after,
+.corner-border > div::before,
+.corner-border > div::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid white;
+    border-radius: 3px;
+}
+.corner-border::before {
+    top: 0;
+    left: 0;
+    border-right: none;
+    border-bottom: none;
+}
+.corner-border::after {
+    top: 0;
+    right: 0;
+    border-left: none;
+    border-bottom: none;
+}
+.corner-border > div::before {
+    bottom: 0;
+    left: 0;
+    border-top: none;
+    border-right: none;
+}
+.corner-border > div::after {
+    bottom: 0;
+    right: 0;
+    border-top: none;
+    border-left: none;
+}
+@keyframes barcode-scan-move {
+    0% {
+        left: -300%;
+    }
+    100% {
+        left: 0;
+    }
+}
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: white;
+    animation: scan-vertical 2.5s ease-in-out infinite;
+    z-index: 5;
+    opacity: 0.8;
+    border-radius: 1px;
+}
+@keyframes scan-vertical {
+    0% { top: 0%; }
+    50% { top: 90%; }
+    100% { top: 0%; }
+}
+@keyframes scan {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Mobile button hover effects */
+.mobile-btn {
+    transition: all 0.3s ease;
+}
+.mobile-btn:active {
+    transform: scale(0.95);
+}
+
+/* QR Scanner specific styles */
+.qr-scanner {
+    position: relative;
+    width: 100%;
+    max-width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.qr-scanner video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.scanner-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+}
+
+.scanner-frame {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200px;
+    height: 200px;
+    transform: translate(-50%, -50%);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+}
+
+.scanner-corners {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.scanner-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #00ff00;
+}
+
+.scanner-corner.top-left {
+    top: -2px;
+    left: -2px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.scanner-corner.top-right {
+    top: -2px;
+    right: -2px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.scanner-corner.bottom-left {
+    bottom: -2px;
+    left: -2px;
+    border-right: none;
+    border-top: none;
+}
+
+.scanner-corner.bottom-right {
+    bottom: -2px;
+    right: -2px;
+    border-left: none;
+    border-top: none;
+}
+
+.scanning-line {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff00, transparent);
+    animation: scan-animation 2s linear infinite;
+}
+
+@keyframes scan-animation {
+    0% { top: 10px; opacity: 1; }
+    50% { opacity: 1; }
+    100% { top: calc(100% - 12px); opacity: 0; }
+}
+
+.camera-error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.scanning-success {
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.fade-enter-active, .fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+.fade-enter-from, .fade-leave-to {
+    opacity: 0;
+}
+</style>
