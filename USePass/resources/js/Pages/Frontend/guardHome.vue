@@ -245,6 +245,7 @@
                                     <div class="scanner-corner bottom-right"></div>
                                 </div>
                                 <div v-if="isScanning" class="scanning-line"></div>
+
                             </div>
                         </div>
 
@@ -312,41 +313,73 @@
 
     <!-- Student Profile Modal -->
     <transition name="fade">
-        <div v-if="showProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+        <div v-if="showProfileModal"
+             class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-70 px-4"
+             style="z-index: 999999 !important;">
+
             <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">
                 <!-- Close Button -->
-                <button @click="showProfileModal = false" class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl">
+                <button @click="closeProfileModal"
+                        class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
                     ×
                 </button>
 
-                <!-- Logo -->
+                <!-- Modal Header -->
                 <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />
 
-                <!-- If student found -->
-                <div v-if="studentFound" class="flex flex-col items-center space-y-4">
-                    <div class="rounded-lg overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
-                        <img :src="getProfileImageUrl(studentProfile.profileImage)" alt="Profile" class="object-cover w-full h-full" />
-                    </div>
-                    <div class="text-gray-800 text-center">
-                        <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
-                            {{ studentProfile.fullName }}
-                        </div>
-                        <div class="text-sm md:text-base lg:text-lg font-medium italic">
-                            {{ studentProfile.course }}
-                        </div>
-                        <div class="text-base md:text-lg mt-2 font-mono tracking-widest">
-                            {{ studentProfile.idNumber }}
-                        </div>
-                    </div>
-                </div>
+                <!-- Modal Content - USING KEY TO FORCE RE-RENDER -->
+                <div class="p-6" :key="`modal-${modalKey}`">
 
-                <!-- If student not found -->
-                <div v-else class="text-red-600 text-xl font-semibold">
-                    No Student ID Found.
+                    <!-- Debug Info -->
+                    <div class="mb-4 p-2 bg-yellow-100 rounded text-xs">
+                        State: {{ studentFound }} | Key: {{ modalKey }} | Time: {{ currentTime }}
+                    </div>
+
+                    <!-- LOADING STATE -->
+                    <div v-show="isLoading" class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Loading student data...</p>
+                        <p class="text-xs text-gray-400 mt-2">Please wait...</p>
+                    </div>
+
+                    <!-- STUDENT FOUND STATE -->
+                    <div v-show="isStudentFound" class="flex flex-col items-center space-y-4">
+                        <div class="mb-4">
+                            <div class="rounded-full overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
+                                <img
+                                    :src="studentImageUrl"
+                                    @error="handleImageError"
+                                    class="object-cover rounded-lg w-full h-full"
+                                    alt="Student Profile"
+                                />
+                            </div>
+                        </div>
+                        <div class="text-gray-800 text-center">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">{{ studentName }}</h3>
+                        <p class="text-sm md:text-base lg:text-lg font-medium italic">{{ studentProgram }}</p>
+                        <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
+
+                        <div class="mt-4 p-3 bg-green-100 rounded-lg">
+                            <p class="text-green-800 font-semibold">✓ Student Found</p>
+                            <p class="text-xs text-gray-600 mt-1">{{ successTime }}</p>
+                        </div>
+                    </div>
+                    </div>
+
+                    <!-- STUDENT NOT FOUND STATE -->
+                    <div v-show="isStudentNotFound" class="text-center py-8">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-red-500 text-2xl">✗</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-gray-800 mb-2">Student Not Found</h3>
+                        <p class="text-gray-600">No student record found for ID: {{ userIdInput }}</p>
+                    </div>
+
                 </div>
             </div>
         </div>
     </transition>
+
 
     <!-- Incident Report Modal -->
     <transition name="fade">
@@ -476,10 +509,12 @@ import axios from "axios";
 import TextInput from "@/Components/TextInput.vue";
 import IncidentTable from "@/Components/IncidentTable.vue";
 import SpotTable from "@/Components/SpotTable.vue";
-import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick, watch, getCurrentInstance } from 'vue';
 import { route } from 'ziggy-js';
 import StudentReportTable from "@/Components/StudentReportTable.vue";
 import Ghome from "@/Pages/Frontend/Ghome.vue";
+import QrScanner from "qr-scanner";
+
 
 // Move reactive data outside of component for proper composition API usage
 const menuOpen = ref(false);
@@ -508,7 +543,7 @@ export default {
         const showScanModal = ref(false);
         const videoElement = ref(null);
         const userIdInput = ref('');
-        const isLoading = ref(false);
+
         const isScanning = ref(false);
         const cameraError = ref(false);
         const errorMessage = ref('');
@@ -516,61 +551,147 @@ export default {
         const scannedResult = ref('');
         const lastScannedCode = ref('');
         const hasMultipleCameras = ref(false);
+        const checking = ref(false);
+        const showProfileModal = ref(false);
+
+        const studentFound = ref(null);
+
+
+
+        const studentProfile = ref({
+            fullName: '',
+           program: '',
+            idNumber: '',
+            profileImage: ''
+        });
+        const modalKey = ref(0);
+        const currentTime = ref('');
+        const successTime = ref('');
+
+        const updateTime = () => {
+            currentTime.value = new Date().toLocaleTimeString();
+        };
+        setInterval(updateTime, 1000);
+
+        const isLoading = computed(() => {
+            console.log('🔄 isLoading computed:', studentFound.value === null);
+            return studentFound.value === null;
+        });
+        const isStudentFound = computed(() => {
+            console.log('✅ isStudentFound computed:', studentFound.value === true);
+            return studentFound.value === true;
+        });
+        const isStudentNotFound = computed(() => {
+            console.log('❌ isStudentNotFound computed:', studentFound.value === false);
+            return studentFound.value === false;
+        });
+
+        const studentName = computed(() => studentProfile.value.fullName || '');
+        const studentProgram = computed(() => studentProfile.value.program || '');
+        const studentId = computed(() => studentProfile.value.idNumber || '');
+        const studentImageUrl = computed(() => {
+            if (!studentProfile.value.profileImage) return '/images/user.png';
+            return `/${studentProfile.value.profileImage}`;
+        });
+
+        const getFullImagePath = (imagePath) => {
+            if (!imagePath) return '/images/user.png';
+
+            console.log('Original image path:', imagePath);
+
+            // If it's already a full URL, return as is
+            if (imagePath.startsWith('http')) {
+                return imagePath;
+            }
+
+            // If it starts with /, return as is
+            if (imagePath.startsWith('/')) {
+                return imagePath;
+            }
+
+            // Try multiple possible paths
+            const possiblePaths = [
+                `/storage/${imagePath}`,
+                `/images/profiles/${imagePath}`,
+                `/public/storage/${imagePath}`,
+                `/storage/app/public/${imagePath}`
+            ];
+
+            // For now, return the storage path
+            const finalPath = `/storage/${imagePath}`;
+            console.log('Final image path:', finalPath);
+            return finalPath;
+        };
 
         let qrScanner = null;
         let currentCameraIndex = 0;
         let availableCameras = [];
 
-        const startScanner = async () => {
-            if (!videoElement.value) return;
 
-            isLoading.value = true;
+        const loadQrScannerLibrary = () => {
+            return new Promise((resolve) => {
+                if (window.QrScanner) return resolve();
+
+                const script = document.createElement('script');
+                script.src = 'https://unpkg.com/qr-scanner@1.4.2/qr-scanner.umd.min.js';
+                script.onload = () => {
+                    QrScanner.WORKER_PATH = 'https://unpkg.com/qr-scanner@1.4.2/qr-scanner-worker.min.js';
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        };
+
+        const fetchAvailableCameras = async () => {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            availableCameras = devices.filter(device => device.kind === 'videoinput');
+            hasMultipleCameras.value = availableCameras.length > 1;
+        };
+
+        const startScanner = async () => {
             cameraError.value = false;
+            scannedResult.value = '';
 
             try {
-                // Check if QrScanner is available (from CDN)
-                if (typeof QrScanner === 'undefined') {
-                    throw new Error('QR Scanner library not loaded');
-                }
+                await loadQrScannerLibrary();
+                await fetchAvailableCameras();
 
-                // Get available cameras
-                const cameras = await QrScanner.listCameras(true);
-                availableCameras = cameras;
-                hasMultipleCameras.value = cameras.length > 1;
+                if (!videoElement.value) throw new Error("No video element found");
 
-                // Initialize QR Scanner
+                const selectedCamera = availableCameras[currentCameraIndex]?.deviceId;
+
                 qrScanner = new QrScanner(
                     videoElement.value,
-                    result => onScanSuccess(result),
+                    (result) => {
+                        console.log("✅ QR Code Result:", result.data);
+                        onScanSuccess(result);
+                        scannedResult.value = result.data;
+                        stopScanner(); // auto-stop after scan
+                    },
                     {
-                        onDecodeError: error => {
-                            // Silent error handling for continuous scanning
-                            console.log('Scanning...', error.message);
-                        },
-                        highlightScanRegion: false,
+                        returnDetailedScanResult: true,
+                        highlightScanRegion: true,
                         highlightCodeOutline: true,
-                        preferredCamera: cameras[currentCameraIndex]?.id || 'environment'
                     }
                 );
 
+                if (selectedCamera) {
+                    await qrScanner.setCamera(selectedCamera);
+                }
+
                 await qrScanner.start();
                 isScanning.value = true;
-                isLoading.value = false;
-            } catch (error) {
-                console.error('Camera error:', error);
+            } catch (err) {
+                console.error("Camera start failed:", err);
+                errorMessage.value = err.message || 'Could not access camera.';
                 cameraError.value = true;
-                isLoading.value = false;
-
-                if (error.name === 'NotAllowedError') {
-                    errorMessage.value = 'Camera permission denied. Please allow camera access.';
-                } else if (error.name === 'NotFoundError') {
-                    errorMessage.value = 'No camera found on this device.';
-                } else if (error.name === 'NotSupportedError') {
-                    errorMessage.value = 'Camera not supported on this device.';
-                } else {
-                    errorMessage.value = 'Failed to access camera. Please try again.';
-                }
             }
+        };
+
+
+        const testCameraAccess = async () => {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            stream.getTracks().forEach(track => track.stop());
         };
 
         const stopScanner = () => {
@@ -600,20 +721,188 @@ export default {
             }
         };
 
+
+        const forceTemplateUpdate = () => {
+            console.log('🔄 Forcing template update');
+            const instance = getCurrentInstance();
+            if (instance && instance.proxy) {
+                instance.proxy.$forceUpdate();
+            }
+        };
+
+        // UPDATED: checkStudent with forced updates
+        const checkStudent = async () => {
+            if (!userIdInput.value.trim()) {
+                console.error('No student ID provided');
+                return;
+            }
+
+            try {
+                console.log('🔍 NUCLEAR: Checking student ID:', userIdInput.value.trim());
+
+                // RESET EVERYTHING
+                studentProfile.value = {
+                    fullName: '',
+                    program: '',
+                    idNumber: '',
+                    profileImage: ''
+                };
+
+                // Increment modal key to force complete re-render
+                modalKey.value++;
+
+                // Set loading state
+                studentFound.value = null;
+                showProfileModal.value = true;
+
+                console.log('✨ NUCLEAR: State set to null, key:', modalKey.value);
+
+                // FORCE MULTIPLE UPDATES
+                await nextTick();
+                await new Promise(resolve => setTimeout(resolve, 100));
+
+                const response = await axios.get(`/students/profile/${userIdInput.value.trim()}`);
+                console.log('📡 NUCLEAR: API Response:', response.data);
+
+                if (response.data && response.data.exists) {
+                    const student = response.data.student;
+
+                    // Update profile data
+                    studentProfile.value = {
+                        fullName: student.fullName || 'Unknown Name',
+                        idNumber: student.id || userIdInput.value,
+                        program: student.program || 'Unknown Program',
+                        profileImage: student.profileImage || ''
+                    };
+
+                    console.log('📝 NUCLEAR: Profile updated:', studentProfile.value);
+
+                    // Wait a bit
+                    await new Promise(resolve => setTimeout(resolve, 100));
+
+                    // Set success state
+                    studentFound.value = true;
+                    successTime.value = new Date().toLocaleTimeString();
+                    modalKey.value++; // Force re-render again
+                    setTimeout(() => {
+                        closeProfileModal();
+                        openScanModal(); // Reopen scanner
+                    }, 2000);
+
+                    console.log('✅ NUCLEAR: Student found, key:', modalKey.value);
+
+                } else {
+                    studentFound.value = false;
+                    modalKey.value++;
+                    console.log('❌ NUCLEAR: Student not found');
+                    setTimeout(() => {
+                        closeProfileModal();
+                        openScanModal();
+                    }, 2000);
+                }
+
+                // Final force update
+                await nextTick();
+
+            } catch (error) {
+                console.error('💥 NUCLEAR: Error checking student:', error);
+                studentFound.value = false;
+                modalKey.value++;
+                setTimeout(() => {
+                    closeProfileModal();
+                    openScanModal();
+                }, 2000);
+            }
+        };
+        const resetModal = () => {
+            console.log('🔄 Resetting modal state');
+            studentFound.value = null;
+            studentProfile.value = {
+                fullName: '',
+                program: '',
+                idNumber: '',
+                profileImage: ''
+            };
+        };
+        const forceUpdate = () => {
+            const instance = getCurrentInstance();
+            if (instance) {
+                instance.proxy.$forceUpdate();
+            }
+        };
+        const closeProfileModal = () => {
+            console.log('🔄 NUCLEAR: Closing modal');
+            showProfileModal.value = false;
+            studentFound.value = null;
+            userIdInput.value = '';
+            modalKey.value++;
+        };
+        const resetAndScanAgain = () => {
+            closeProfileModal();
+            setTimeout(() => {
+                openScanModal();
+            }, 300);
+        };
+        const handleImageError = (event) => {
+            console.log('🖼️ Image error, using fallback');
+            event.target.src = '/images/user.png';
+        };
+// Add this watcher to catch unauthorized changes
+        watch([showProfileModal, studentFound], ([show, found]) => {
+            console.log('Modal:', show, '| State:', found)
+            console.log('Template should show:',
+                found === null ? 'Loading' :
+                    found ? 'Student' : 'Not Found'
+            )
+        })
+
+
+
+
+
+
+
+
         const onScanSuccess = (result) => {
             console.log('QR Code scanned:', result.data);
-            scannedResult.value = result.data;
-            lastScannedCode.value = result.data;
-            userIdInput.value = result.data;
 
-            // Show success animation
+            const scannedRaw = result.data.trim();
+            const cleanedId = scannedRaw.replace(/^ID:\s*/, '');
+
+
+            userIdInput.value = cleanedId;
+            lastScannedCode.value = cleanedId;
+            scannedResult.value = scannedRaw;
+
             scanSuccess.value = true;
 
-            // Auto-check student after a brief delay
+            // Then check student after a brief delay
             setTimeout(() => {
-                // This will be handled by the main component's checkStudent method
-            }, 1000);
+                checkStudent();
+            }, 500);
         };
+
+        watch([showProfileModal, studentFound], ([modalVisible, foundState]) => {
+            console.log(`Modal: ${modalVisible}, State: ${foundState}`)
+        })
+
+// Add this method to test state transitions
+        const testStateFlow = async () => {
+            studentFound.value = null
+            showProfileModal.value = true
+            await new Promise(resolve => setTimeout(resolve, 1000))
+
+            studentProfile.value = {
+                fullName: "TEST STUDENT",
+                idNumber: "TEST-123",
+                program: "TEST PROGRAM",
+                profileImage: "/images/user.png"
+            }
+            studentFound.value = true
+
+            await new Promise(resolve => setTimeout(resolve, 2000))
+            studentFound.value = false
+        }
 
         const retryCamera = () => {
             cameraError.value = false;
@@ -635,9 +924,19 @@ export default {
             nextTick(() => {
                 setTimeout(() => {
                     startScanner();
+                    scanSuccess.value = false;
                 }, 100);
             });
         };
+
+
+        onMounted(async () => {
+            // Load the scanner library dynamically
+            watch(studentFound, (newVal) => {
+                console.log("studentFound changed to:", newVal)
+            })
+            await loadQrScannerLibrary();
+        });
 
         onUnmounted(() => {
             stopScanner();
@@ -665,7 +964,31 @@ export default {
             switchCamera,
             retryCamera,
             closeScanModal,
-            openScanModal
+            openScanModal,
+            onScanSuccess,
+            studentFound,
+            checking,
+            showProfileModal,
+            studentProfile,
+
+            closeProfileModal,
+            resetAndScanAgain,
+            getFullImagePath,
+            handleImageError,
+            checkStudent,
+            resetModal,
+            forceUpdate,
+            modalKey,
+            currentTime,
+            successTime,
+
+            isStudentFound,
+            isStudentNotFound,
+            studentName,
+            studentProgram,
+            studentId,
+            studentImageUrl,
+
         };
     },
     data() {
@@ -677,19 +1000,13 @@ export default {
             isResending: false,
             scannedCode: null,
             studentFound: null,
-            studentProfile: {
-                fullName: '',
-                course: '',
-                idNumber: '',
-                profileImage: ''
-            },
+
             checking: false,
             showIncidentModal: false,
             showSpotModal: false,
             showStudentAttendanceModal: false,
             showFacultyAndStaffAttendanceModal: false,
             showLogsModal: false,
-            showProfileModal: false,
             triggeredByButton: false,
             currentUser: {
                 id: 1,
@@ -779,41 +1096,12 @@ export default {
         getProfileImageUrl(imagePath) {
             // Add your logic here to return the full URL for the profile image
             return imagePath ? `/images/profiles/${imagePath}` : '/images/default-profile.jpg';
-        },
-        async checkStudent() {
-            if (!this.userIdInput) {
-                this.studentFound = false;
-                this.showScanModal = false;
-                this.showProfileModal = true;
-                return;
-            }
-            this.checking = true;
-            this.studentFound = null;
-
-            try {
-                // Call your backend API route. If you put the Laravel route in 'web.php', use '/students/...'
-                const response = await axios.get(
-                    `/students/${this.userIdInput.trim()}`
-                );
-                this.studentFound = response.data.exists;
-                if (this.studentFound) {
-                    this.studentProfile = response.data.student;
-                }
-                this.showScanModal = false;
-                this.showProfileModal = true;
-            } catch (error) {
-                console.error("Error checking student:", error);
-                this.studentFound = false;
-                this.showScanModal = false;
-                this.showProfileModal = true;
-            } finally {
-                this.checking = false;
-            }
-        },
+        }
+        ,
         // Method to load incident reports from backend
         async loadIncidentReports() {
             try {
-                const response = await axios.get('/api/incident-reports');
+                const response = await axios.get('/incident-reports');
                 this.incidentReports = response.data;
             } catch (error) {
                 console.error("Error loading incident reports:", error);
@@ -1099,5 +1387,26 @@ body {
 }
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
+}
+.z-\[9999\] {
+    z-index: 9999 !important;
+}
+.fixed.inset-0 {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+.animate-spin {
+    animation: spin 1s linear infinite;
 }
 </style>
