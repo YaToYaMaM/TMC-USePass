@@ -65,7 +65,12 @@
     <!-- Mobile Header -->
     <div class="md:hidden bg-black bg-opacity-90 text-white px-4 py-3 flex items-center justify-between relative">
         <div class="flex items-center space-x-3">
-            <img src="/images/profile.png" alt="Profile" class="w-8 h-8 rounded-full border border-white object-cover" />
+            <img
+                :src="user.profile_image || '/guard_profiles/user.png'"
+                @error="handleImageError"
+                alt="Profile"
+                class="h-10 w-10 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white"
+            />
             <div>
                 <div class="font-semibold text-sm">{{ user.first_name }} {{ user.last_name}}</div>
                 <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
@@ -82,7 +87,12 @@
         <transition name="fade">
             <div v-if="menuOpen" class="absolute right-0 top-full mt-2 w-40 sm:w-48 bg-black rounded-lg shadow-lg border border-[#ffffff] z-[99999]">
                 <div class="flex items-center space-x-2 sm:space-x-3 px-3 py-2 border-b border-[#ffffff]">
-                    <img src="/images/profile.png" alt="Profile" class="h-8 w-8 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white" />
+                    <img
+                        :src="user.profile_image || '/guard_profiles/user.png'"
+                        @error="handleImageError"
+                        alt="Profile"
+                        class="h-10 w-10 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white"
+                    />
                     <div>
                         <div class="font-semibold uppercase text-xs">{{ user.first_name }} {{ user.last_name}}</div>
                         <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
@@ -359,11 +369,11 @@
                         <p class="text-sm md:text-base lg:text-lg font-medium italic">{{ studentProgram }}</p>
                         <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
 
-                        <div class="mt-4 p-3 bg-green-100 rounded-lg">
-                            <div v-if="lastScanType" class="mt-2 p-2 bg-blue-100 text-blue-800 text-sm font-medium rounded">
-                                <template v-if="lastScanType === 'in'">🟢 Time In Recorded</template>
-                                <template v-else-if="lastScanType === 'out'">🔵 Time Out Recorded</template>
-                                <template v-else>❓ Unknown Status</template>
+                        <div class="mt-4 p-3">
+                            <div v-if="lastScanType" class="mt-2 p-2 text-red-800 text-lg font-bold">
+                                <div v-if="lastScanType === 'in'">Time In</div>
+                                <div v-else-if="lastScanType === 'out'">Time Out</div>
+                                <div v-else>❓ Unknown Status</div>
                             </div>
                         </div>
                     </div>
@@ -1014,6 +1024,8 @@ export default {
             studentProgram,
             studentId,
             studentImageUrl,
+
+            lastScanType,
 
         };
     },
