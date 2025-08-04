@@ -115,6 +115,7 @@ Route::get('/spot-report/print', function () {
         ],
     ]);
 });
+
 Route::post('/students/import', [StudentController::class, 'import']);
 Route::post('/students', [StudentController::class, 'store'])->name('students.store');
 Route::get('/students/list', [StudentController::class, 'index']);
@@ -128,6 +129,11 @@ Route::get('/students-by-category', [StudentController::class, 'getCountsByCateg
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
+Route::get('/students/profile/{students_id}', [StudentController::class, 'fetchStudentProfile']);
+Route::get('/students/records/last/{student_id}', [StudentRecordController::class, 'lastRecord']);
+Route::post('/students/records', [StudentRecordController::class, 'store']);
+Route::patch('/students/records/{record}', [StudentRecordController::class, 'update']);
+
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);

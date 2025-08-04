@@ -112,4 +112,32 @@ class StudentRecordController extends Controller
 
         return response()->json($records);
     }
+    public function lastRecord($studentId)
+    {
+        return StudentRecord::where('student_id', $studentId)
+            ->latest()
+            ->first();
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'students_id' => 'required|string',
+        ]);
+
+        return StudentRecord::create([
+            'students_id' => $validated['students_id'],
+            'record_in' => now()
+        ]);
+    }
+    public function update(Request $request, StudentRecord $record)
+    {
+        $record->update([
+            'record_out' => now()
+        ]);
+
+        return $record;
+    }
+
+
 }

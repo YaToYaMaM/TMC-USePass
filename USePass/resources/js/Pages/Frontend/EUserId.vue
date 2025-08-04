@@ -179,6 +179,19 @@ export default {
         proceedToDetails() {
             if (!this.canProceed) return;
 
+            if (this.studentHasContact && !this.parentHasContact) {
+                this.$inertia.visit(`/Details?step=1&mode=parent_update`, {
+                    data: {
+                        studentData: this.studentData,
+                        parentData: this.parentData,
+                        studentHasContact: this.studentHasContact,
+                        parentHasContact: this.parentHasContact,
+                        requiresOtp: true
+                    },
+                    method: 'get'
+                });
+                return;
+            }
 
             this.$inertia.visit(`/Details?step=${this.redirectStep}`, {
                 data: {
