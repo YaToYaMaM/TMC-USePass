@@ -656,6 +656,9 @@ export default {
         };
 
         const fetchAvailableCameras = async () => {
+            if (!navigator.mediaDevices || !navigator.mediaDevices.enumerateDevices) {
+                throw new Error("Camera API not supported in this browser.");
+            }
             const devices = await navigator.mediaDevices.enumerateDevices();
             availableCameras = devices.filter(device => device.kind === 'videoinput');
             hasMultipleCameras.value = availableCameras.length > 1;
@@ -666,6 +669,8 @@ export default {
             scannedResult.value = '';
 
             try {
+                await navigator.mediaDevices.getUserMedia({ video: true });
+
                 await loadQrScannerLibrary();
                 await fetchAvailableCameras();
 
