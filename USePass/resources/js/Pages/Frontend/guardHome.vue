@@ -20,6 +20,9 @@
             <button @click="showFacultyAndStaffAttendanceModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
                 Faculty & Staff
             </button>
+            <button class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+                Visitors
+            </button>
             <button @click="showLogsModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
                 Logs
             </button>
@@ -27,10 +30,123 @@
 
         <!-- Center Search -->
         <div class="flex items-center space-x-6 justify-end">
-            <div class="flex items-center space-x-2 border-r-2">
-                <input type="text" placeholder="Search Attendance..." class="bg-black bg-opacity-40 text-white px-3 py-1 rounded-[10px] border border-white border-opacity-30 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-1 focus:ring-white" />
-                <button class="text-white pr-8">Search</button>
+            <div class="flex items-center space-x-2 border-r-2 relative">
+                <div class="relative">
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        @input="onSearchInput"
+                        @focus="searchQuery && searchStudents()"
+                        @blur="hideSearchDropdown"
+                        placeholder="Search Students..."
+                        class="bg-black bg-opacity-40 text-white px-3 py-1 rounded-[10px] border border-white border-opacity-30 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-1 focus:ring-white w-64"
+                    />
+
+                    <!-- Loading indicator -->
+                    <div v-if="isSearching" class="absolute right-2 top-1/2 transform -translate-y-1/2">
+                        <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    </div>
+
+                    <!-- Clear button -->
+                    <button
+                        v-if="searchQuery && !isSearching"
+                        @click="clearSearch"
+                        class="absolute right-2 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Enhanced Search Results Dropdown -->
+                    <transition name="dropdown">
+                        <div
+                            v-if="showSearchDropdown && searchResults.length > 0"
+                            class="absolute top-full left-0 right-0 mt-1 bg-black/65 rounded-lg shadow-lg z-[100] max-h-80 overflow-y-auto min-w-80"
+                        >
+                            <div class="py-2 bg-transparent">
+                                <div
+                                    v-for="student in searchResults"
+                                    :key="student.id"
+                                    @click="selectStudent(student)"
+                                    class="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                                >
+                                    <div class="flex items-center space-x-3">
+                                        <!-- Student Avatar placeholder -->
+                                        <div class="flex-shrink-0">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
+                                                <!-- Profile Image -->
+                                                <img
+                                                    v-if="student.profile && student.profile.trim()"
+                                                    :src="student.profile"
+                                                    :alt="student.full_name"
+                                                    class="w-full h-full object-cover rounded-full"
+                                                    @error="handleImageError($event)"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <!-- Student Info -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex text-sm font-bold text-white truncate">
+                                                {{ student.full_name }}
+                                                <div class="ml-2 mt-1 w-2 h-2 bg-green-400 rounded-full" title="Active Student"></div>
+                                            </div>
+                                            <div class="hidden text-xs text-blue-600 font-medium truncate">
+                                                ID: {{ student.id_number }}
+                                            </div>
+                                            <div class="text-xs text-white truncate">
+                                                {{ student.program }}
+                                            </div>
+                                            <div v-if="student.major" class="text-xs text-white truncate">
+                                                Major: {{ student.major }}
+                                            </div>
+                                            <div v-if="student.unit" class="text-xs text-white truncate">
+                                                Unit: {{ student.unit }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Status indicator -->
+                                        <div class="flex-shrink-0 flex flex-col items-end space-y-1">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search summary -->
+                            <div class="px-4 py-2 bg-transparent border-t text-xs text-white text-center">
+                                {{ searchResults.length }} student(s) found
+                                <span v-if="searchResults.length >= 10">• Showing first 10 results</span>
+                            </div>
+
+                            <!-- No results message -->
+                            <div v-if="searchQuery && !isSearching && searchResults.length === 0" class="px-4 py-6 text-sm text-gray-500 text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                No students found for "{{ searchQuery }}"
+                                <div class="text-xs text-gray-400 mt-1">Try searching by name, ID, or program</div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+
+                <button
+                    @click="searchStudents"
+                    :disabled="!searchQuery.trim() || isSearching"
+                    class="text-white pr-8 hover:text-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150"
+                >
+                    <svg v-if="isSearching" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span v-else>Search</span>
+                </button>
             </div>
+
             <!-- Right Profile -->
             <div class="flex items-center space-x-3">
                 <div class="text-sm text-right">
@@ -202,6 +318,17 @@
                             <span class="font-semibold text-sm">Faculty and Staff Attendance</span>
                         </button>
 
+                        <!-- Visitor Button -->
+                        <button
+                                class="mobile-btn bg-gray-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <span class="font-semibold text-sm">Visitors</span>
+                        </button>
+
                         <!-- Logs Button -->
                         <button @click="showLogsModal = true"
                                 class="mobile-btn bg-yellow-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
@@ -311,42 +438,42 @@
     </transition>
 
     <!-- Student Profile Modal -->
-    <transition name="fade">
-        <div v-if="showProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
-            <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">
-                <!-- Close Button -->
-                <button @click="showProfileModal = false" class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl">
-                    ×
-                </button>
+<!--    <transition name="fade">-->
+<!--        <div v-if="showProfileModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">-->
+<!--            <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">-->
+<!--                &lt;!&ndash; Close Button &ndash;&gt;-->
+<!--                <button @click="showProfileModal = false" class="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-xl">-->
+<!--                    ×-->
+<!--                </button>-->
 
-                <!-- Logo -->
-                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />
+<!--                &lt;!&ndash; Logo &ndash;&gt;-->
+<!--                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />-->
 
-                <!-- If student found -->
-                <div v-if="studentFound" class="flex flex-col items-center space-y-4">
-                    <div class="rounded-lg overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
-                        <img :src="getProfileImageUrl(studentProfile.profileImage)" alt="Profile" class="object-cover w-full h-full" />
-                    </div>
-                    <div class="text-gray-800 text-center">
-                        <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">
-                            {{ studentProfile.fullName }}
-                        </div>
-                        <div class="text-sm md:text-base lg:text-lg font-medium italic">
-                            {{ studentProfile.course }}
-                        </div>
-                        <div class="text-base md:text-lg mt-2 font-mono tracking-widest">
-                            {{ studentProfile.idNumber }}
-                        </div>
-                    </div>
-                </div>
+<!--                &lt;!&ndash; If student found &ndash;&gt;-->
+<!--                <div v-if="studentFound" class="flex flex-col items-center space-y-4">-->
+<!--                    <div class="rounded-lg overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">-->
+<!--                        <img :src="getProfileImageUrl(studentProfile.profileImage)" alt="Profile" class="object-cover w-full h-full" />-->
+<!--                    </div>-->
+<!--                    <div class="text-gray-800 text-center">-->
+<!--                        <div class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">-->
+<!--                            {{ studentProfile.fullName }}-->
+<!--                        </div>-->
+<!--                        <div class="text-sm md:text-base lg:text-lg font-medium italic">-->
+<!--                            {{ studentProfile.course }}-->
+<!--                        </div>-->
+<!--                        <div class="text-base md:text-lg mt-2 font-mono tracking-widest">-->
+<!--                            {{ studentProfile.idNumber }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
 
-                <!-- If student not found -->
-                <div v-else class="text-red-600 text-xl font-semibold">
-                    No Student ID Found.
-                </div>
-            </div>
-        </div>
-    </transition>
+<!--                &lt;!&ndash; If student not found &ndash;&gt;-->
+<!--                <div v-else class="text-red-600 text-xl font-semibold">-->
+<!--                    No Student ID Found.-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </transition>-->
 
     <!-- Incident Report Modal -->
     <transition name="fade">
@@ -389,7 +516,7 @@
                 <!-- Modal Body -->
                 <div class="h-full overflow-y-auto p-6">
                     <div class="space-y-4">
-                        <SpotTable :reports="reports || []" />
+                        <SpotTable :reports="spotReports || []"/>
                     </div>
                 </div>
             </div>
@@ -401,19 +528,24 @@
         <div v-if="showStudentAttendanceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
             <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
                 <!-- Close Button -->
-                <button @click="showStudentAttendanceModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                <button @click="closeStudentAttendanceModal" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
                     ×
                 </button>
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">Student Attendance Report</h2>
+                    <h2 class="text-2xl font-bold">
+                        Student Attendance Report
+                        <span v-if="selectedStudent" class="text-lg font-normal ml-2">
+                        - {{ selectedStudent.full_name || selectedStudent.name }}
+                    </span>
+                    </h2>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="h-full overflow-y-auto p-6">
                     <div class="space-y-4">
-                        <ghome/>
+                        <ghome :selected-student="selectedStudent" :key="selectedStudent ? selectedStudent.id : 'no-student'" />
                     </div>
                 </div>
             </div>
@@ -461,7 +593,7 @@
                 <!-- Modal Body -->
                 <div class="h-full overflow-y-auto p-6">
                     <div class="space-y-4">
-                        <p>HELLOOO</p>
+                        <glogs />
                     </div>
                 </div>
             </div>
@@ -480,6 +612,7 @@ import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import { route } from 'ziggy-js';
 import StudentReportTable from "@/Components/StudentReportTable.vue";
 import Ghome from "@/Pages/Frontend/Ghome.vue";
+import Glogs from "@/Pages/Frontend/Glogs.vue";
 
 // Move reactive data outside of component for proper composition API usage
 const menuOpen = ref(false);
@@ -491,6 +624,7 @@ const logout = () => {
 export default {
     name: "guardHome",
     components: {
+        Glogs,
         SpotTable,
         Ghome,
         StudentReportTable,
@@ -697,7 +831,15 @@ export default {
                 email: 'john@example.com',
                 role: 'guard' // or 'admin' or 'user'
             },
-            incidentReports: []
+            incidentReports: [],
+            spotReports: [],
+            searchQuery: '',
+            searchResults: [],
+            showSearchDropdown: false,
+            isSearching: false,
+            searchTimeout: null,
+            allStudentRecords: [],
+            selectedStudent: null,
         };
     },
     computed: {
@@ -813,17 +955,148 @@ export default {
         // Method to load incident reports from backend
         async loadIncidentReports() {
             try {
-                const response = await axios.get('/api/incident-reports');
+                // If using Option 1, adjust the URL based on the current page
+                const response = await axios.get('/incident', {  // or '/guard-home' for guards
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
                 this.incidentReports = response.data;
             } catch (error) {
                 console.error("Error loading incident reports:", error);
             }
+        },
+        async loadSpotReports() {
+            try {
+                // Fixed URL to match the route
+                const response = await axios.get('/spot-reports', {
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                this.spotReports = response.data;
+            } catch (error) {
+                console.error("Error loading spot reports:", error);
+            }
+        },
+        async searchStudents() {
+            if (!this.searchQuery.trim() || this.searchQuery.length < 2) {
+                this.searchResults = [];
+                this.showSearchDropdown = false;
+                return;
+            }
+
+            this.isSearching = true;
+
+            try {
+                const response = await axios.get('/students/search-active', {
+                    params: {
+                        query: this.searchQuery.trim()
+                    },
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                this.searchResults = response.data.students || [];
+                this.showSearchDropdown = this.searchResults.length > 0;
+
+            } catch (error) {
+                console.error('Search error:', error);
+                this.searchResults = [];
+                this.showSearchDropdown = false;
+
+                // Optional: Show error message to user
+                if (error.response && error.response.status === 500) {
+                    console.error('Server error during search');
+                }
+            } finally {
+                this.isSearching = false;
+            }
+        },
+
+        onSearchInput() {
+            // Clear previous timeout
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+
+            // If search query is empty, clear results immediately
+            if (!this.searchQuery.trim()) {
+                this.searchResults = [];
+                this.showSearchDropdown = false;
+                return;
+            }
+
+            // Debounce search - wait 300ms after user stops typing
+            this.searchTimeout = setTimeout(() => {
+                this.searchStudents();
+            }, 300);
+        },
+
+        selectStudent(student) {
+            // Transform the search result to match the expected format for ghome component
+            this.selectedStudent = {
+                id: student.id,
+                student_id: student.id, // Add this for compatibility
+                name: student.full_name,
+                full_name: student.full_name,
+                program: student.program,
+                major: student.major,
+                unit: student.unit,
+                id_number: student.id_number,
+                profile: student.profile
+            };
+
+            // Hide the search dropdown
+            this.showSearchDropdown = false;
+
+            // Clear the search query
+            this.searchQuery = '';
+
+            // Show the student attendance modal
+            this.showStudentAttendanceModal = true;
+
+            console.log('Selected student for attendance:', this.selectedStudent);
+        },
+
+        hideSearchDropdown() {
+            setTimeout(() => {
+                this.showSearchDropdown = false;
+            }, 200);
+        },
+
+        clearSearch() {
+            this.searchQuery = '';
+            this.searchResults = [];
+            this.showSearchDropdown = false;
+            if (this.searchTimeout) {
+                clearTimeout(this.searchTimeout);
+            }
+        },
+
+        // Make sure to call fetchStudentRecords when component loads
+        // so you have data to search through
+        async loadInitialData() {
+            await this.fetchStudentRecords();
+            // Now allStudentRecords will be populated for searching
+        },
+        closeStudentAttendanceModal() {
+            this.showStudentAttendanceModal = false;
+            // Reset selected student after a short delay to allow for smooth transition
+            setTimeout(() => {
+                this.selectedStudent = null;
+            }, 300);
         },
     },
     mounted() {
         this.startTimer();
         // Load incident reports when component mounts
         this.loadIncidentReports(); // Uncomment when you have the backend endpoint ready
+        this.loadSpotReports(); // Uncomment when you have the backend endpoint ready
 
         // Load QR Scanner library dynamically if not already loaded
         if (typeof QrScanner === 'undefined') {
@@ -1099,5 +1372,34 @@ body {
 }
 .fade-enter-from, .fade-leave-to {
     opacity: 0;
+}
+/* Enhanced dropdown styles */
+.dropdown-enter-active, .dropdown-leave-active {
+    transition: all 0.2s ease;
+}
+.dropdown-enter-from, .dropdown-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+/* Custom scrollbar for dropdown */
+.overflow-y-auto::-webkit-scrollbar {
+    width: 6px;
+}
+.overflow-y-auto::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+/* Loading animation */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 </style>

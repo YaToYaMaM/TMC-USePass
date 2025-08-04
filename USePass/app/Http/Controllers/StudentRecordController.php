@@ -37,6 +37,66 @@ class StudentRecordController extends Controller
         return response()->json($records);
     }
 
+    /**
+     * Search for students currently inside the campus
+     * (students who have checked in but not checked out today)
+     */
+    public function searchActiveStudents(Request $request)
+    {
+        $query = $request->get('query');
+
+        if (empty($query) || strlen(trim($query)) < 2) {
+            return response()->json([
+                'students' => [],
+                'message' => 'Query must be at least 2 characters long.'
+            ]);
+        }
+
+        try {
+            $students = DB::table('students_records')
+                ->join('students', 'students.students_id', '=', 'students_records.students_id')
+                ->select(
+                    'students.students_id as id',
+                    'students.students_id as id_number',
+                    DB::raw("CONCAT(students.students_first_name, ' ', students.students_middle_initial, '. ', students.students_last_name) as full_name"),
+                    'students.students_program as program',
+                    'students.students_major as major',
+                    'students.students_unit as unit',
+                    'students.students_profile_image as profile',
+                    'students_records.record_in',
+                    'students_records.record_out'
+                )
+                // Only get records from today
+                ->whereDate('students_records.created_at', today())
+                // Only students who have checked in but not out (record_out is null)
+                ->whereNotNull('students_records.record_in')
+                ->whereNull('students_records.record_out')
+                // Search by name, ID, or program
+                ->where(function($q) use ($query) {
+                    $q->where(DB::raw("CONCAT(students.students_first_name, ' ', students.students_middle_initial, '. ', students.students_last_name)"), 'LIKE', "%{$query}%")
+                        ->orWhere('students.students_id', 'LIKE', "%{$query}%")
+                        ->orWhere('students.students_program', 'LIKE', "%{$query}%")
+                        ->orWhere('students.students_major', 'LIKE', "%{$query}%");
+                })
+                ->orderBy('students.students_first_name')
+                ->limit(10) // Limit to 10 results for performance
+                ->get();
+
+            return response()->json([
+                'students' => $students,
+                'count' => $students->count()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Student search error: ' . $e->getMessage());
+
+            return response()->json([
+                'students' => [],
+                'message' => 'An error occurred while searching students.',
+                'error' => $e->getMessage() // Remove this in production
+            ], 500);
+        }
+    }
 
     public function index(Request $request)
     {
@@ -48,7 +108,7 @@ class StudentRecordController extends Controller
             ], 400);
         }
 
-        $records = StudentRecord::whereDate('record_in', $date)->get(); // ✅ Eloquent usage
+        $records = StudentRecord::whereDate('record_in', $date)->get();
 
         return response()->json($records);
     }
