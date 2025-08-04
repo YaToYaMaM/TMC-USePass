@@ -7,6 +7,9 @@ import axios from 'axios';
 const props = defineProps<{
     studentData: any;
     parentData: any;
+    requiresOtp?: boolean;
+    studentHasContact?: boolean;
+    parentHasContact?: boolean;
 }>();
 
 // Get step from URL params or default to 1
@@ -20,6 +23,8 @@ const studentEmail = ref("");
 const studentPhone = ref("");
 
 const loading = ref(false);
+const mode = urlParams.get('mode') || '';
+const requiresOtp = ref(props.requiresOtp || false);
 
 // Parent verification
 const guardianFirstName = ref("");
@@ -348,6 +353,11 @@ onMounted(() => {
         setTimeout(() => generateQRCode(), 500);
         setTimeout(() => generateQRCode(), 1000);
     }
+
+    if (mode === 'parent_update' && props.studentData) {
+        studentEmail.value = props.studentData.students_email || "";
+        studentPhone.value = props.studentData.students_phone_num || "";
+    }
 });
 </script>
 
@@ -412,7 +422,9 @@ onMounted(() => {
                 </div>
 
                 <div class="border-t pt-4">
-                    <h3 class="font-bold mb-4 text-red-600">Please Provide Your Contact Details for Verification</h3>
+                    <h3 class="font-bold mb-4 text-red-600">
+                        {{ mode === 'parent_update' ? 'Verify Your Email to Update Parent Information' : 'Please Provide Your Contact Details for Verification' }}
+                    </h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">Email Address*</label>
@@ -448,7 +460,7 @@ onMounted(() => {
                         </button>
                     </div>
                     <p class="text-sm text-gray-600 mt-2">
-                        An OTP will be sent to your email for verification before proceeding to the next step.
+                        {{ mode === 'parent_update' ? 'An OTP will be sent to verify your identity before updating parent information.' : 'An OTP will be sent to your email for verification before proceeding to the next step.' }}
                     </p>
                 </div>
             </div>

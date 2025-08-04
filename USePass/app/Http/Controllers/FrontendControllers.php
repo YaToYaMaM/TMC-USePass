@@ -1,7 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use Illuminate\Support\Facades\Session;
+use App\Models\Student;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -72,6 +73,10 @@ class FrontendControllers extends Controller
         $studentHasContact = $request->boolean('studentHasContact', false);
         $parentHasContact = $request->boolean('parentHasContact', false);
 
+        $step = $request->get('step', 1);
+        $mode = $request->get('mode', '');
+        $requiresOtp = $request->boolean('requiresOtp', false);
+
 
         if (!$studentData && Session::get('verified_student_id')) {
             $student = Student::where('students_id', Session::get('verified_student_id'))->first();
@@ -86,11 +91,21 @@ class FrontendControllers extends Controller
             }
         }
 
+        if ($mode === 'parent_update' && $studentData) {
+            Session::forget(['student_authenticated', 'verified_student_id', 'verified_student_email', 'verified_student_phone']);
+
+            $step = 1;
+            $requiresOtp = true;
+        }
+
         return Inertia::render('Frontend/Edetails', [
-            'studentData' => $request->studentData,
-            'parentData' => $request->parentData,
+            'studentData' => $studentData,
+            'parentData' => $parentData,
             'studentHasContact' => $studentHasContact,
             'parentHasContact' => $parentHasContact,
+            'step' => $step,
+            'mode' => $mode,
+            'requiresOtp' => $requiresOtp,
         ]);
     }
 
