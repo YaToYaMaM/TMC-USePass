@@ -360,8 +360,11 @@
                         <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
 
                         <div class="mt-4 p-3 bg-green-100 rounded-lg">
-                            <p class="text-green-800 font-semibold">✓ Student Found</p>
-                            <p class="text-xs text-gray-600 mt-1">{{ successTime }}</p>
+                            <div v-if="lastScanType" class="mt-2 p-2 bg-blue-100 text-blue-800 text-sm font-medium rounded">
+                                <template v-if="lastScanType === 'in'">🟢 Time In Recorded</template>
+                                <template v-else-if="lastScanType === 'out'">🔵 Time Out Recorded</template>
+                                <template v-else>❓ Unknown Status</template>
+                            </div>
                         </div>
                     </div>
                     </div>
@@ -555,7 +558,7 @@ export default {
         const showProfileModal = ref(false);
 
         const studentFound = ref(null);
-
+        const lastScanType = ref('');
 
 
         const studentProfile = ref({
@@ -776,7 +779,7 @@ export default {
                     };
 
                     console.log('📝 NUCLEAR: Profile updated:', studentProfile.value);
-
+                    await logStudentScan(student.id);
                     // Wait a bit
                     await new Promise(resolve => setTimeout(resolve, 100));
 
@@ -847,6 +850,29 @@ export default {
             console.log('🖼️ Image error, using fallback');
             event.target.src = '/images/user.png';
         };
+
+        const logStudentScan = async (studentsId) => {
+            try {
+                const response = await axios.post('/students/log-scan', {
+                    students_id: studentsId,
+                });
+
+                const result = response.data;
+
+                // Only accept 'in' or 'out'
+                if (result.status === 'in' || result.status === 'out') {
+                    lastScanType.value = result.status;
+                } else {
+                    lastScanType.value = ''; // fallback
+                }
+
+            } catch (error) {
+                console.error('💥 Failed to log student scan:', error);
+                lastScanType.value = '';
+            }
+        };
+
+
 // Add this watcher to catch unauthorized changes
         watch([showProfileModal, studentFound], ([show, found]) => {
             console.log('Modal:', show, '| State:', found)

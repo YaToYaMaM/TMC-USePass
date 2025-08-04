@@ -124,9 +124,8 @@ Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 Route::get('/students/profile/{students_id}', [StudentController::class, 'fetchStudentProfile']);
-Route::get('/students/records/last/{student_id}', [StudentRecordController::class, 'lastRecord']);
-Route::post('/students/records', [StudentRecordController::class, 'store']);
-Route::patch('/students/records/{record}', [StudentRecordController::class, 'update']);
+Route::post('/students/log-scan', [StudentRecordController::class, 'log']);
+
 
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);

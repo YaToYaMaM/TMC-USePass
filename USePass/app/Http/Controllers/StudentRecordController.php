@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\StudentRecord;
 use Illuminate\Support\Facades\Log;
+use Carbon\Carbon;
 
 class StudentRecordController extends Controller
 {
@@ -52,32 +53,47 @@ class StudentRecordController extends Controller
 
         return response()->json($records);
     }
-    public function lastRecord($studentId)
+    public function log(Request $request)
     {
-        return StudentRecord::where('student_id', $studentId)
+        $request->validate([
+            'students_id' => 'required|exists:students,students_id',
+        ]);
+
+        $studentsId = $request->input('students_id');
+        $now = \Carbon\Carbon::now();
+
+        // Get today’s latest record
+        $latestRecord = StudentRecord::where('students_id', $studentsId)
+            ->whereDate('record_in', $now->toDateString())
             ->latest()
             ->first();
+
+        if (!$latestRecord || $latestRecord->record_out !== null) {
+            // No scan today or last record already has time-out → TIME IN
+            StudentRecord::create([
+                'students_id' => $studentsId,
+                'record_in' => $now,
+                'record_out' => null,
+            ]);
+
+            return response()->json([
+                'status' => 'in',
+                'time' => $now->toDateTimeString(),
+            ]);
+        } else {
+            // Last record has time-in but no time-out → TIME OUT
+            $latestRecord->update([
+                'record_out' => $now,
+            ]);
+
+            return response()->json([
+                'status' => 'out',
+                'time' => $now->toDateTimeString(),
+            ]);
+        }
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'students_id' => 'required|string',
-        ]);
 
-        return StudentRecord::create([
-            'students_id' => $validated['students_id'],
-            'record_in' => now()
-        ]);
-    }
-    public function update(Request $request, StudentRecord $record)
-    {
-        $record->update([
-            'record_out' => now()
-        ]);
-
-        return $record;
-    }
 
 
 }
