@@ -55,7 +55,7 @@ class SpotController extends Controller
 
         // Render different views based on user role
         if ($user->role === 'admin') {
-            return Inertia::render('Frontend/secSpot', [
+            return Inertia::render('Frontend/secIncident', [
                 'reports' => $reports,
             ]);
         } else {
