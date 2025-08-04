@@ -39,7 +39,8 @@ class CustomForgotPasswordController extends Controller
         $request->validate([
             'email' => 'required|email',
             'phone' => 'required|string',
-            'student_id' => 'required|string'
+            'student_id' => 'required|string',
+            'profile_image' => 'nullable|image|max:5120'
         ]);
 
         // Verify student exists
@@ -47,6 +48,22 @@ class CustomForgotPasswordController extends Controller
 
         if (!$student) {
             return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        $imagePath = null;
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $destinationPath = public_path('profile_pictures');
+
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0755, true);
+            }
+
+            $image->move($destinationPath, $imageName);
+            $imagePath = 'profile_pictures/' . $imageName;
+
+            $student->update(['students_profile_image' => $imagePath]);
         }
 
         $otp = rand(100000, 999999);
@@ -63,7 +80,8 @@ class CustomForgotPasswordController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'OTP sent successfully',
-            'otp_start_time' => now()
+            'otp_start_time' => now(),
+            'profile_image_uploaded' => $imagePath ? true : false
         ]);
     }
 

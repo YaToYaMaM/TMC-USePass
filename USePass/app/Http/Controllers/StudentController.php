@@ -8,7 +8,6 @@ use App\Models\Student;
 use Illuminate\Support\Facades\Storage;
 use App\Models\ParentCredential;
 use App\Imports\StudentsImport;
-use Maatwebsite\Excel\Facades\Excel;
 class StudentController extends Controller
 {
     public function store(Request $request)
@@ -77,29 +76,14 @@ class StudentController extends Controller
     }
     public function import(Request $request)
     {
-        try {
-            $request->validate([
-                'file' => 'required|file|mimes:xlsx,csv'
-            ]);
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv'
+        ]);
 
-            Excel::import(new StudentsImport, $request->file('file'));
+        Excel::import(new StudentsImport, $request->file('file'));
 
-            return response()->json(['message' => 'Import successful']);
-        } catch (\Exception $e) {
-            \Log::error('Import failed', ['error' => $e->getMessage()]);
-            return response()->json([
-                'message' => 'Import failed',
-                'error' => $e->getMessage()
-            ], 500);
-        }
+        return response()->json(['message' => 'Import successful']);
     }
-
-
-
-
-
-
-
     public function index()
     {
         $students = Student::all();
