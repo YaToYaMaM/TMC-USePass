@@ -12,9 +12,20 @@ use Tighten\Ziggy\Ziggy;
 use Inertia\Inertia;
 use App\Http\Controllers\StudentRecordController;
 use App\Http\Controllers\DashboardController;
-
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
+use App\Http\Controllers\StudentReportController;
+
+Route::get('/.well-known/{any}', function ($any) {
+    if (str_contains($any, 'chrome.devtools')) {
+        return response()->json(['message' => 'DevTools probe ignored'], 404);
+    }
+    \Log::info('Chrome probe blocked:', ['path' => $any]);
+    return response()->json(['message' => "$any not available"], 404);
+
+})->where('any', '.*');
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/incident', [ReportController::class, 'incident'])->name('incident.index');
@@ -37,6 +48,7 @@ Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'rese
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
 
+
 //guard scan
 
 
@@ -54,7 +66,8 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
 // User Guard Dashboard
 Route::middleware(['auth', 'can:isGuard'])->group(function () {
     Route::get('/', [FrontendControllers::class, 'ghome'])->name('guard.ghome');
-    Route::get('/scan', [FrontendControllers::class, 'scan'])->name('scan');
+//    Route::get('/scan', [FrontendControllers::class, 'scan'])->name('scan');
+    Route::get('/GuardHome', [FrontendControllers::class, 'guardHome'])->name('guardHome');
     Route::get('/glog', [FrontendControllers::class, 'glog'])->name('glog');
 });
 //Route::get('/', function () {
@@ -110,6 +123,8 @@ Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 
+//Route::post('/change-password', [UserController::class, 'changePassword']);
+//Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
 //Route::get('/dashboard', function () {
 //    return Inertia::render('Dashboard');
 //})->middleware(['auth', 'verified'])->name('dashboard');

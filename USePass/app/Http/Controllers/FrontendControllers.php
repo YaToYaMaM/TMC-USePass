@@ -33,9 +33,15 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/Eotp');
     }
 
-    public function scan()
+//    public function scan()
+//    {
+//        return Inertia::render('Frontend/Gscan');
+//    }
+//
+//
+    public function guardHome()
     {
-        return Inertia::render('Frontend/Gscan');
+        return Inertia::render('Frontend/guardHome');
     }
 
     public function ghome()

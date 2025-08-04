@@ -40,7 +40,7 @@ class AuthenticatedSessionController extends Controller
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role === 'guard') {
-            return redirect()->route('guard.ghome');
+            return redirect()->route('guardHome');
         }
 
         $this->logActivity(
