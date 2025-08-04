@@ -17,6 +17,16 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
 use App\Http\Controllers\StudentReportController;
 
+Route::get('/.well-known/{any}', function ($any) {
+    if (str_contains($any, 'chrome.devtools')) {
+        return response()->json(['message' => 'DevTools probe ignored'], 404);
+    }
+    \Log::info('Chrome probe blocked:', ['path' => $any]);
+    return response()->json(['message' => "$any not available"], 404);
+
+})->where('any', '.*');
+
+
 Route::middleware(['auth'])->group(function () {
     Route::get('/incident', [ReportController::class, 'incident'])->name('incident.index');
 });
