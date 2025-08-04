@@ -92,6 +92,14 @@ class GuardController extends Controller
             'contact_number' => $request->contact_number,
         ]);
 
+        // Log the activity after successful creation
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Guard Updated',
+            "Guard Updated Information: {$guard->first_name} {$guard->last_name}"
+        );
+
         return response()->json(['message' => 'Guard updated successfully.']);
     }
 
