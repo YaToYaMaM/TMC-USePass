@@ -12,10 +12,12 @@ interface User {
     last_name: string;
     email?: string;
     role: 'admin' | 'guard' | 'user';
+    name?: string; // Add name property for compatibility
 }
 
 const page = usePage();
-const currentUser = computed(() => page.props.auth.user as User & { role: string });
+// Fix the type assertion - remove the redundant intersection type
+const currentUser = computed(() => page.props.auth.user as User);
 
 const props = defineProps<{
     reports: any[];
@@ -23,12 +25,12 @@ const props = defineProps<{
 }>();
 
 const reports = ref(props.reports);
-const filteredReports = computed(() => {
-    return props.reports?.filter(report => {
-        // your filtering condition
-        return true; // modify as needed
-    }) ?? [];
-});
+// const filteredReports = computed(() => {
+//     return props.reports?.filter(report => {
+//         // your filtering condition
+//         return true; // modify as needed
+//     }) ?? [];
+// });
 
 // Utility function to format date as "Date | Time"
 function formatDateTime(dateString: string): string {
@@ -173,10 +175,10 @@ function submitReport() {
         return;
     }
 
-    // Create new report object
+    // Create new report object - fix the name property reference
     const reportToAdd = {
         id: Math.max(...reports.value.map(r => r.id)) + 1,
-        name: currentUser.value.name,
+        name: currentUser.value.name || `${currentUser.value.first_name} ${currentUser.value.last_name}`,
         user_id: currentUser.value.id,
         ...newReport.value
     };

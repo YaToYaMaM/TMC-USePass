@@ -199,7 +199,7 @@
         </div>
     </transition>
 
-<!--    SPOT REPORT MODAL-->
+    <!--    SPOT REPORT MODAL-->
     <transition name="fade">
         <div
             v-if="showSpotModal"

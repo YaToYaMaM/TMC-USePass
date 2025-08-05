@@ -16,12 +16,14 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
 use App\Http\Controllers\StudentReportController;
+use App\Http\Controllers\ActivityLogController;
+use Illuminate\Support\Facades\Log;
 
 Route::get('/.well-known/{any}', function ($any) {
     if (str_contains($any, 'chrome.devtools')) {
         return response()->json(['message' => 'DevTools probe ignored'], 404);
     }
-    \Log::info('Chrome probe blocked:', ['path' => $any]);
+    Log::info('Chrome probe blocked:', ['path' => $any]);
     return response()->json(['message' => "$any not available"], 404);
 
 })->where('any', '.*');
@@ -29,9 +31,10 @@ Route::get('/.well-known/{any}', function ($any) {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/incident', [ReportController::class, 'incident'])->name('incident.index');
+    Route::get('/spot-reports', [SpotController::class, 'spot']);
+    Route::get('/activity-logs', [ActivityLogController::class, 'index']);
 });
 
-Route::get('/spot-reports', [SpotController::class, 'spot']);
 
 
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
@@ -48,9 +51,11 @@ Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'rese
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
 
-
-//guard scan
-
+//Activity Logs
+Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+Route::get('/activity-logs/user/{userId}', [ActivityLogController::class, 'getByUser']);
+Route::get('/activity-logs/action/{action}', [ActivityLogController::class, 'getByAction']);
+Route::post('/activity-logs', [ActivityLogController::class, 'store']);
 
 // Admin Dashboard
 Route::middleware(['auth', 'can:isAdmin'])->group(function () {
@@ -118,6 +123,7 @@ Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
 
+Route::get('/students/search-active', [StudentRecordController::class, 'searchActiveStudents']);
 Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
 Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);

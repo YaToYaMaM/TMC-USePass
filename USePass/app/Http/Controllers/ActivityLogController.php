@@ -45,9 +45,18 @@ class ActivityLogController extends Controller
     {
         try {
             $perPage = $request->get('per_page', 15);
-            $logs = ActivityLog::with('user')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage);
+            $date = $request->get('date');
+
+            $query = ActivityLog::with(['user' => function($query) {
+                $query->select('id', 'first_name', 'last_name', 'email')
+                    ->selectRaw("CONCAT(first_name, ' ', last_name) as name");
+            }])->orderBy('created_at', 'desc');
+
+            if ($date) {
+                $query->whereDate('created_at', $date);
+            }
+
+            $logs = $query->paginate($perPage);
 
             return response()->json([
                 'success' => true,
