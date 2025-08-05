@@ -1,6 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
-import { usePage } from "@inertiajs/vue3";
+import { useForm, usePage } from "@inertiajs/vue3";
+
+// For image upload
+const selectedImages = ref<File[]>([]);
+const imagePreviews = ref<string[]>([]);
+
+function handleImageUpload(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    if (files) {
+        selectedImages.value = Array.from(files);
+        imagePreviews.value = selectedImages.value.map(file => URL.createObjectURL(file));
+
+        // Assign files to form data
+        newReport.spotPicture = selectedImages.value;
+    }
+}
 
 // Define the User interface with role property
 interface User {
@@ -9,8 +24,9 @@ interface User {
     last_name: string;
     email?: string;
     role: 'admin' | 'guard' | 'user';
-    name?: string; // Add name property for compatibility
+    name?: string;
 }
+
 // Extend the Inertia page props to include our User type
 interface PageProps {
     auth: {
@@ -26,15 +42,6 @@ const props = defineProps<{
     spot: any[];
     selectedDate?: string;
 }>();
-
-// const props = withDefaults(defineProps<{
-//     reports: any[];
-//     spot: any[];
-//     selectedDate?: string;
-// }>(), {
-//     spot: () => [],
-// });
-
 
 const reports = ref(props.reports);
 
@@ -59,16 +66,17 @@ const showViewModal = ref(false);
 const showAddModal = ref(false);
 const selectedReport = ref<any>(null);
 
-// Form data for new report
-const newReport = ref({
+// Form data for new report - FIXED: Added guard_name field
+const newReport = useForm({
     findings: '',
     time: '',
     date: '',
     location: '',
-    actionTaken: '',
-    teamLeader: '',
-    departmentRepresentative: '',
-    Rtype: 'Spot Report'
+    action_taken: '', // FIXED: Changed from actionTaken to action_taken
+    team_leader: '', // FIXED: Changed from teamLeader to team_leader
+    department_representative: '', // FIXED: Changed from departmentRepresentative to department_representative
+    guard_name: '', // FIXED: Added guard_name field
+    spotPicture: null as File[] | null,
 });
 
 // Form validation errors
@@ -107,57 +115,65 @@ function openAddModal() {
     showAddModal.value = true;
 }
 
-// Reset form data
+// Reset form data - FIXED: Updated field names and added guard_name
 function resetForm() {
-    newReport.value = {
-        findings: '',
-        time: '',
-        date: new Date().toISOString().split('T')[0], // Set current date as default
-        location: '',
-        actionTaken: '',
-        teamLeader: '',
-        departmentRepresentative: '',
-        Rtype: 'Spot Report'
-    };
+    newReport.reset();
+
+    // Set default values
+    const now = new Date();
+    newReport.date = now.toISOString().split('T')[0]; // Set current date as default
+    newReport.time = now.toTimeString().slice(0, 5); // Set current time as default
+
+    // Set guard name from current user
+    if (currentUser.value) {
+        newReport.guard_name = `${currentUser.value.first_name} ${currentUser.value.last_name}`;
+    }
+
+    selectedImages.value = [];
+    imagePreviews.value = [];
     formErrors.value = {};
 }
 
-// Validate form
+// Validate form - FIXED: Updated field names
 function validateForm(): boolean {
     formErrors.value = {};
 
-    if (!newReport.value.findings.trim()) {
+    if (!newReport.findings.trim()) {
         formErrors.value.findings = 'Findings are required';
     }
 
-    if (!newReport.value.time.trim()) {
+    if (!newReport.time.trim()) {
         formErrors.value.time = 'Time is required';
     }
 
-    if (!newReport.value.date.trim()) {
+    if (!newReport.date.trim()) {
         formErrors.value.date = 'Date is required';
     }
 
-    if (!newReport.value.location.trim()) {
+    if (!newReport.location.trim()) {
         formErrors.value.location = 'Location is required';
     }
 
-    if (!newReport.value.actionTaken.trim()) {
-        formErrors.value.actionTaken = 'Action taken is required';
+    if (!newReport.action_taken.trim()) {
+        formErrors.value.action_taken = 'Action taken is required';
     }
 
-    if (!newReport.value.teamLeader.trim()) {
-        formErrors.value.teamLeader = 'Team leader is required';
+    if (!newReport.team_leader.trim()) {
+        formErrors.value.team_leader = 'Team leader is required';
     }
 
-    if (!newReport.value.departmentRepresentative.trim()) {
-        formErrors.value.departmentRepresentative = 'Department representative is required';
+    if (!newReport.department_representative.trim()) {
+        formErrors.value.department_representative = 'Department representative is required';
+    }
+
+    if (!newReport.guard_name.trim()) {
+        formErrors.value.guard_name = 'Guard name is required';
     }
 
     return Object.keys(formErrors.value).length === 0;
 }
 
-// Submit new report
+// Submit new report - FIXED: Updated to use proper form submission
 function submitReport() {
     if (!validateForm()) {
         return;
@@ -168,23 +184,53 @@ function submitReport() {
         return;
     }
 
-    // Create new report object
-    const reportToAdd = {
-        id: Math.max(...reports.value.map(r => r.id)) + 1,
-        user_id: currentUser.value.id,
-        guardName: currentUser.value.name,
-        ...newReport.value
+    const formData = {
+        findings: newReport.findings,
+        team_leader: newReport.team_leader,
+        action_taken: newReport.action_taken,
+        department_representative: newReport.department_representative,
+        location: newReport.location,
+        date: newReport.date
     };
 
-    // Add to reports array
-    reports.value.unshift(reportToAdd);
+    // Submit the form using Inertia's post method
+    newReport.post('/spot-report', {
+        forceFormData: true, // Required for sending images
+        onSuccess: (page) => {
+            showAddModal.value = false;
+            resetForm();
+            alert('Spot report created successfully!');
 
-    // Close modal and reset form
-    showAddModal.value = false;
-    resetForm();
+            // Update the reports list with the new data from the server
+            if (page.props && page.props.reports) {
+                reports.value.unshift(page.props.newReport);
+            }else {
+                // ✅ Fallback: manually create the report object using stored form data
+                const newReportData = {
+                    id: Date.now(), // temporary ID
+                    guard_name: currentUser.value.name || `${currentUser.value.first_name} ${currentUser.value.last_name}`,
+                    user_id: currentUser.value.id,
+                    created_at: new Date().toISOString(),
+                    // ✅ Use the stored form data instead of the reset form
+                    findings: formData.findings,
+                    team_leader: formData.team_leader,
+                    action_taken: formData.action_taken,
+                    department_representative: formData.department_representative,
+                    location: formData.location,
+                    date: formData.date
+                };
+                reports.value.unshift(newReportData);
+            }
+        },
+        onError: (errors) => {
+            console.error('Validation errors:', errors);
 
-    // Show success message
-    alert('Spot report created successfully!');
+            // Map server validation errors to form errors
+            Object.keys(errors).forEach(key => {
+                formErrors.value[key] = errors[key];
+            });
+        },
+    });
 }
 
 function printReport() {
@@ -195,15 +241,14 @@ function printReport() {
 
     const reportParams = {
         id: selectedReport.value.id,
-        guardName: selectedReport.value.guardName,
+        guard_name: selectedReport.value.guard_name || selectedReport.value.guardName,
         findings: selectedReport.value.findings,
         time: selectedReport.value.time,
         date: selectedReport.value.date,
         location: selectedReport.value.location,
-        actionTaken: selectedReport.value.actionTaken,
-        teamLeader: selectedReport.value.teamLeader,
-        departmentRepresentative: selectedReport.value.departmentRepresentative,
-        Rtype: selectedReport.value.Rtype
+        action_taken: selectedReport.value.action_taken || selectedReport.value.actionTaken,
+        team_leader: selectedReport.value.team_leader || selectedReport.value.teamLeader,
+        department_representative: selectedReport.value.department_representative || selectedReport.value.departmentRepresentative,
     };
 
     const query = new URLSearchParams(reportParams).toString();
@@ -224,8 +269,6 @@ const filteredReport = computed(() => {
 
     return filtered;
 });
-
-
 
 const paginatedIncident = computed(() => {
     const start = (currentPage.value - 1) * itemsPerPage;
@@ -265,11 +308,11 @@ watch(filteredReport, () => {
             <div>
                 <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
                 <p class="text-sm text-blue-700">{{ getRoleDisplayName }}</p>
-            </div>
-            <div class="text-sm text-blue-600">
-                <span v-if="currentUser.role === 'guard'">
-                    You can create and view your own spot reports
-                </span>
+                <div class="text-sm text-blue-600">
+                    <span v-if="currentUser.role === 'guard'">
+                        You can create and view your own spot reports
+                    </span>
+                </div>
             </div>
         </div>
     </div>
@@ -291,7 +334,7 @@ watch(filteredReport, () => {
             <tr class="text-gray-600 uppercase text-xs tracking-wider">
                 <th class="px-6 py-3 text-left">Guard on Duty</th>
                 <th class="px-6 py-3 text-left">Findings</th>
-                <th class="px-6 py-3 text-left">Type of Report</th>
+                <th class="px-6 py-3 text-left">Action Taken</th>
                 <th class="px-6 py-3 text-left">Date</th>
                 <th class="px-6 py-3 text-center">Action</th>
             </tr>
@@ -301,8 +344,8 @@ watch(filteredReport, () => {
                 v-for="(item, index) in paginatedIncident"
                 :key="item.id || index"
                 :class="{
-                    'bg-green-50': currentUser && item.user_id === currentUser.id && currentUser.role === 'guard',
-                }"
+                        'bg-green-50': currentUser && item.user_id === currentUser.id && currentUser.role === 'guard',
+                    }"
             >
                 <td class="px-6 py-4 font-medium whitespace-nowrap">
                     {{ item.guard_name }}
@@ -313,15 +356,15 @@ watch(filteredReport, () => {
                 </td>
                 <td class="px-6 py-4 font-semibold">{{ item.findings }}</td>
                 <td class="px-6 py-4 font-semibold">{{ item.action_taken }}</td>
-                <td class="px-6 py-4 font-semibold">{{formatDateTime(item.created_at)}}</td>
+                <td class="px-6 py-4 font-semibold">{{ formatDateTime(item.created_at) }}</td>
                 <td class="px-6 py-4 text-center">
                     <button
                         @click="openEditModal(item)"
                         :disabled="!canViewReport(item)"
                         class="inline-flex items-center gap-1 px-3 py-1.5 rounded text-xs transition"
                         :class="canViewReport(item)
-                            ? 'bg-blue-500 text-white hover:bg-blue-600'
-                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                ? 'bg-blue-500 text-white hover:bg-blue-600'
+                                : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
                     >
                         <svg
                             class="w-4 h-4"
@@ -421,6 +464,19 @@ watch(filteredReport, () => {
 
             <!-- Form -->
             <form @submit.prevent="submitReport" class="space-y-4">
+                <!-- Guard Name (Read-only) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        Guard Name <span class="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        v-model="newReport.guard_name"
+                        readonly
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none"
+                    />
+                </div>
+
                 <!-- Findings -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -486,13 +542,13 @@ watch(filteredReport, () => {
                         Action Taken <span class="text-red-500">*</span>
                     </label>
                     <textarea
-                        v-model="newReport.actionTaken"
+                        v-model="newReport.action_taken"
                         rows="3"
                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        :class="{ 'border-red-500': formErrors.actionTaken }"
+                        :class="{ 'border-red-500': formErrors.action_taken }"
                         placeholder="Describe what action you took..."
                     ></textarea>
-                    <p v-if="formErrors.actionTaken" class="text-red-500 text-xs mt-1">{{ formErrors.actionTaken }}</p>
+                    <p v-if="formErrors.action_taken" class="text-red-500 text-xs mt-1">{{ formErrors.action_taken }}</p>
                 </div>
 
                 <!-- Team Leader and Department Rep Row -->
@@ -502,19 +558,17 @@ watch(filteredReport, () => {
                             Team Leader <span class="text-red-500">*</span>
                         </label>
                         <select
-                            v-model="newReport.teamLeader"
+                            v-model="newReport.team_leader"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            :class="{ 'border-red-500': formErrors.teamLeader }"
+                            :class="{ 'border-red-500': formErrors.team_leader }"
                         >
-                            <option value="" disabled selected>Select a team leader</option>
+                            <option value="" disabled>Select a team leader</option>
                             <option value="Alice">Alice</option>
                             <option value="Bob">Bob</option>
                             <option value="Charlie">Charlie</option>
-                            <!-- Add more team leaders as needed -->
                         </select>
-                        <p v-if="formErrors.teamLeader" class="text-red-500 text-xs mt-1">{{ formErrors.teamLeader }}</p>
+                        <p v-if="formErrors.team_leader" class="text-red-500 text-xs mt-1">{{ formErrors.team_leader }}</p>
                     </div>
-
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
@@ -522,12 +576,46 @@ watch(filteredReport, () => {
                         </label>
                         <input
                             type="text"
-                            v-model="newReport.departmentRepresentative"
+                            v-model="newReport.department_representative"
                             class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                            :class="{ 'border-red-500': formErrors.departmentRepresentative }"
+                            :class="{ 'border-red-500': formErrors.department_representative }"
                             placeholder="Department representative name"
                         />
-                        <p v-if="formErrors.departmentRepresentative" class="text-red-500 text-xs mt-1">{{ formErrors.departmentRepresentative }}</p>
+                        <p v-if="formErrors.department_representative" class="text-red-500 text-xs mt-1">{{ formErrors.department_representative }}</p>
+                    </div>
+                </div>
+
+                <!-- Image Upload -->
+                <div class="mt-5">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Upload Pictures (Optional)
+                    </label>
+                    <div class="flex justify-center">
+                        <div class="w-full max-w-xs border-2 border-dashed border-gray-400 rounded-md p-6 flex flex-col items-center text-center">
+                            <!-- Upload Icon -->
+                            <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0-9l-3 3m3-3l3 3m-6-6a4 4 0 118 0 4 4 0 01-8 0z" />
+                            </svg>
+
+                            <!-- Upload Text -->
+                            <p class="text-sm font-medium text-gray-700">Upload Pictures</p>
+                            <p class="text-xs text-gray-500 mb-3">JPEG, JPG, PNG formats, up to 5MB each</p>
+
+                            <!-- Browse Files -->
+                            <label class="cursor-pointer inline-block px-4 py-1 bg-gray-200 rounded text-sm font-medium hover:bg-gray-300">
+                                Browse Files
+                                <input type="file" accept="image/*" multiple @change="handleImageUpload" class="hidden" />
+                            </label>
+
+                            <!-- Image Previews -->
+                            <div v-if="imagePreviews.length" class="mt-4 grid grid-cols-2 gap-2">
+                                <div v-for="(src, index) in imagePreviews" :key="index">
+                                    <img :src="src" alt="Preview" class="h-24 rounded border" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -542,9 +630,10 @@ watch(filteredReport, () => {
                     </button>
                     <button
                         type="submit"
-                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200"
+                        :disabled="newReport.processing"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition duration-200 disabled:opacity-50"
                     >
-                        Create Report
+                        {{ newReport.processing ? 'Creating...' : 'Create Report' }}
                     </button>
                 </div>
             </form>
@@ -579,8 +668,8 @@ watch(filteredReport, () => {
             <!-- Report Info Grid -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm text-gray-700">
                 <div>
-                    <label class="text-lg font-bold block mb-2">Findings:</label>
-                    <p class="text-gray-900">{{ selectedReport.findings }}</p>
+                    <label class="text-lg font-bold block mb-2">Guard Name:</label>
+                    <p class="text-gray-900">{{ selectedReport.guard_name || selectedReport.guardName }}</p>
                 </div>
                 <div>
                     <label class="text-lg font-bold block mb-2">Time:</label>
@@ -594,25 +683,21 @@ watch(filteredReport, () => {
                     <label class="text-lg font-bold block mb-2">Location:</label>
                     <p class="text-gray-900">{{ selectedReport.location }}</p>
                 </div>
-                <div>
-                    <label class="font-bold text-lg block mb-2">Guard Name:</label>
-                    <p class="text-gray-900">{{ selectedReport.guardName }}</p>
+                <div class="md:col-span-2">
+                    <label class="text-lg font-bold block mb-2">Findings:</label>
+                    <p class="text-gray-900">{{ selectedReport.findings }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="text-lg font-bold block mb-2">Action Taken:</label>
+                    <p class="text-gray-900">{{ selectedReport.action_taken || selectedReport.actionTaken }}</p>
                 </div>
                 <div>
                     <label class="font-bold text-lg block mb-2">Team Leader:</label>
-                    <p class="text-gray-900">{{ selectedReport.teamLeader }}</p>
+                    <p class="text-gray-900">{{ selectedReport.team_leader || selectedReport.teamLeader }}</p>
                 </div>
                 <div>
-                    <label class="font-bold text-lg block mb-2">Type:</label>
-                    <p class="text-gray-900">{{ selectedReport.Rtype }}</p>
-                </div>
-                <div>
-                    <label class="font-bold text-lg block mb-2">Action Taken:</label>
-                    <p class="text-gray-900">{{ selectedReport.actionTaken }}</p>
-                </div>
-                <div class="md:col-span-2">
                     <label class="font-bold text-lg block mb-2">Department Representative:</label>
-                    <p class="text-gray-900">{{ selectedReport.departmentRepresentative }}</p>
+                    <p class="text-gray-900">{{ selectedReport.department_representative || selectedReport.departmentRepresentative }}</p>
                 </div>
             </div>
 

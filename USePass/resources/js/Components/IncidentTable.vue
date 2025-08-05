@@ -5,6 +5,22 @@ import { usePage } from "@inertiajs/vue3";
 // Import Inertia's form helper for adding new reports
 import { useForm } from '@inertiajs/vue3';
 
+const selectedImages = ref<File[]>([]);
+const imagePreviews = ref<string[]>([]);
+
+function handleImageUpload(event: Event) {
+    const files = (event.target as HTMLInputElement).files;
+    if (files) {
+        selectedImages.value = Array.from(files);
+        imagePreviews.value = selectedImages.value.map(file => URL.createObjectURL(file));
+
+        // Optional: Assign to your report field (if needed to send to backend)
+        newReport.incidentPicture = selectedImages.value; // ✅ no `.value` needed for useForm
+
+    }
+}
+
+
 // Define the User interface with role property
 interface User {
     id: number;
@@ -56,17 +72,32 @@ const showAddModal = ref(false);
 const selectedReport = ref<any>(null);
 
 // Form data for new report
-const newReport = ref({
+// const newReport = ref({
+//     description: '',
+//     // type: 'Incident Report',
+//     date: '',
+//     what: '',
+//     who: '',
+//     where: '',
+//     when: '',
+//     how: '',
+//     why: '',
+//     recommendation: '',
+//     incidentPicture: null,
+// });
+
+const newReport = useForm({
     description: '',
     type: 'Incident Report',
-    date: '',
+    date: new Date().toISOString().split('T')[0],
     what: '',
     who: '',
     where: '',
     when: '',
     how: '',
     why: '',
-    recommendation: ''
+    recommendation: '',
+    incidentPicture: null, // This can be an array if you're uploading multiple
 });
 
 // Form validation errors
@@ -105,65 +136,74 @@ function openAddModal() {
 }
 
 // Reset form data
+// function resetForm() {
+//     newReport.value = {
+//         description: '',
+//         type: 'Incident Report',
+//         date: new Date().toISOString().split('T')[0], // Set current date as default
+//         what: '',
+//         who: '',
+//         where: '',
+//         when: '',
+//         how: '',
+//         why: '',
+//         recommendation: '',
+//         incidentPicture: null,
+//     };
+//     formErrors.value = {};
+// }
 function resetForm() {
-    newReport.value = {
-        description: '',
-        type: 'Incident Report',
-        date: new Date().toISOString().split('T')[0], // Set current date as default
-        what: '',
-        who: '',
-        where: '',
-        when: '',
-        how: '',
-        why: '',
-        recommendation: ''
-    };
+    newReport.reset(); // ✅ This is the correct way
+    selectedImages.value = [];
+    imagePreviews.value = [];
     formErrors.value = {};
 }
+
 
 // Validate form
 function validateForm(): boolean {
     formErrors.value = {};
 
-    if (!newReport.value.description.trim()) {
+    if (!newReport.description.trim()) {
         formErrors.value.description = 'Description is required';
     }
 
-    if (!newReport.value.date.trim()) {
+    if (!newReport.date.trim()) {
         formErrors.value.date = 'Date is required';
     }
 
-    if (!newReport.value.what.trim()) {
+    if (!newReport.what.trim()) {
         formErrors.value.what = 'What field is required';
     }
 
-    if (!newReport.value.who.trim()) {
+    if (!newReport.who.trim()) {
         formErrors.value.who = 'Who field is required';
     }
 
-    if (!newReport.value.where.trim()) {
+    if (!newReport.where.trim()) {
         formErrors.value.where = 'Where field is required';
     }
 
-    if (!newReport.value.when.trim()) {
+    if (!newReport.when.trim()) {
         formErrors.value.when = 'When field is required';
     }
 
-    if (!newReport.value.how.trim()) {
+    if (!newReport.how.trim()) {
         formErrors.value.how = 'How field is required';
     }
 
-    if (!newReport.value.why.trim()) {
+    if (!newReport.why.trim()) {
         formErrors.value.why = 'Why field is required';
     }
 
-    if (!newReport.value.recommendation.trim()) {
+    if (!newReport.recommendation.trim()) {
         formErrors.value.recommendation = 'Recommendation is required';
     }
 
     return Object.keys(formErrors.value).length === 0;
 }
 
+// Submit new report
 // Submit new report
 function submitReport() {
     if (!validateForm()) {
@@ -175,23 +215,59 @@ function submitReport() {
         return;
     }
 
-    // Create new report object - fix the name property reference
-    const reportToAdd = {
-        id: Math.max(...reports.value.map(r => r.id)) + 1,
-        name: currentUser.value.name || `${currentUser.value.first_name} ${currentUser.value.last_name}`,
-        user_id: currentUser.value.id,
-        ...newReport.value
+    // ✅ Store the form data before submission (since form gets reset)
+    const formData = {
+        description: newReport.description,
+        what: newReport.what,
+        who: newReport.who,
+        where: newReport.where,
+        when: newReport.when,
+        how: newReport.how,
+        why: newReport.why,
+        recommendation: newReport.recommendation,
+        type: newReport.type,
+        date: newReport.date
     };
 
-    // Add to reports array
-    reports.value.unshift(reportToAdd);
+    newReport.post('/incident-report', {
+        forceFormData: true,
+        onSuccess: (page) => {
+            showAddModal.value = false;
 
-    // Close modal and reset form
-    showAddModal.value = false;
-    resetForm();
+            // ✅ If server returns the new report, add it to the local array
+            if (page.props && page.props.newReport) {
+                reports.value.unshift(page.props.newReport);
+            } else {
+                // ✅ Fallback: manually create the report object using stored form data
+                const newReportData = {
+                    id: Date.now(), // temporary ID
+                    guard_name: currentUser.value.name || `${currentUser.value.first_name} ${currentUser.value.last_name}`,
+                    user_id: currentUser.value.id,
+                    created_at: new Date().toISOString(),
+                    // ✅ Use the stored form data instead of the reset form
+                    description: formData.description,
+                    what: formData.what,
+                    who: formData.who,
+                    where: formData.where,
+                    when: formData.when,
+                    how: formData.how,
+                    why: formData.why,
+                    recommendation: formData.recommendation,
+                    type: formData.type,
+                    date: formData.date
+                };
+                reports.value.unshift(newReportData);
+            }
 
-    // Show success message
-    alert('Incident report created successfully!');
+            // ✅ Reset form after updating the reports array
+            resetForm();
+            alert('Incident report created successfully!');
+        },
+        onError: (errors) => {
+            console.error('Validation errors:', errors);
+            formErrors.value = errors;
+        }
+    });
 }
 
 function printReport() {
@@ -211,6 +287,7 @@ function printReport() {
         when: selectedReport.value.when,
         how: selectedReport.value.how,
         why: selectedReport.value.why,
+        incidentPicture: selectedReport.value.incidentPicture,
         recommendation: selectedReport.value.recommendation
     };
 
@@ -256,6 +333,38 @@ const getRoleDisplayName = computed(() => {
             return "User";
     }
 });
+
+function handleImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    console.error('Failed to load image:', img.src);
+
+    // Optionally replace with a placeholder
+    img.src = '/images/placeholder-image.png'; // if you have a placeholder
+    img.alt = 'Image could not be loaded';
+}
+
+function handleImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    console.log('Image loaded successfully:', img.src);
+}
+
+// Helper function to get the correct image URL
+function getImageUrl(imagePath: string): string {
+    if (!imagePath) return '';
+
+    // If it's already a full URL, return as is
+    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+        return imagePath;
+    }
+
+    // If it starts with storage/, remove it since we'll add /storage/
+    if (imagePath.startsWith('storage/')) {
+        return `/${imagePath}`;
+    }
+
+    // Otherwise, assume it's a relative path in storage
+    return `/storage/${imagePath}`;
+}
 
 watch(filteredReport, () => {
     if (currentPage.value > totalPages.value && totalPages.value > 0) {
@@ -571,6 +680,35 @@ console.log('Reports received:', props.reports);
                         ></textarea>
                         <p v-if="formErrors.recommendation" class="text-red-500 text-xs mt-1">{{ formErrors.recommendation }}</p>
                     </div>
+
+                    <!-- Add picture -->
+                    <div class="mt-5 flex justify-center">
+                        <div class="w-full max-w-xs border-2 border-dashed border-gray-400 rounded-md p-6 flex flex-col items-center text-center">
+                            <!-- Upload Icon -->
+                            <svg class="w-10 h-10 text-gray-400 mb-2" fill="none" stroke="currentColor" stroke-width="2"
+                                 viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                      d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12v9m0-9l-3 3m3-3l3 3m-6-6a4 4 0 118 0 4 4 0 01-8 0z" />
+                            </svg>
+
+                            <!-- Upload Text -->
+                            <p class="text-sm font-medium text-gray-700">Upload Pictures</p>
+                            <p class="text-xs text-gray-500 mb-3">JPEG, JPG, PNG formats, up to 5MB each</p>
+
+                            <!-- Browse Files -->
+                            <label class="cursor-pointer inline-block px-4 py-1 bg-gray-200 rounded text-sm font-medium hover:bg-gray-300">
+                                Browse Files
+                                <input type="file" accept="image/*" multiple @change="handleImageUpload" class="hidden" />
+                            </label>
+
+                            <!-- Image Previews -->
+                            <div v-if="imagePreviews.length" class="mt-4 grid grid-cols-2 gap-2">
+                                <div v-for="(src, index) in imagePreviews" :key="index">
+                                    <img :src="src" alt="Preview" class="h-24 rounded border" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -611,7 +749,7 @@ console.log('Reports received:', props.reports);
 
             <!-- Header -->
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 pr-8">
-                {{ selectedReport.type === 'Incident Report' ? 'Incident Report Details' : 'Spot Report Details' }}
+                {{ selectedReport.type === 'Incident Report' ? 'Incident Report Details' : 'Incident Report Details' }}
                 <span
                     v-if="currentUser && selectedReport.user_id === currentUser.id && currentUser.role === 'guard'"
                     class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded ml-2"
@@ -647,6 +785,20 @@ console.log('Reports received:', props.reports);
                 <div class="md:col-span-2">
                     <label class="font-bold text-lg block mb-2">Recommendation:</label>
                     <p class="text-gray-900">{{ selectedReport.recommendation }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <label class="font-bold text-lg block mb-2">Evidence:</label>
+
+                    <!-- Option 1: If incidentPicture is a file path from your server -->
+                    <div v-if="selectedReport.incidentPicture" class="space-y-2">
+                        <img
+                            :src="`/storage/${selectedReport.incidentPicture}`"
+                            :alt="`Evidence for ${selectedReport.description}`"
+                            class="max-w-full h-auto rounded shadow border"
+                            @error="handleImageError"
+                            @load="handleImageLoad"
+                        />
+                    </div>
                 </div>
             </div>
 
