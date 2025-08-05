@@ -169,10 +169,26 @@ class StudentController extends Controller
         return response()->json($results);
     }
 
-    public function checkStudentExists($students_id)
+    public function show($id)
     {
-        $exists = \App\Models\Student::where('students_id', $students_id)->exists();
-        return response()->json(['exists' => $exists]);
+        $student = Student::where('students_id', $id)->first();
+
+        if ($student) {
+            // Compose full name manually since you store first, last, middle separately
+            $fullName = trim($student->students_first_name . ' ' . ($student->students_middle_initial ?? '') . ' ' . $student->students_last_name);
+
+            return response()->json([
+                'exists' => true,
+                'student' => [
+                    'full_name' => $fullName,
+                    'course' => $student->students_program,
+                    'id_number' => $student->students_id,
+                    'profile_image' => $student->students_profile_image,
+                ],
+            ]);
+        } else {
+            return response()->json(['exists' => false]);
+        }
     }
     public function fetchStudentProfile($students_id)
     {
@@ -188,7 +204,5 @@ class StudentController extends Controller
             'student' => $student,
         ]);
     }
-
-
 
 }

@@ -502,8 +502,8 @@
 
                         <div class="mt-4 p-3">
                             <div v-if="lastScanType" class="mt-2 p-2 text-red-800 text-lg font-bold">
-                                <div v-if="lastScanType === 'in'">Time In</div>
-                                <div v-else-if="lastScanType === 'out'">Time Out</div>
+                                <div v-if="lastScanType === 'time in'">Time In</div>
+                                <div v-else-if="lastScanType === 'time out'">Time Out</div>
                                 <div v-else>❓ Unknown Status</div>
                             </div>
                         </div>
@@ -1013,7 +1013,7 @@ export default {
                 const result = response.data;
 
                 // Only accept 'in' or 'out'
-                if (result.status === 'in' || result.status === 'out') {
+                if (result.status === 'time in' || result.status === 'time out') {
                     lastScanType.value = result.status;
                 } else {
                     lastScanType.value = ''; // fallback
