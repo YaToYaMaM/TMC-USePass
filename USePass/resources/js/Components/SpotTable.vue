@@ -5,11 +5,12 @@ import { usePage } from "@inertiajs/vue3";
 // Define the User interface with role property
 interface User {
     id: number;
-    name: string;
+    first_name: string;
+    last_name: string;
     email?: string;
     role: 'admin' | 'guard' | 'user';
+    name?: string; // Add name property for compatibility
 }
-
 // Extend the Inertia page props to include our User type
 interface PageProps {
     auth: {
@@ -18,13 +19,22 @@ interface PageProps {
 }
 
 const page = usePage();
-const currentUser = computed(() => page.props.auth.user as User & { role: string });
+const currentUser = computed(() => page.props.auth.user as User);
 
 const props = defineProps<{
     reports: any[];
     spot: any[];
     selectedDate?: string;
 }>();
+
+// const props = withDefaults(defineProps<{
+//     reports: any[];
+//     spot: any[];
+//     selectedDate?: string;
+// }>(), {
+//     spot: () => [],
+// });
+
 
 const reports = ref(props.reports);
 
@@ -204,7 +214,7 @@ const currentPage = ref(1);
 const itemsPerPage = 7;
 
 const filteredReport = computed(() => {
-    let filtered = reports.value;
+    let filtered = reports.value || [];
 
     if (props.selectedDate) {
         filtered = filtered.filter((s) => s.date === props.selectedDate);
@@ -214,6 +224,7 @@ const filteredReport = computed(() => {
 
     return filtered;
 });
+
 
 
 const paginatedIncident = computed(() => {
@@ -252,7 +263,7 @@ watch(filteredReport, () => {
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4" v-if="currentUser">
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.name }}</h3>
+                <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
                 <p class="text-sm text-blue-700">{{ getRoleDisplayName }}</p>
             </div>
             <div class="text-sm text-blue-600">

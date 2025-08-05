@@ -8,20 +8,16 @@ import { useForm } from '@inertiajs/vue3';
 // Define the User interface with role property
 interface User {
     id: number;
-    name: string;
+    first_name: string;
+    last_name: string;
     email?: string;
     role: 'admin' | 'guard' | 'user';
-}
-
-// Extend the Inertia page props to include our User type
-interface PageProps {
-    auth: {
-        user: User;
-    };
+    name?: string; // Add name property for compatibility
 }
 
 const page = usePage();
-const currentUser = computed(() => page.props.auth.user as User & { role: string });
+// Fix the type assertion - remove the redundant intersection type
+const currentUser = computed(() => page.props.auth.user as User);
 
 const props = defineProps<{
     reports: any[];
@@ -29,12 +25,12 @@ const props = defineProps<{
 }>();
 
 const reports = ref(props.reports);
-const filteredReports = computed(() => {
-    return props.reports?.filter(report => {
-        // your filtering condition
-        return true; // modify as needed
-    }) ?? [];
-});
+// const filteredReports = computed(() => {
+//     return props.reports?.filter(report => {
+//         // your filtering condition
+//         return true; // modify as needed
+//     }) ?? [];
+// });
 
 // Utility function to format date as "Date | Time"
 function formatDateTime(dateString: string): string {
@@ -179,10 +175,10 @@ function submitReport() {
         return;
     }
 
-    // Create new report object
+    // Create new report object - fix the name property reference
     const reportToAdd = {
         id: Math.max(...reports.value.map(r => r.id)) + 1,
-        name: currentUser.value.name,
+        name: currentUser.value.name || `${currentUser.value.first_name} ${currentUser.value.last_name}`,
         user_id: currentUser.value.id,
         ...newReport.value
     };
@@ -276,7 +272,7 @@ console.log('Reports received:', props.reports);
     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4" v-if="currentUser">
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.name }}</h3>
+                <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
                 <p class="text-sm text-blue-700">{{ getRoleDisplayName }}</p>
             </div>
             <div class="text-sm text-blue-600">
@@ -315,13 +311,13 @@ console.log('Reports received:', props.reports);
                 v-for="(item, index) in paginatedIncident"
                 :key="item.id || index"
                 :class="{
-                    'bg-green-50': currentUser && item.guardId === currentUser.id && currentUser.role === 'guard',
+                    'bg-green-50': currentUser && item.user_id === currentUser.id && currentUser.role === 'guard',
                 }"
             >
                 <td class="px-6 py-4 font-medium whitespace-nowrap">
                     {{ item.guard_name }}
                     <span
-                        v-if="currentUser && item.guardId === currentUser.id && currentUser.role === 'guard'"
+                        v-if="currentUser && item.user_id === currentUser.id && currentUser.role === 'guard'"
                         class="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded"
                     >Your Report</span>
                 </td>
@@ -617,7 +613,7 @@ console.log('Reports received:', props.reports);
             <h2 class="text-2xl font-semibold text-gray-800 mb-6 border-b pb-2 pr-8">
                 {{ selectedReport.type === 'Incident Report' ? 'Incident Report Details' : 'Spot Report Details' }}
                 <span
-                    v-if="currentUser && selectedReport.guardId === currentUser.id && currentUser.role === 'guard'"
+                    v-if="currentUser && selectedReport.user_id === currentUser.id && currentUser.role === 'guard'"
                     class="text-sm bg-green-100 text-green-800 px-2 py-1 rounded ml-2"
                 >Your Report</span>
             </h2>
@@ -663,7 +659,7 @@ console.log('Reports received:', props.reports);
                     Close
                 </button>
                 <button
-                    v-if="currentUser && currentUser.role === 'guard' && selectedReport.guardId === currentUser.id"
+                    v-if="currentUser && currentUser.role === 'guard' && selectedReport.user_id === currentUser.id"
                     @click="printReport"
                     class="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition text-sm"
                 >

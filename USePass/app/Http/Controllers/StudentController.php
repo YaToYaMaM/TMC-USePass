@@ -190,5 +190,19 @@ class StudentController extends Controller
             return response()->json(['exists' => false]);
         }
     }
+    public function fetchStudentProfile($students_id)
+    {
+        $student = \App\Models\Student::select(
+            'students_id as id',
+            \DB::raw("CONCAT(students_first_name, ' ', students_middle_initial, ' ', students_last_name) as fullName"),
+            'students_program as program',
+            'students_profile_image as profileImage'
+        )->where('students_id', $students_id)->first();
+
+        return response()->json([
+            'exists' => $student !== null,
+            'student' => $student,
+        ]);
+    }
 
 }

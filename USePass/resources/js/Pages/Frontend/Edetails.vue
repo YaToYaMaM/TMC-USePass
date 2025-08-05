@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch, nextTick } from "vue";
 import { router } from '@inertiajs/vue3';
-import JsBarcode from "jsbarcode";
+import QRCode from "qrcode";
 import axios from 'axios';
 
 const props = defineProps<{
     studentData: any;
     parentData: any;
+    requiresOtp?: boolean;
+    studentHasContact?: boolean;
+    parentHasContact?: boolean;
 }>();
 
 // Get step from URL params or default to 1
@@ -18,8 +21,12 @@ const studentId = ref(props.studentData?.students_id || '');
 const currentStep = ref(initialStep);
 const studentEmail = ref("");
 const studentPhone = ref("");
+const profileImage = ref(null);
+const profileImagePreview = ref("");
 
 const loading = ref(false);
+const mode = urlParams.get('mode') || '';
+const requiresOtp = ref(props.requiresOtp || false);
 
 // Parent verification
 const guardianFirstName = ref("");
@@ -30,7 +37,7 @@ const guardianEmail = ref("");
 const guardianPhone = ref("");
 const parentVerified = ref(false);
 const savingData = ref(false);
-const barcodeDownloaded = ref(false);
+const qrcodeDownloaded = ref(false);
 // Check if student is already authenticated (from session)
 const checkAuthentication = () => {
     // If we're on step 2 and came from OTP verification, we're authenticated
@@ -40,6 +47,73 @@ const checkAuthentication = () => {
     return false;
 };
 
+watch(currentStep, async (newStep) => {
+    if (newStep === 3) {
+
+        await nextTick();
+        // Generate QR code with multiple retry attempts
+        setTimeout(() => generateQRCode(), 100);
+        setTimeout(() => generateQRCode(), 300);
+        setTimeout(() => generateQRCode(), 600);
+    }
+});
+
+
+const handleImageUpload = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+
+    if (!files || files.length === 0) {
+        console.log('No file selected');
+        return;
+    }
+
+    const file = files[0];
+
+    if (file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please select a valid image file.');
+            target.value = '';
+            return;
+        }
+
+        if (file.size > 5120 * 1024) {
+            alert('Image size must be less than 5MB.');
+            target.value = '';
+            return;
+        }
+
+        profileImage.value = file;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            // Type-safe result handling
+            const result = e.target?.result;
+            if (result && typeof result === 'string') {
+                profileImagePreview.value = result;
+            }
+        };
+
+        reader.onerror = () => {
+            console.error('Error reading file');
+            alert('Error reading the selected file.');
+        };
+
+        reader.readAsDataURL(file);
+    }
+};
+
+const removeImage = () => {
+    profileImage.value = null;
+    profileImagePreview.value = "";
+
+    // ✅ Type-safe element access
+    const fileInput = document.getElementById('profile-image-input') as HTMLInputElement;
+    if (fileInput) {
+        fileInput.value = '';
+    }
+};
+
 // Student authentication - send OTP
 const authenticateStudent = async () => {
     if (studentEmail.value.trim() === "" || studentPhone.value.trim() === "") {
@@ -47,13 +121,27 @@ const authenticateStudent = async () => {
         return;
     }
 
+    if (!profileImage.value && !props.studentData?.students_profile_image) {
+        alert("Please upload a profile image.");
+        return;
+    }
+
     loading.value = true;
 
     try {
-        const response = await axios.post('/student/send-otp', {
-            email: studentEmail.value,
-            phone: studentPhone.value,
-            student_id: props.studentData.students_id
+        const formData = new FormData();
+        formData.append('email', studentEmail.value);
+        formData.append('phone', studentPhone.value);
+        formData.append('student_id', props.studentData.students_id);
+
+        if (profileImage.value) {
+            formData.append('profile_image', profileImage.value);
+        }
+
+        const response = await axios.post('/student/send-otp', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
 
         if (response.data.success) {
@@ -118,8 +206,16 @@ const verifyParent = async () => {
         if (response.data.success) {
             parentVerified.value = true;
             currentStep.value = 3;
-            const studentId = response.data.student_id || props.studentData.students_id;
-            generateBarcode(studentId);
+
+
+            await nextTick();
+
+            const studentIdForQR = response.data.student_id || props.studentData.students_id;
+
+            // Multiple attempts to generate QR code
+            setTimeout(() => generateQRCode(studentIdForQR), 200);
+            setTimeout(() => generateQRCode(studentIdForQR), 500);
+            setTimeout(() => generateQRCode(studentIdForQR), 1000);
         }
     } catch (error) {
         console.error('Save data error:', error);
@@ -166,97 +262,138 @@ const goBackToStep1 = async () => {
     }
 };
 
-const generateBarcode = (studentIdParam  = null) => {
+const generateQRCode = async (studentIdParam: string | null = null) => {
     const id = studentIdParam || props.studentData?.students_id || studentId.value;
     if (!id) {
-        console.error('No student ID available for barcode generation');
+        console.error('No student ID available for QR code generation');
         return;
     }
 
-    console.log('Generating barcode for ID:', id);
+    console.log('Generating QR code for ID:', id);
 
-    const generateCode = () => {
-        const barcodeElement = document.querySelector("#barcode");
+    // Wait for DOM
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-        if (!barcodeElement) {
-            console.error('Barcode element not found');
+    try {
+        const canvas = document.querySelector("#qrcode") as HTMLCanvasElement;
+        if (!canvas) {
+            console.error('QR code canvas element not found');
+            setTimeout(() => generateQRCode(studentIdParam), 500);
             return;
         }
 
-        try {
-            JsBarcode(barcodeElement, id, {
-                format: "CODE128",
-                lineColor: "#000",
-                width: 2,
-                height: 80,
-                displayValue: true,
-                fontSize: 16,
-                textMargin: 2
-            });
-            console.log('Barcode generated successfully');
-        } catch (error) {
-            console.error('Error generating barcode:', error);
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
         }
-    };
 
-    setTimeout(generateCode, 100);
-    setTimeout(generateCode, 300);
-    setTimeout(generateCode, 500);
+        // Generate QR code
+        await QRCode.toCanvas(canvas, id, {
+            width: 200,
+            height: 200,
+            margin: 2,
+            color: {
+                dark: '#000000',
+                light: '#FFFFFF'
+            }
+        });
+
+        console.log('QR code generated successfully');
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+
+        setTimeout(() => generateQRCode(studentIdParam), 1000);
+    }
 };
 
-const downloadBarcode = () => {
-    const svg = document.querySelector("#barcode");
+// NEW QR Code download function
+const downloadQRCode = () => {
+    const canvas = document.querySelector("#qrcode") as HTMLCanvasElement;
 
-    if (!svg || !svg.innerHTML.trim()) {
-        alert('Barcode not generated yet. Please wait a moment and try again.');
-        generateBarcode();
+    if (!canvas) {
+        alert('QR code not generated yet. Please wait a moment and try again.');
+        generateQRCode();
         return;
     }
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    canvas.width = 300;
-    canvas.height = 120;
-    ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svg);
-    const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
-    const svgUrl = URL.createObjectURL(svgBlob);
+    try {
+        // Create a new canvas for the combined image
+        const combinedCanvas = document.createElement('canvas');
+        const ctx = combinedCanvas.getContext('2d');
 
-    img.onload = function() {
+        if (!ctx) {
+            alert('Failed to create download canvas. Please try again.');
+            return;
+        }
 
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Convert canvas to PNG blob
-        canvas.toBlob(function(blob) {
+        const qrSize = 200;
+        const textHeight = 60;
+        const padding = 20;
+
+        combinedCanvas.width = qrSize + (padding * 2);
+        combinedCanvas.height = qrSize + textHeight + (padding * 2);
+
+        // Fill background with white
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+
+        // Draw the QR code
+        ctx.drawImage(canvas, padding, padding, qrSize, qrSize);
+
+        // Add student ID text
+        const studentIdText = props.studentData?.students_id || studentId.value;
+
+        // Configure text style
+        ctx.fillStyle = '#000000';
+        ctx.font = 'bold 16px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        // Calculate text position (centered below QR code)
+        const textX = combinedCanvas.width / 2;
+        const textY = qrSize + padding + (textHeight / 2);
+
+        // Draw the student ID text
+        ctx.fillText(`Student ID: ${studentIdText}`, textX, textY);
+
+        // Optional: Add a border around the entire image
+        ctx.strokeStyle = '#CCCCCC';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(1, 1, combinedCanvas.width - 2, combinedCanvas.height - 2);
+
+        // Convert combined canvas to blob and download
+        combinedCanvas.toBlob((blob: Blob | null) => {
+            if (!blob) {
+                alert('Failed to generate image. Please try again.');
+                return;
+            }
+
             const url = URL.createObjectURL(blob);
             const link = document.createElement("a");
             link.href = url;
-            link.download = `barcode_${props.studentData?.students_id || studentId.value}.png`;
+            link.download = `student_qrcode_${studentIdText}.png`;
             link.click();
 
             // Cleanup
             URL.revokeObjectURL(url);
-            URL.revokeObjectURL(svgUrl);
         }, 'image/png');
-    };
 
-    img.src = svgUrl;
-    barcodeDownloaded.value = true;
+        qrcodeDownloaded.value = true;
+    } catch (error) {
+        console.error('Error downloading QR code:', error);
+        alert('Failed to download QR code. Please try again.');
+    }
 };
 
 const startOver = () => {
-    if (!barcodeDownloaded.value) return;
-
+    if (!qrcodeDownloaded.value) return;
 
     router.visit('/user', {
         method: 'get',
         replace: true
     });
 };
-
 // Navigation helpers
 const goToStep = (step: number) => {
     currentStep.value = step;
@@ -269,6 +406,9 @@ const goToStep = (step: number) => {
 onMounted(() => {
     if (props.studentData?.students_id) {
         studentId.value = props.studentData.students_id;
+    }
+    if (props.studentData?.students_profile_image) {
+        profileImagePreview.value = `/storage/${props.studentData.students_profile_image}`;
     }
 
     if (currentStep.value === 2) {
@@ -283,10 +423,15 @@ onMounted(() => {
         }
     }
     if (currentStep.value === 3) {
-        // Add a small delay
-        setTimeout(() => {
-            generateBarcode();
-        }, 200);
+
+        setTimeout(() => generateQRCode(), 100);
+        setTimeout(() => generateQRCode(), 500);
+        setTimeout(() => generateQRCode(), 1000);
+    }
+
+    if (mode === 'parent_update' && props.studentData) {
+        studentEmail.value = props.studentData.students_email || "";
+        studentPhone.value = props.studentData.students_phone_num || "";
     }
 });
 </script>
@@ -352,7 +497,48 @@ onMounted(() => {
                 </div>
 
                 <div class="border-t pt-4">
-                    <h3 class="font-bold mb-4 text-red-600">Please Provide Your Contact Details for Verification</h3>
+                    <h3 class="font-bold mb-4 text-red-600">
+                        {{ mode === 'parent_update' ? 'Verify Your Email to Update Parent Information' : 'Please Provide Your Contact Details for Verification' }}
+                    </h3>
+
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium mb-2">Profile Image*</label>
+
+                        <div class="mb-4">
+                            <div v-if="profileImagePreview || studentData?.students_profile_image"
+                                 class="relative inline-block">
+                                <img
+                                    :src="profileImagePreview || `/storage/${studentData.students_profile_image}`"
+                                    alt="Profile Preview"
+                                    class="w-32 h-32 object-cover rounded-lg border-2 border-gray-300"
+                                />
+                                <button
+                                    v-if="profileImagePreview"
+                                    @click="removeImage"
+                                    type="button"
+                                    class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
+                                >
+                                    ×
+                                </button>
+                            </div>
+                            <div v-else class="w-32 h-32 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                                <span class="text-gray-400 text-sm">No image</span>
+                            </div>
+                        </div>
+
+
+                        <input
+                            id="profile-image-input"
+                            type="file"
+                            accept="image/*"
+                            @change="handleImageUpload"
+                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                            :disabled="loading"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">Maximum file size: 5MB. Supported formats: JPG, PNG</p>
+                    </div>
+
+                    <!-- Contact Information -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium mb-1">Email Address*</label>
@@ -381,14 +567,14 @@ onMounted(() => {
                     <div class="mt-4">
                         <button
                             @click="authenticateStudent"
-                            :disabled="loading || !studentEmail.trim() || !studentPhone.trim()"
+                            :disabled="loading || !studentEmail.trim() || !studentPhone.trim() || (!profileImage && !studentData?.students_profile_image)"
                             class="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 text-white px-6 py-2 rounded text-sm font-medium"
                         >
                             {{ loading ? 'Sending OTP...' : 'Send OTP to Email' }}
                         </button>
                     </div>
                     <p class="text-sm text-gray-600 mt-2">
-                        An OTP will be sent to your email for verification before proceeding to the next step.
+                        {{ mode === 'parent_update' ? 'An OTP will be sent to verify your identity before updating parent information.' : 'An OTP will be sent to your email for verification before proceeding to the next step.' }}
                     </p>
                 </div>
             </div>
@@ -497,18 +683,18 @@ onMounted(() => {
                 </div>
             </div>
 
-            <!-- Barcode Generation -->
+            <!-- QR Code Generation -->
             <div v-if="currentStep === 3">
-                <h2 class="text-black font-semibold text-lg mb-4">Step 3: Your Student Barcode</h2>
+                <h2 class="text-black font-semibold text-lg mb-4">Step 3:  Your Student QR Code</h2>
 
                 <div class="bg-white p-6 rounded shadow-md text-center">
                     <h3 class="font-bold mb-4 text-green-600">✓ Registration Complete!</h3>
                     <p class="text-sm text-gray-600 mb-4">
-                        Your information has been saved successfully. Here's your student barcode:
+                        Your information has been saved successfully. Here's your student QR code:
                     </p>
 
                     <div class="border-2 border-gray-300 rounded p-4 mb-4 inline-block">
-                        <svg id="barcode" width="300" height="120"></svg>
+                        <canvas id="qrcode" width="200" height="200"></canvas>
                     </div>
 
                     <p class="text-sm text-gray-600 mb-4">
@@ -517,10 +703,10 @@ onMounted(() => {
 
                     <div class="space-y-3">
                         <button
-                            @click="downloadBarcode"
+                            @click="downloadQRCode"
                             class="bg-red-700 hover:bg-red-800 text-white px-6 py-2 text-sm rounded font-medium block mx-auto"
                         >
-                            Download Barcode
+                            Download QR Code
                         </button>
                         <p class="text-xs text-gray-500">
                             Save this barcode for future campus access
@@ -529,15 +715,15 @@ onMounted(() => {
                         <!-- New Student Button - enabled after download -->
                         <button
                             @click="startOver"
-                            :disabled="!barcodeDownloaded"
+                            :disabled="!qrcodeDownloaded"
                             :class="[
                     'px-6 py-2 text-sm rounded font-medium transition-all duration-200',
-                    barcodeDownloaded
+                     qrcodeDownloaded
                         ? 'bg-blue-600 hover:bg-blue-700 text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 ]"
                         >
-                            {{ barcodeDownloaded ? 'Register New Student' : 'Download barcode first' }}
+                            {{ qrcodeDownloaded ? 'Register New Student' : 'Download QR code first' }}
 
                         </button>
                     </div>
