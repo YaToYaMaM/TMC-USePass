@@ -151,6 +151,7 @@ Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm']
 Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
 Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPassword'])->name('password.store');
 
+
 //Route::get('/usepass-otp', function () {
 //    return Inertia::render('Frontend/userOTP');
 //});

@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\DB;
 use App\Models\StudentRecord;
 use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
+use App\Models\ParentCredential;
+use App\Models\Student;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StudentAttendanceReport;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 
 class StudentRecordController extends Controller
 {
@@ -120,40 +127,84 @@ class StudentRecordController extends Controller
         ]);
 
         $studentsId = $request->input('students_id');
-        $now = \Carbon\Carbon::now();
+        $now = Carbon::now('Asia/Manila');
 
-        // Get today’s latest record
+        $student = Student::where('students_id', $studentsId)->first();
+        $parent = ParentCredential::where('students_id', $studentsId)->first();
+
+        if (!$student || !$parent || !$parent->parent_email) {
+            return response()->json(['error' => 'Missing student or parent data.'], 422);
+        }
+
+        // Get today's latest record
         $latestRecord = StudentRecord::where('students_id', $studentsId)
             ->whereDate('record_in', $now->toDateString())
             ->latest()
             ->first();
 
+        $status = '';
+
         if (!$latestRecord || $latestRecord->record_out !== null) {
-            // No scan today or last record already has time-out → TIME IN
+            // Time In
             StudentRecord::create([
                 'students_id' => $studentsId,
                 'record_in' => $now,
                 'record_out' => null,
             ]);
-
-            return response()->json([
-                'status' => 'in',
-                'time' => $now->toDateTimeString(),
-            ]);
+            $status = 'Time In';
         } else {
-            // Last record has time-in but no time-out → TIME OUT
+            // Time Out
             $latestRecord->update([
                 'record_out' => $now,
             ]);
-
-            return response()->json([
-                'status' => 'out',
-                'time' => $now->toDateTimeString(),
-            ]);
+            $status = 'Time Out';
         }
+
+        // Send email using PHPMailer
+        try {
+            $mail = new PHPMailer(true);
+            $mail->isSMTP();
+            $mail->Host = 'smtp.gmail.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'usepasstmc.system@gmail.com'; // your Gmail
+            $mail->Password = 'rhkwujluyfwnaxpy'; // your app password
+            $mail->SMTPSecure = 'tls';
+            $mail->Port = 587;
+
+            $mail->setFrom('usepasstmc.system@gmail.com', 'USePass System');
+            $mail->addAddress($parent->parent_email); // parent email
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Student Attendance Report';
+
+            $studentName = "{$student->students_first_name} {$student->students_last_name}";
+            $formattedTime = $now->format('h:i A');
+            $logoPath = public_path('images/usep-logo-small.png');
+            if (file_exists($logoPath)) {
+                $mail->addEmbeddedImage($logoPath, 'useplogo');
+            }
+            $mail->Body = "
+            <div style='font-family: Arial, sans-serif;'>
+                    <div style='text-align: center; margin-bottom: 10px;'>
+                    <img src='cid:useplogo' alt='USePASS Logo' style='width: 120px;'>
+                    <h2 style='color: #2d3748;'>USePASS</h2>
+                </div>
+                <p><strong>Date:</strong> {$now->format('F j, Y')}</p>
+                <p style='margin-top: 20px;'>Dear Parent,</p>
+                <p>Your child <strong>{$studentName}</strong> has recorded a <strong>{$status}</strong> at <strong>{$formattedTime}</strong>.</p>
+                <p>Thank you for using USePass.</p>
+            </div>
+        ";
+
+            $mail->send();
+        } catch (Exception $e) {
+            \Log::error('Email failed to send: ' . $e->getMessage());
+        }
+
+        return response()->json([
+            'status' => strtolower($status),
+            'time' => $now->toDateTimeString(),
+        ]);
     }
-
-
-
 
 }
