@@ -39,12 +39,25 @@ const handleImportFile = async () => {
                 'Content-Type': 'multipart/form-data',
             },
         });
-        alert('Import successful');
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Import Successful',
+            text: 'The student data has been successfully imported.',
+            confirmButtonColor: '#3085d6',
+        });
     } catch (error) {
         console.error("Import error:", error);
-        alert('Unexpected error during import');
+
+        Swal.fire({
+            icon: 'error',
+            title: 'Import Failed',
+            text: 'There was an unexpected error during the import.',
+            confirmButtonColor: '#d33',
+        });
     }
 };
+
 
 
 const students = ref<any[]>([]);
