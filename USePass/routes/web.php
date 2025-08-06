@@ -18,6 +18,9 @@ use App\Http\Controllers\SpotController;
 use App\Http\Controllers\StudentReportController;
 use App\Http\Controllers\Auth\FacultyRegistrationController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\FacultyRecordController;
+
 use Illuminate\Support\Facades\Log;
 
 Route::get('/.well-known/{any}', function ($any) {
@@ -59,7 +62,6 @@ Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFac
 Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
 Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
 Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
-
 Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
 
 //Activity Logs
@@ -145,11 +147,21 @@ Route::get('/student-records', [StudentRecordController::class, 'fetchRecords'])
 Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
+//Route::get('/getStats', [StudentRecordController::class, 'getStats']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 Route::get('/students/profile/{students_id}', [StudentController::class, 'fetchStudentProfile']);
 Route::post('/students/log-scan', [StudentRecordController::class, 'log']);
+//Route::get('/getStats', [DashboardController::class, 'getCounts']);
 
 
+//FacultyStaff Records insert data and fetch data
+Route::get('/faculty-records', [FacultyRecordController::class, 'fetchFacultyRecords']);
+Route::post('/faculty-log', [FacultyRecordController::class, 'facultyLog']);
+
+//FacultyStaff insert data and fetch data
+Route::post('/faculty', [FacultyController::class, 'store']);
+Route::get('/faculty', [FacultyController::class, 'index']);
+Route::get('/faculty/{faculty_id}', [FacultyController::class, 'fetchFacultyProfile']);
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
@@ -167,6 +179,7 @@ Route::post('/otp/request', [CustomForgotPasswordController::class, 'sendOtp'])-
 Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm'])->name('otp.form');
 Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
 Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPassword'])->name('password.store');
+
 
 
 //Route::get('/usepass-otp', function () {
