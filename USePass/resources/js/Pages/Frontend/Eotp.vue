@@ -211,7 +211,6 @@ onMounted(() => {
         class="relative min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
     >
-        <div class="absolute top-0 left-0 w-full h-12 bg-[#760000] z-20"></div>
         <!-- Overlay layer -->
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
 
