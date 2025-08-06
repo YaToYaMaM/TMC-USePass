@@ -41,7 +41,7 @@ class FacultyRecordController extends Controller
     public function facultyLog(Request $request)
     {
         $request->validate([
-            'faculty_id' => 'required|exists:faculty,faculty_id',
+            'faculty_id' => 'required|exists:facultystaff,faculty_id',
         ]);
 
         $facultyId = $request->input('faculty_id');

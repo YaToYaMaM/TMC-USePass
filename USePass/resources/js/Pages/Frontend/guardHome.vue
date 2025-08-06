@@ -889,14 +889,15 @@ export default {
         // UPDATED: checkStudent with forced updates
         const checkStudent = async () => {
             if (!userIdInput.value.trim()) {
-                console.error('No student ID provided');
+                console.error('No ID provided');
                 return;
             }
 
             try {
-                console.log('🔍 NUCLEAR: Checking student ID:', userIdInput.value.trim());
+                const id = userIdInput.value.trim();
+                console.log('🔍 Checking ID:', id);
 
-                // RESET EVERYTHING
+                // Reset everything
                 studentProfile.value = {
                     fullName: '',
                     program: '',
@@ -904,64 +905,62 @@ export default {
                     profileImage: ''
                 };
 
-                // Increment modal key to force complete re-render
                 modalKey.value++;
-
-                // Set loading state
                 studentFound.value = null;
                 showProfileModal.value = true;
 
-                console.log('✨ NUCLEAR: State set to null, key:', modalKey.value);
-
-                // FORCE MULTIPLE UPDATES
                 await nextTick();
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                const response = await axios.get(`/students/profile/${userIdInput.value.trim()}`);
-                console.log('📡 NUCLEAR: API Response:', response.data);
+                // 🔹 First try student API
+                let response = await axios.get(`/students/profile/${id}`);
+                if (!response.data?.exists) {
+                    // 🔸 Then try faculty API
+                    response = await axios.get(`/faculty/${id}`);
+                }
 
                 if (response.data && response.data.exists) {
-                    const student = response.data.student;
+                    const person = response.data.student || response.data.faculty;
 
-                    // Update profile data
                     studentProfile.value = {
-                        fullName: student.fullName || 'Unknown Name',
-                        idNumber: student.id || userIdInput.value,
-                        program: student.program || 'Unknown Program',
-                        profileImage: student.profileImage || ''
+                        fullName: person.fullName || 'Unknown Name',
+                        idNumber: person.id || id,
+                        program: person.program || 'N/A',
+                        profileImage: person.profileImage || ''
                     };
 
-                    console.log('📝 NUCLEAR: Profile updated:', studentProfile.value);
-                    await logStudentScan(student.id);
-                    // Wait a bit
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    console.log('📝 Profile updated:', studentProfile.value);
 
-                    // Set success state
+                    // 🔄 Log scan for student or faculty
+                    if (response.data.student) {
+                        await logStudentScan(person.id);
+                    } else if (response.data.faculty) {
+                        await logFacultyScan(person.id); // ⬅️ You’ll define this
+                    }
+
                     studentFound.value = true;
                     successTime.value = new Date().toLocaleTimeString();
-                    modalKey.value++; // Force re-render again
+                    modalKey.value++;
+
                     setTimeout(() => {
                         closeProfileModal();
-                        openScanModal(); // Reopen scanner
+                        openScanModal();
                     }, 2000);
 
-                    console.log('✅ NUCLEAR: Student found, key:', modalKey.value);
-
+                    console.log('✅ Person found:', modalKey.value);
                 } else {
                     studentFound.value = false;
                     modalKey.value++;
-                    console.log('❌ NUCLEAR: Student not found');
+                    console.log('❌ Person not found');
                     setTimeout(() => {
                         closeProfileModal();
                         openScanModal();
                     }, 2000);
                 }
 
-                // Final force update
                 await nextTick();
-
             } catch (error) {
-                console.error('💥 NUCLEAR: Error checking student:', error);
+                console.error('💥 Error checking ID:', error);
                 studentFound.value = false;
                 modalKey.value++;
                 setTimeout(() => {
@@ -970,6 +969,7 @@ export default {
                 }, 2000);
             }
         };
+
         const resetModal = () => {
             console.log('🔄 Resetting modal state');
             studentFound.value = null;
@@ -1024,6 +1024,29 @@ export default {
                 lastScanType.value = '';
             }
         };
+        const logFacultyScan = async (facultyId) => {
+            try {
+                const response = await axios.post('/faculty-log', {
+                    faculty_id: facultyId,
+                });
+
+                const result = response.data;
+
+                // Accept only 'time in' or 'time out'
+                if (result.status === 'time in' || result.status === 'time out') {
+                    lastScanType.value = result.status;
+                    console.log(`✅ Faculty ${result.status} at ${result.time}`);
+                } else {
+                    lastScanType.value = ''; // fallback
+                    console.warn('⚠️ Unrecognized status:', result.status);
+                }
+
+            } catch (error) {
+                console.error('💥 Failed to log faculty scan:', error);
+                lastScanType.value = '';
+            }
+        };
+
 
 
 // Add this watcher to catch unauthorized changes

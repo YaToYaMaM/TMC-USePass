@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use App\Models\FacultyStaff;
+use App\Models\Faculty;
 use Maatwebsite\Excel\Facades\Excel;
 
 class FacultyController extends Controller
@@ -38,7 +38,7 @@ class FacultyController extends Controller
             $image->move($destinationPath, $imageName);
             $imagePath = 'faculty_pictures/' . $imageName; // Relative path to store in DB
         }
-        FacultyStaff::create([
+        Faculty::create([
             'faculty_id' => $request->faculty_id,
             'faculty_last_name' => $request->faculty_last_name,
             'faculty_first_name' => $request->faculty_first_name,
@@ -56,14 +56,14 @@ class FacultyController extends Controller
     }
 
     public function index(){
-        $faculty = FacultyStaff::all();
+        $faculty = Faculty::all();
         return response()->json($faculty);
 
     }
 
     public function fetchFacultyProfile($faculty_id)
     {
-        $faculty = FacultyStaff::select(
+        $faculty = Faculty::select(
             'faculty_id as id',
             \DB::raw("CONCAT(faculty_first_name, ' ', faculty_middle_initial, ' ', faculty_last_name) as fullName"),
             'faculty_department as program',
