@@ -16,6 +16,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
 use App\Http\Controllers\StudentReportController;
+use App\Http\Controllers\Auth\FacultyRegistrationController;
 use App\Http\Controllers\ActivityLogController;
 use Illuminate\Support\Facades\Log;
 
@@ -44,12 +45,22 @@ Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
 
+//Students Registration
 Route::post('/student/get-data', [StudentController::class, 'getStudentData']);
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendStudentOtp'])->name('student.otp.send');
 Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
+//Faculty-Staff Registration
+Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
+Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
+Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
+Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
+Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
+
+Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
 
 //Activity Logs
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);
