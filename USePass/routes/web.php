@@ -97,6 +97,12 @@ Route::middleware(['auth', 'can:isGuard'])->group(function () {
 //Route::middleware(['auth'])->group(function () {
 //    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 //});
+// routes/web.php
+Route::post('/incident-report', [ReportController::class, 'store']);
+
+Route::post('/spot-report', [SpotController::class, 'store']);
+
+
 Route::get('/incident-report/print', function () {
     return Inertia::render('Frontend/IncidentReportTemplate', [
         'report' => [
