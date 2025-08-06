@@ -125,6 +125,11 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/secStudents');
     }
 
+    public function facultynstaff()
+    {
+        return Inertia::render('Frontend/secStudents');
+    }
+
     public function statistics()
     {
         return Inertia::render('Frontend/secStatistics');

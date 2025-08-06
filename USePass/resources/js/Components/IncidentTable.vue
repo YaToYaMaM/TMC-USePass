@@ -334,36 +334,108 @@ const getRoleDisplayName = computed(() => {
     }
 });
 
-function handleImageError(event: Event) {
-    const img = event.target as HTMLImageElement;
-    console.error('Failed to load image:', img.src);
+// Add these new reactive variables to your existing refs
+const showImageModal = ref(false);
+const selectedImageUrl = ref('');
 
-    // Optionally replace with a placeholder
-    img.src = '/images/placeholder-image.png'; // if you have a placeholder
-    img.alt = 'Image could not be loaded';
-}
-
-function handleImageLoad(event: Event) {
-    const img = event.target as HTMLImageElement;
-    console.log('Image loaded successfully:', img.src);
-}
-
-// Helper function to get the correct image URL
-function getImageUrl(imagePath: string): string {
+// Update your existing getImageUrl function to handle more cases
+function getImageUrl(imagePath: string | string[]): string {
     if (!imagePath) return '';
+
+    // Handle array case (get first image)
+    if (Array.isArray(imagePath)) {
+        if (imagePath.length === 0) return '';
+        imagePath = imagePath[0];
+    }
 
     // If it's already a full URL, return as is
     if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
         return imagePath;
     }
 
-    // If it starts with storage/, remove it since we'll add /storage/
+    // If it starts with storage/, return with leading slash
     if (imagePath.startsWith('storage/')) {
         return `/${imagePath}`;
     }
 
-    // Otherwise, assume it's a relative path in storage
+    // If it's a relative path starting with uploads/ or images/
+    if (imagePath.startsWith('uploads/') || imagePath.startsWith('images/')) {
+        return `/${imagePath}`;
+    }
+
+    // Otherwise, assume it's in storage directory
     return `/storage/${imagePath}`;
+}
+
+// New function to open image in modal
+function openImageModal(imageUrl: string) {
+    selectedImageUrl.value = imageUrl;
+    showImageModal.value = true;
+}
+
+// Update your handleImageError function to be more robust
+function handleImageError(event: Event) {
+    const img = event.target as HTMLImageElement;
+    console.error('Failed to load image:', img.src);
+
+    // Try alternative paths
+    const originalSrc = img.src;
+
+    // If the current src includes /storage/, try without it
+    if (originalSrc.includes('/storage/')) {
+        const newSrc = originalSrc.replace('/storage/', '/');
+        if (newSrc !== originalSrc) {
+            img.src = newSrc;
+            return;
+        }
+    }
+
+    // If it doesn't include /storage/, try with it
+    if (!originalSrc.includes('/storage/')) {
+        const fileName = originalSrc.split('/').pop();
+        if (fileName) {
+            img.src = `/storage/uploads/${fileName}`;
+            return;
+        }
+    }
+
+    // Finally, set a placeholder or hide the image
+    img.style.display = 'none';
+
+    // Optionally, show an error message
+    const errorDiv = document.createElement('div');
+    errorDiv.className = 'flex items-center justify-center h-32 bg-gray-100 rounded border text-gray-500 text-sm';
+    errorDiv.innerHTML = `
+        <div class="text-center">
+            <svg class="w-8 h-8 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p>Image could not be loaded</p>
+        </div>
+    `;
+    img.parentNode?.insertBefore(errorDiv, img);
+}
+
+// Debug function to check image data (you can call this in console)
+function debugImageData(report: any) {
+    console.log('Report data:', report);
+    console.log('incidentPicture:', report.incidentPicture);
+    console.log('Type of incidentPicture:', typeof report.incidentPicture);
+    console.log('Is array?', Array.isArray(report.incidentPicture));
+
+    if (typeof report.incidentPicture === 'string') {
+        console.log('Processed URL:', getImageUrl(report.incidentPicture));
+    } else if (Array.isArray(report.incidentPicture)) {
+        report.incidentPicture.forEach((img: string, index: number) => {
+            console.log(`Image ${index}:`, img, '-> Processed:', getImageUrl(img));
+        });
+    }
+}
+
+function handleImageLoad(event: Event) {
+    const img = event.target as HTMLImageElement;
+    console.log('Image loaded successfully:', img.src);
 }
 
 watch(filteredReport, () => {
@@ -789,15 +861,67 @@ console.log('Reports received:', props.reports);
                 <div class="md:col-span-2">
                     <label class="font-bold text-lg block mb-2">Evidence:</label>
 
-                    <!-- Option 1: If incidentPicture is a file path from your server -->
-                    <div v-if="selectedReport.incidentPicture" class="space-y-2">
-                        <img
-                            :src="`/storage/${selectedReport.incidentPicture}`"
-                            :alt="`Evidence for ${selectedReport.description}`"
-                            class="max-w-full h-auto rounded shadow border"
-                            @error="handleImageError"
-                            @load="handleImageLoad"
-                        />
+                    <!-- Handle multiple images or single image -->
+                    <div v-if="selectedReport.incidentPicture && selectedReport.incidentPicture.length > 0" class="space-y-4">
+                        <!-- If incidentPicture is an array of images -->
+                        <div v-if="Array.isArray(selectedReport.incidentPicture)" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div v-for="(image, index) in selectedReport.incidentPicture" :key="index" class="relative">
+                                <img
+                                    :src="getImageUrl(image)"
+                                    :alt="`Evidence ${index + 1} for ${selectedReport.description}`"
+                                    class="max-w-full h-auto rounded shadow border cursor-pointer hover:opacity-90 transition-opacity"
+                                    @error="handleImageError"
+                                    @load="handleImageLoad"
+                                    @click="openImageModal(getImageUrl(image))"
+                                />
+                                <p class="text-xs text-gray-500 mt-1">Evidence {{ index + 1 }}</p>
+                            </div>
+                        </div>
+
+                        <!-- If incidentPicture is a single image (string) -->
+                        <div v-else class="relative inline-block">
+                            <img
+                                :src="getImageUrl(selectedReport.incidentPicture)"
+                                :alt="`Evidence for ${selectedReport.description}`"
+                                class="max-w-full h-auto rounded shadow border cursor-pointer hover:opacity-90 transition-opacity"
+                                @error="handleImageError"
+                                @load="handleImageLoad"
+                                @click="openImageModal(getImageUrl(selectedReport.incidentPicture))"
+                            />
+                        </div>
+                    </div>
+
+                    <!-- No evidence message -->
+                    <div v-else class="flex items-center justify-center h-32 bg-gray-50 rounded border-2 border-dashed border-gray-300">
+                        <div class="text-center">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                            </svg>
+                            <p class="text-gray-500 text-sm">No evidence images available</p>
+                        </div>
+                    </div>
+                    <!-- Add this Image Modal for full-screen viewing (add after your main modal) -->
+                    <div
+                        v-if="showImageModal"
+                        class="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-80 px-4"
+                        @click.self="showImageModal = false"
+                    >
+                        <div class="relative max-w-4xl max-h-[90vh] overflow-hidden">
+                            <button
+                                @click="showImageModal = false"
+                                class="absolute top-4 right-4 text-white hover:text-red-400 text-3xl font-bold focus:outline-none z-10 bg-black bg-opacity-50 rounded-full w-10 h-10 flex items-center justify-center"
+                                title="Close"
+                            >
+                                &times;
+                            </button>
+                            <img
+                                :src="selectedImageUrl"
+                                alt="Full size evidence"
+                                class="max-w-full max-h-full rounded shadow-2xl"
+                                @error="handleImageError"
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
