@@ -261,12 +261,12 @@ const filteredStudents = computed(() => {
 
 <template>
     <Frontend>
-        <Head title="Student Page" />
+        <Head title="Faculty and Staff Page" />
         <div class="flex flex-col p-3 px-12 pt-8">
 
             <!-- Top Control Buttons -->
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
-                <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Student</button>
+                <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Faculty/Staff</button>
 
                 <div class="flex flex-wrap items-center gap-2">
                     <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>
@@ -310,7 +310,7 @@ const filteredStudents = computed(() => {
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <h1 class="text-xl font-bold">Students</h1>
+                    <h1 class="text-xl font-bold">Faculty and Staff</h1>
                     <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">
                         <option>Active</option>
                         <option>Inactive</option>
@@ -323,7 +323,7 @@ const filteredStudents = computed(() => {
                         <input
                             v-model="searchQuery"
                             type="text"
-                            placeholder="Search a student..."
+                            placeholder="Search a faculty or staff..."
                             class="w-full border border-gray-300 pl-10 pr-4 py-2 rounded-3xl focus:outline-none"
                         />
                         <div class="absolute inset-y-0 left-3 flex items-center pointer-events-none">
