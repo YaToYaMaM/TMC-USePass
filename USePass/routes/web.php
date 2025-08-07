@@ -16,7 +16,11 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SpotController;
 use App\Http\Controllers\StudentReportController;
+use App\Http\Controllers\Auth\FacultyRegistrationController;
 use App\Http\Controllers\ActivityLogController;
+use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\FacultyRecordController;
+
 use Illuminate\Support\Facades\Log;
 
 Route::get('/.well-known/{any}', function ($any) {
@@ -45,12 +49,21 @@ Route::get('/checking', [App\Http\Controllers\FrontendControllers::class, 'check
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
 
+//Students Registration
 Route::post('/student/get-data', [StudentController::class, 'getStudentData']);
 Route::get('/Details', [App\Http\Controllers\FrontendControllers::class, 'deets'])->name('deets');
 Route::post('/student/send-otp', [CustomForgotPasswordController::class, 'sendStudentOtp'])->name('student.otp.send');
 Route::post('/student/resend-otp', [CustomForgotPasswordController::class, 'resendStudentOtp'])->name('student.otp.resend');
 Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'verifyOtp'])->name('student.otp.verify');
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
+
+//Faculty-Staff Registration
+Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
+Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
+Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
+Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
+Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
+Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
 
 //Activity Logs
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);
@@ -64,6 +77,7 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/guard', [FrontendControllers::class, 'guard'])->name('guard');
     Route::get('/students', [FrontendControllers::class, 'students'])->name('students');
+    Route::get('/faculty-and-staff', [FrontendControllers::class, 'facultynstaff'])->name('faculty-and-staff');
     Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
@@ -87,6 +101,12 @@ Route::middleware(['auth', 'can:isGuard'])->group(function () {
 //Route::middleware(['auth'])->group(function () {
 //    Route::get('/incident', [FrontendControllers::class, 'incident'])->name('incident');
 //});
+// routes/web.php
+Route::post('/incident-report', [ReportController::class, 'store']);
+
+Route::post('/spot-report', [SpotController::class, 'store']);
+
+
 Route::get('/incident-report/print', function () {
     return Inertia::render('Frontend/IncidentReportTemplate', [
         'report' => [
@@ -129,11 +149,21 @@ Route::get('/student-records', [StudentRecordController::class, 'fetchRecords'])
 Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
 Route::get('/getProgramCategoryCounts', [DashboardController::class, 'getCountsByCategory']);
+//Route::get('/getStats', [StudentRecordController::class, 'getStats']);
 Route::get('/students/{students_id}', [StudentController::class, 'checkStudentExists']);
 Route::get('/students/profile/{students_id}', [StudentController::class, 'fetchStudentProfile']);
 Route::post('/students/log-scan', [StudentRecordController::class, 'log']);
+//Route::get('/getStats', [DashboardController::class, 'getCounts']);
 
 
+//FacultyStaff Records insert data and fetch data
+Route::get('/faculty-records', [FacultyRecordController::class, 'fetchFacultyRecords']);
+Route::post('/faculty-log', [FacultyRecordController::class, 'facultyLog']);
+
+//FacultyStaff insert data and fetch data
+Route::post('/faculty', [FacultyController::class, 'store']);
+Route::get('/faculty', [FacultyController::class, 'index']);
+Route::get('/faculty/{faculty_id}', [FacultyController::class, 'fetchFacultyProfile']);
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
@@ -151,6 +181,7 @@ Route::post('/otp/request', [CustomForgotPasswordController::class, 'sendOtp'])-
 Route::get('/otp/verify', [CustomForgotPasswordController::class, 'showOtpForm'])->name('otp.form');
 Route::post('/otp/verify', [CustomForgotPasswordController::class, 'verifyOtp'])->name('otp.verify');
 Route::post('/reset-password', [CustomForgotPasswordController::class, 'resetPassword'])->name('password.store');
+
 
 
 //Route::get('/usepass-otp', function () {

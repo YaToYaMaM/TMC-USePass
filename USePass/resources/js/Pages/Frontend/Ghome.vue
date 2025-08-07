@@ -157,7 +157,7 @@
                                 :key="student.id"
                                 :class="[
                                     'hover:bg-gray-50 transition-colors duration-150',
-                                    props.selectedStudent && props.selectedStudent.id === student.id ? 'bg-blue-50 border-l-4 border-blue-400' : ''
+                                    props.selectedStudent && props.selectedStudent.id === student.id && getStatusText(student) === 'Present' ? 'bg-blue-50 border-l-4 border-[#760000]' : ''
                                 ]"
                             >
                                 <!-- Student Column -->

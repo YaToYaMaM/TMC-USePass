@@ -9,8 +9,11 @@ class IncidentReport extends Model
 {
     use HasFactory;
 
+    protected $primaryKey = 'incident_id';
+
     protected $fillable = [
         'user_id',
+        'guard_name',
         'description',
         'type',
         'date',
@@ -21,10 +24,12 @@ class IncidentReport extends Model
         'how',
         'why',
         'recommendation',
+        'incidentPicture',
     ];
 
     protected $casts = [
         'date' => 'date',
+        'incidentPicture' => 'array',
     ];
 
     /**
@@ -34,5 +39,4 @@ class IncidentReport extends Model
     {
         return $this->belongsTo(User::class);
     }
-
 }

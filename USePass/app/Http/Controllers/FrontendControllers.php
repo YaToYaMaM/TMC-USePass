@@ -130,6 +130,11 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/secStudents');
     }
 
+    public function facultynstaff()
+    {
+        return Inertia::render('Frontend/adminFacultyNStaff');
+    }
+
     public function statistics()
     {
         return Inertia::render('Frontend/secStatistics');
@@ -147,5 +152,17 @@ class FrontendControllers extends Controller
     public function incident()
     {
         return Inertia::render('Frontend/secIncident');
+    }
+
+    public function facultyRegistration()
+    {
+        return Inertia::render('Frontend/FacultyRegistration');
+    }
+
+    public function facultySuccess(Request $request)
+    {
+        return Inertia::render('Frontend/FacultySuccess', [
+            'facultyData' => $request->facultyData,
+        ]);
     }
 }

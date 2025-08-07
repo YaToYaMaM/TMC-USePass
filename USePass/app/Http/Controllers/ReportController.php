@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\IncidentReport;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Str;
 
 class ReportController extends Controller
 {
@@ -17,11 +19,15 @@ class ReportController extends Controller
             ? IncidentReport::with('user')->orderBy('created_at', 'desc')->get()
             : IncidentReport::with('user')->where('user_id', $user->id)->orderBy('created_at', 'desc')->get();
 
-        // Add guard name to each report for display
+        // Since guard_name is now stored in database, we don't need to map it
+        // But keep this for backward compatibility with existing records
         $reports = $reports->map(function ($report) {
-            $report->guard_name = $report->user ?
-                $report->user->first_name . ' ' . $report->user->last_name :
-                'Unknown Guard';
+            // Use stored guard_name if available, otherwise fallback to user relationship
+            if (empty($report->guard_name) && $report->user) {
+                $report->guard_name = $report->user->first_name . ' ' . $report->user->last_name;
+            } elseif (empty($report->guard_name)) {
+                $report->guard_name = 'Unknown Guard';
+            }
             return $report;
         });
 
@@ -44,11 +50,8 @@ class ReportController extends Controller
 
     public function store(Request $request)
     {
-        // Validate the request
         $validated = $request->validate([
-            'description' => 'required|string|max:255',
-            'type' => 'required|string|max:100',
-            'date' => 'required|date',
+            'description' => 'required|string',
             'what' => 'required|string',
             'who' => 'required|string',
             'where' => 'required|string',
@@ -56,33 +59,67 @@ class ReportController extends Controller
             'how' => 'required|string',
             'why' => 'required|string',
             'recommendation' => 'required|string',
+            'incidentPicture.*' => 'nullable|image|max:5120',
         ]);
 
-        // Create the incident report
-        $report = IncidentReport::create([
-            'user_id' => auth()->id(),
-            'description' => $validated['description'],
-            'type' => $validated['type'],
-            'date' => $validated['date'],
-            'what' => $validated['what'],
-            'who' => $validated['who'],
-            'where' => $validated['where'],
-            'when' => $validated['when'],
-            'how' => $validated['how'],
-            'why' => $validated['why'],
-            'recommendation' => $validated['recommendation'],
-        ]);
+        $paths = [];
 
-        // For Inertia requests, redirect back to the same page
-        return redirect()->back()->with('success', 'Incident report created successfully!');
+        if ($request->hasFile('incidentPicture')) {
+            foreach ($request->file('incidentPicture') as $file) {
+                $filename = Str::random(20) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('incident_pictures'), $filename);
+                $paths[] = 'incident_pictures/' . $filename;
+            }
+        }
+
+        $user = auth()->user();
+
+        $report = new IncidentReport();
+        $report->fill($validated);
+        $report->user_id = $user->id;
+        $report->guard_name = $user->first_name . ' ' . $user->last_name; // Store guard name
+        $report->incidentPicture = $paths; // This will be automatically cast to JSON
+        $report->save();
+
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Incident Report Created',
+            "Incident Report Added: {$report->guard_name} {$report->what}"
+        );
+
+        return back()->with('success', 'Report submitted.');
     }
+
     public function print(Request $request)
     {
         $reportData = $request->only([
-            'id', 'name', 'type', 'date', 'what', 'who',
+            'id', 'name', 'date', 'what', 'who',
             'where', 'when', 'how', 'why', 'recommendation'
         ]);
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Incident Report Print',
+            "Incident Report Printed: {$reportData->guard_name} {$reportData->what}"
+        );
+
         return view('reports.print', compact('reportData'));
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 }
