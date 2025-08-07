@@ -506,7 +506,15 @@
                                 <div v-else-if="lastScanType === 'time out'">Time Out</div>
                                 <div v-else>❓ Unknown Status</div>
                             </div>
+                            <div v-if="userType" class="mt-2 p-2 text-blue-800 text-2xl font-bold">
+                                <div v-if="userType === 'Student'">Student</div>
+                                <div v-else-if="userType === 'Faculty'">Faculty</div>
+                                <div v-else>❓ Unknown Status</div>
+                            </div>
                         </div>
+
+
+
                     </div>
                     </div>
 
@@ -707,6 +715,7 @@ export default {
 
         const studentFound = ref(null);
         const lastScanType = ref('');
+        const userType = ref('');
 
 
         const studentProfile = ref({
@@ -912,11 +921,13 @@ export default {
                 await nextTick();
                 await new Promise(resolve => setTimeout(resolve, 100));
 
-                // 🔹 First try student API
+
                 let response = await axios.get(`/students/profile/${id}`);
+                userType.value = 'Student'
                 if (!response.data?.exists) {
-                    // 🔸 Then try faculty API
+
                     response = await axios.get(`/faculty/${id}`);
+                    userType.value = 'Faculty'
                 }
 
                 if (response.data && response.data.exists) {
@@ -935,7 +946,7 @@ export default {
                     if (response.data.student) {
                         await logStudentScan(person.id);
                     } else if (response.data.faculty) {
-                        await logFacultyScan(person.id); // ⬅️ You’ll define this
+                        await logFacultyScan(person.id);
                     }
 
                     studentFound.value = true;
@@ -1192,6 +1203,7 @@ export default {
             studentImageUrl,
 
             lastScanType,
+            userType,
 
         };
     },
