@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
+Route::get('/checking', [App\Http\Controllers\FrontendControllers::class, 'checking'])->name('checking');
 
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
