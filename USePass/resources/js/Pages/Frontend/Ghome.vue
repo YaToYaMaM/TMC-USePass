@@ -134,7 +134,12 @@
                     <h3 class="text-lg font-medium text-gray-900">Students Inside Campus</h3>
                     <p class="mt-1 text-sm text-gray-500">
                         Showing {{ filteredStudents.length }} students for {{ selectedUnit }} unit
-                        <span v-if="props.selectedStudent"> (Selected: {{ props.selectedStudent.name }})</span>
+                        <span v-if="localSelectedStudent">
+                            (Selected: {{ localSelectedStudent.name }})
+                        </span>
+                        <span v-else-if="props.selectedStudent && searchText === props.selectedStudent.name">
+                            (Selected: {{ props.selectedStudent.name }})
+                        </span>
                     </p>
                 </div>
 
@@ -155,9 +160,12 @@
                             <tr
                                 v-for="(student, index) in paginatedStudents"
                                 :key="student.id"
+                                @click="selectStudent(student)"
                                 :class="[
-                                    'hover:bg-gray-50 transition-colors duration-150',
-                                    props.selectedStudent && props.selectedStudent.id === student.id && getStatusText(student) === 'Present' ? 'bg-blue-50 border-l-4 border-[#760000]' : ''
+                                'hover:bg-gray-50 transition-colors duration-150 cursor-pointer',
+                                (localSelectedStudent?.id === student.id ||
+                                 (props.selectedStudent?.id === student.id && searchText === props.selectedStudent.name)) &&
+                                 getStatusText(student) === 'Present' ? 'bg-blue-50 border-l-4 border-[#760000]' : ''
                                 ]"
                             >
                                 <!-- Student Column -->
@@ -301,6 +309,7 @@ const selectedProgram = ref('');
 const allStudentRecords = ref([]); // Store all records
 const loading = ref(false);
 const error = ref('');
+const localSelectedStudent = ref(null);
 
 // Computed properties
 const availablePrograms = computed(() => {
@@ -497,6 +506,7 @@ const buttonClass = (unit) => {
 const clearFilters = () => {
     searchText.value = '';
     selectedProgram.value = '';
+    localSelectedStudent.value = null;
     currentPage.value = 1;
 };
 
@@ -517,6 +527,13 @@ const nextPage = () => {
     }
 };
 
+const selectStudent = (student) => {
+    localSelectedStudent.value = student;
+    searchText.value = student.name;
+    // You might want to emit this to parent component
+    // emit('studentSelected', student);
+};
+
 // Watchers
 watch(searchText, () => {
     currentPage.value = 1;
@@ -532,6 +549,27 @@ watch(selectedProgram, () => {
     // Don't refetch - we already have all the data
 });
 
+// Watch for selectedStudent prop changes and update search input
+watch(() => props.selectedStudent, (newStudent) => {
+    if (newStudent && newStudent.name) {
+        searchText.value = newStudent.name;
+        localSelectedStudent.value = newStudent;
+    }
+}, { immediate: true });
+
+// Watch for search text changes and clear selection when user types
+watch(searchText, (newSearchText, oldSearchText) => {
+    // Only clear selection if the user manually changed the search text
+    // (not when it was programmatically set by selecting a student)
+    if (localSelectedStudent.value &&
+        newSearchText !== localSelectedStudent.value.name) {
+        localSelectedStudent.value = null;
+        // Emit an event to parent to clear selectedStudent if needed
+        // emit('clearSelectedStudent');
+    }
+    // Reset pagination when searching
+    currentPage.value = 1;
+});
 // Note: removed the selectedUnit watcher that was calling fetchStudentRecords
 // since we now do frontend filtering
 
