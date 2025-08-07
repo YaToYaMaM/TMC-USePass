@@ -594,7 +594,7 @@
                 <div class="bg-gray-600 text-white px-6 py-4">
                     <h2 class="text-2xl font-bold">
                         Student Attendance Report
-                        <span v-if="selectedStudent" class="text-lg font-normal ml-2">
+                        <span v-if="selectedStudent" class="hidden text-lg font-normal ml-2">
                         - {{ selectedStudent.full_name || selectedStudent.name }}
                     </span>
                     </h2>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use App\Models\Student;
 use Illuminate\Support\Facades\Storage;
@@ -72,6 +73,14 @@ class StudentController extends Controller
 
         // Save parent
         ParentCredential::create($validatedParent);
+        $fullName = trim($student->students_first_name . ' ' . ($student->students_middle_initial ?? '') . ' ' . $student->students_last_name);
+
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Student Created',
+            "New Student Added: Student ID: {$student->students_id}: {$fullName}"
+        );
 
         return response()->json(['message' => 'Saved successfully.']);
     }
@@ -82,6 +91,13 @@ class StudentController extends Controller
         ]);
 
         Excel::import(new StudentsImport, $request->file('file'));
+
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Student Import',
+            "Importing Students Information"
+        );
 
         return response()->json(['message' => 'Import successful']);
     }
@@ -204,6 +220,21 @@ class StudentController extends Controller
             'exists' => $student !== null,
             'student' => $student,
         ]);
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 
 }

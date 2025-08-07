@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -51,6 +52,13 @@ class FacultyController extends Controller
             'faculty_profile_image' => $imagePath,
         ]);
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Faculty/Staff Created',
+            "New Faculty/Staff Added: ID: {$request->faculty_id}, {$request->faculty_first_name} {$request->faculty_last_name}"
+        );
+
         return response()->json(['message' => 'Guard created successfully.']);
 
     }
@@ -74,5 +82,20 @@ class FacultyController extends Controller
             'exists' => $faculty !== null,
             'faculty' => $faculty,
         ]);
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 }
