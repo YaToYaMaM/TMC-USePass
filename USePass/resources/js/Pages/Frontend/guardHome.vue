@@ -390,6 +390,7 @@
                             </div>
                         </div>
 
+
                         <!-- Error overlay -->
                         <div v-if="cameraError" class="absolute inset-0 bg-red-50 flex items-center justify-center">
                             <div class="text-red-600 text-center p-4">
