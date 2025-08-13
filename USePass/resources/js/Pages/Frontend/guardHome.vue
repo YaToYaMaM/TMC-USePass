@@ -391,12 +391,6 @@
                         </div>
 
                         <!-- Loading overlay -->
-                        <div v-if="isLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <div class="text-white text-center">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                                <p class="text-sm">Starting camera...</p>
-                            </div>
-                        </div>
 
                         <!-- Error overlay -->
                         <div v-if="cameraError" class="absolute inset-0 bg-red-50 flex items-center justify-center">
@@ -479,7 +473,7 @@
                     <!-- LOADING STATE -->
                     <div v-show="isLoading" class="text-center py-8">
                         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                        <p class="text-gray-600">Loading student data...</p>
+                        <p class="text-gray-600">Loading data...</p>
                         <p class="text-xs text-gray-400 mt-2">Please wait...</p>
                     </div>
 
@@ -506,7 +500,7 @@
                                 <div v-else-if="lastScanType === 'time out'">Time Out</div>
                                 <div v-else>❓ Unknown Status</div>
                             </div>
-                            <div v-if="userType" class="mt-2 p-2 text-blue-800 text-2xl font-bold">
+                            <div v-if="userType" class="mt-1 p-2 text-blue-800 text-2xl font-bold">
                                 <div v-if="userType === 'Student'">Student</div>
                                 <div v-else-if="userType === 'Faculty'">Faculty</div>
                                 <div v-else>❓ Unknown Status</div>
@@ -1092,7 +1086,7 @@ export default {
             // Then check student after a brief delay
             setTimeout(() => {
                 checkStudent();
-            }, 500);
+            }, 300);
         };
 
         watch([showProfileModal, studentFound], ([modalVisible, foundState]) => {
@@ -1113,7 +1107,7 @@ export default {
             }
             studentFound.value = true
 
-            await new Promise(resolve => setTimeout(resolve, 2000))
+            await new Promise(resolve => setTimeout(resolve, 1000))
             studentFound.value = false
         }
 
