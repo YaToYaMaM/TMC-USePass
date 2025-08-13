@@ -71,7 +71,7 @@ class FacultyRecordController extends Controller
                 $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
                 $request->user()->role ?? 'System', // Get user role or default to 'System'
                 'Faculty/Staff Time In',
-                "Faculty/Staff ID: {$facultyId->faculty_id}, Time-In By Guard ID:{$request->user()->id}"
+                "Faculty/Staff ID: {$facultyId}, Time-In By Guard ID:{$request->user()->id}"
             );
         } else {
             // Time Out
@@ -83,7 +83,7 @@ class FacultyRecordController extends Controller
                 $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
                 $request->user()->role ?? 'System', // Get user role or default to 'System'
                 'Faculty/Staff Time Out',
-                "Faculty/Staff ID: {$facultyId->faculty_id}, Time-Out By Guard ID:{$request->user()->id}"
+                "Faculty/Staff ID: {$facultyId}, Time-Out By Guard ID:{$request->user()->id}"
             );
         }
 

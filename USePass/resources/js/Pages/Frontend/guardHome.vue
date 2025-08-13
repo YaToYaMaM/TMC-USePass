@@ -494,9 +494,9 @@
                         <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
 
                         <div class="mt-4 p-3">
-                            <div v-if="lastScanType" class="mt-2 p-2 text-red-800 text-lg font-bold">
-                                <div v-if="lastScanType === 'time in'">Time In</div>
-                                <div v-else-if="lastScanType === 'time out'">Time Out</div>
+                            <div v-if="lastScanType" class="mt-2 p-2 text-lg font-bold">
+                                <div class="text-green-600" v-if="lastScanType === 'time in'">Time In</div>
+                                <div class="text-red-600" v-else-if="lastScanType === 'time out'">Time Out</div>
                                 <div v-else>❓ Unknown Status</div>
                             </div>
                             <div v-if="userType" class="mt-2 p-2 text-blue-800 text-2xl font-bold">
