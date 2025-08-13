@@ -152,12 +152,7 @@
                     <div class="font-semibold uppercase">{{ user.first_name }} {{ user.last_name}}</div>
                     <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
                 </div>
-                <img
-                    :src="user.profile_image || '/guard_profiles/user.png'"
-                    @error="handleImageError"
-                    alt="Profile"
-                    class="h-10 w-10 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white"
-                />
+                <img src="/images/profile.png" alt="Profile" class="w-10 h-10 rounded-full border border-white object-cover" />
                 <button @click="menuOpen = !menuOpen" class="focus:outline-none" aria-label="Toggle menu">
                     <svg class="h-5 w-5 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -364,9 +359,9 @@
         </div>
     </div>
 
-    <!-- Mobile Scan Modal - ONLY VISIBLE ON MOBILE -->
+    <!-- Mobile Scan Modal -->
     <transition name="fade">
-        <div v-if="showScanModal" class="md:hidden fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 px-4">
+        <div v-if="showScanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90 px-4">
             <div class="relative w-full max-w-sm bg-white rounded-xl p-6">
                 <!-- Close Button -->
                 <button @click="closeScanModal" class="absolute top-4 right-4 z-10 text-gray-600 hover:text-red-500 text-xl bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
@@ -391,16 +386,10 @@
                                     <div class="scanner-corner bottom-right"></div>
                                 </div>
                                 <div v-if="isScanning" class="scanning-line"></div>
+
                             </div>
                         </div>
 
-                        <!-- Loading overlay -->
-                        <div v-if="isLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <div class="text-white text-center">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                                <p class="text-sm">Starting camera...</p>
-                            </div>
-                        </div>
 
                         <!-- Error overlay -->
                         <div v-if="cameraError" class="absolute inset-0 bg-red-50 flex items-center justify-center">
@@ -443,6 +432,7 @@
                         >
                             <i class="fas fa-camera-rotate"></i>
                         </button>
+
                     </div>
 
                     <!-- Scanner Status -->
@@ -461,76 +451,73 @@
              class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-70 px-4"
              style="z-index: 999999 !important;">
 
-            <div class="relative z-10 flex flex-col items-center px-6 py-6 w-full max-w-sm sm:max-w-md md:max-w-lg lg:max-w-xl space-y-4 bg-white rounded-xl shadow-lg text-center">
+            <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">
                 <!-- Close Button -->
                 <button @click="closeProfileModal"
-                        class="absolute top-3 right-3 z-20 text-gray-600 hover:text-red-500 text-xl font-bold bg-white rounded-full w-7 h-7 flex items-center justify-center shadow-lg transition-colors">
+                        class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
                     ×
                 </button>
 
                 <!-- Modal Header -->
-                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-32 sm:w-40 md:w-48 h-auto" />
+                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />
 
                 <!-- Modal Content - USING KEY TO FORCE RE-RENDER -->
-                <div class="w-full" :key="`modal-${modalKey}`">
+                <div class="p-6" :key="`modal-${modalKey}`">
 
                     <!-- Debug Info -->
-                    <div class="hidden mb-4 p-2 bg-yellow-100 rounded text-xs">
+                    <div class="mb-4 p-2 bg-yellow-100 rounded text-xs">
                         State: {{ studentFound }} | Key: {{ modalKey }} | Time: {{ currentTime }}
                     </div>
 
-                    <div class="mb-4 p-2 bg-gray-50 rounded text-xs">
-                        Time: {{ currentTime }}
-                    </div>
-
                     <!-- LOADING STATE -->
-                    <div v-show="isLoading" class="text-center py-6">
-                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto mb-3"></div>
-                        <p class="text-gray-600 text-sm">Loading student data...</p>
-                        <p class="text-xs text-gray-400 mt-1">Please wait...</p>
+                    <div v-show="isLoading" class="text-center py-8">
+                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                        <p class="text-gray-600">Loading student data...</p>
+                        <p class="text-xs text-gray-400 mt-2">Please wait...</p>
                     </div>
 
                     <!-- STUDENT FOUND STATE -->
-                    <div v-show="isStudentFound" class="flex flex-col items-center space-y-3">
-                        <div class="mb-3">
-                            <div class="rounded-full overflow-hidden shadow border-4 border-white w-24 h-24 sm:w-28 sm:h-28 md:w-32 md:h-32 lg:w-36 lg:h-36">
+                    <div v-show="isStudentFound" class="flex flex-col items-center space-y-4">
+                        <div class="mb-4">
+                            <div class="rounded-full overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
                                 <img
                                     :src="studentImageUrl"
                                     @error="handleImageError"
-                                    class="object-cover w-full h-full"
+                                    class="object-cover rounded-lg w-full h-full"
                                     alt="Student Profile"
                                 />
                             </div>
                         </div>
+                        <div class="text-gray-800 text-center">
+                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">{{ studentName }}</h3>
+                        <p class="text-sm md:text-base lg:text-lg font-medium italic">{{ studentProgram }}</p>
+                        <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
 
-                        <div class="text-gray-800 text-center w-full">
-                            <h3 class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">{{ studentName }}</h3>
-                            <p class="text-sm md:text-base font-medium italic text-gray-600">{{ studentProgram }}</p>
-                            <p class="text-sm md:text-base mt-1 font-mono tracking-widest text-gray-700">ID: {{ studentId }}</p>
-
-                            <div class="mt-4 space-y-2">
-                                <div v-if="userType" class="p-2 text-blue-800 text-lg md:text-xl font-bold bg-blue-50 rounded">
-                                    <div v-if="userType === 'Student'">Student</div>
-                                    <div v-else-if="userType === 'Faculty'">Faculty</div>
-                                    <div v-else>❓ Unknown Status</div>
-                                </div>
-
-                                <div v-if="lastScanType" class="p-2 text-red-800 text-base md:text-lg font-bold bg-red-50 rounded">
-                                    <div v-if="lastScanType === 'time in'">Time In</div>
-                                    <div v-else-if="lastScanType === 'time out'">Time Out</div>
-                                    <div v-else>❓ Unknown Status</div>
-                                </div>
+                        <div class="mt-4 p-3">
+                            <div v-if="lastScanType" class="mt-2 p-2 text-red-800 text-lg font-bold">
+                                <div v-if="lastScanType === 'time in'">Time In</div>
+                                <div v-else-if="lastScanType === 'time out'">Time Out</div>
+                                <div v-else>❓ Unknown Status</div>
+                            </div>
+                            <div v-if="userType" class="mt-2 p-2 text-blue-800 text-2xl font-bold">
+                                <div v-if="userType === 'Student'">Student</div>
+                                <div v-else-if="userType === 'Faculty'">Faculty</div>
+                                <div v-else>❓ Unknown Status</div>
                             </div>
                         </div>
+
+
+
+                    </div>
                     </div>
 
                     <!-- STUDENT NOT FOUND STATE -->
-                    <div v-show="isStudentNotFound" class="text-center py-6">
-                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <span class="text-red-500 text-xl">✗</span>
+                    <div v-show="isStudentNotFound" class="text-center py-8">
+                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-red-500 text-2xl">✗</span>
                         </div>
                         <h3 class="text-lg font-bold text-gray-800 mb-2">Student Not Found</h3>
-                        <p class="text-gray-600 text-sm">No student record found for ID: {{ userIdInput }}</p>
+                        <p class="text-gray-600">No student record found for ID: {{ userIdInput }}</p>
                     </div>
 
                 </div>
@@ -600,7 +587,7 @@
                 <div class="bg-gray-600 text-white px-6 py-4">
                     <h2 class="text-2xl font-bold">
                         Student Attendance Report
-                        <span v-if="selectedStudent" class="hidden text-lg font-normal ml-2">
+                        <span v-if="selectedStudent" class="text-lg font-normal ml-2">
                         - {{ selectedStudent.full_name || selectedStudent.name }}
                     </span>
                     </h2>
