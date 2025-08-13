@@ -330,6 +330,161 @@
                 </p>
             </div>
 
+            <!-- Add this section after the logo section and before the mobile button grid -->
+            <!-- Mobile Search Section -->
+            <div class="flex-shrink-0 px-6 pb-6">
+                <div class="relative">
+                    <input
+                        type="text"
+                        v-model="searchQuery"
+                        @input="onSearchInput"
+                        @focus="searchQuery && performSearch()"
+                        @blur="hideSearchDropdown"
+                        placeholder="Search Students, Faculty & Staff..."
+                        class="w-full bg-black bg-opacity-40 text-white px-4 py-3 rounded-xl border border-white border-opacity-30 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50"
+                    />
+
+                    <!-- Loading indicator -->
+                    <div v-if="isSearching" class="absolute right-3 top-1/2 transform -translate-y-1/2">
+                        <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                    </div>
+
+                    <!-- Clear button -->
+                    <button
+                        v-if="searchQuery && !isSearching"
+                        @click="clearSearch"
+                        class="absolute right-3 top-1/2 transform -translate-y-1/2 text-white hover:text-gray-300"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Mobile Search Results Dropdown -->
+                    <transition name="dropdown">
+                        <div
+                            v-if="showSearchDropdown && (searchResults.students.length > 0 || searchResults.faculty.length > 0)"
+                            class="absolute top-full left-0 right-0 mt-2 bg-black/80 rounded-xl shadow-lg z-[100] max-h-80 overflow-y-auto"
+                        >
+                            <!-- Students Section -->
+                            <div v-if="searchResults.students.length > 0" class="py-2">
+                                <div class="px-4 py-2 bg-blue-600/30 text-white text-xs font-semibold uppercase tracking-wide border-b border-gray-600">
+                                    Students ({{ searchResults.students.length }})
+                                </div>
+                                <div
+                                    v-for="student in searchResults.students.slice(0, 3)"
+                                    :key="`mobile-student-${student.id}`"
+                                    @click="selectPerson(student, 'student')"
+                                    class="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors duration-150"
+                                >
+                                    <div class="flex items-center space-x-3">
+                                        <!-- Student Avatar -->
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-xs">
+                                                <img
+                                                    v-if="student.profile && student.profile.trim()"
+                                                    :src="student.profile"
+                                                    :alt="student.full_name"
+                                                    class="w-full h-full object-cover rounded-full"
+                                                    @error="handleImageError($event)"
+                                                />
+                                                <span v-else>{{ getInitials(student.full_name) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Student Info -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center text-sm font-bold text-white truncate">
+                                                {{ student.full_name }}
+                                                <div class="ml-2 mt-0.5 w-1.5 h-1.5 bg-blue-400 rounded-full" title="Student"></div>
+                                            </div>
+                                            <div class="text-xs text-blue-300 font-medium truncate">
+                                                ID: {{ student.id_number }}
+                                            </div>
+                                            <div class="text-xs text-gray-300 truncate">
+                                                {{ student.program }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Arrow indicator -->
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Faculty & Staff Section -->
+                            <div v-if="searchResults.faculty.length > 0" class="py-2">
+                                <div class="px-4 py-2 bg-green-600/30 text-white text-xs font-semibold uppercase tracking-wide border-b border-gray-600">
+                                    Faculty & Staff ({{ searchResults.faculty.length }})
+                                </div>
+                                <div
+                                    v-for="faculty in searchResults.faculty.slice(0, 3)"
+                                    :key="`mobile-faculty-${faculty.id}`"
+                                    @click="selectPerson(faculty, 'faculty')"
+                                    class="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-600 last:border-b-0 transition-colors duration-150"
+                                >
+                                    <div class="flex items-center space-x-3">
+                                        <!-- Faculty Avatar -->
+                                        <div class="flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-xs">
+                                                <img
+                                                    v-if="faculty.profile && faculty.profile.trim()"
+                                                    :src="faculty.profile"
+                                                    :alt="faculty.name"
+                                                    class="w-full h-full object-cover rounded-full"
+                                                    @error="handleImageError($event)"
+                                                />
+                                                <span v-else>{{ getInitials(faculty.name) }}</span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Faculty Info -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center text-sm font-bold text-white truncate">
+                                                {{ faculty.name }}
+                                                <div class="ml-2 mt-0.5 w-1.5 h-1.5 bg-green-400 rounded-full" title="Faculty/Staff"></div>
+                                            </div>
+                                            <div class="text-xs text-green-300 font-medium truncate">
+                                                ID: {{ faculty.employee_id }}
+                                            </div>
+                                            <div class="text-xs text-gray-300 truncate">
+                                                {{ faculty.department || 'N/A' }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Arrow indicator -->
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Search summary -->
+                            <div class="px-4 py-2 bg-transparent border-t border-gray-600 text-xs text-white text-center">
+                                {{ getTotalResults() }} result(s) found
+                                <span v-if="getTotalResults() >= 6">• Showing first 6 results</span>
+                            </div>
+
+                            <!-- No results message -->
+                            <div v-if="searchQuery && !isSearching && getTotalResults() === 0" class="px-4 py-6 text-sm text-gray-300 text-center">
+                                <svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                                No results found for "{{ searchQuery }}"
+                                <div class="text-xs text-gray-400 mt-1">Try searching by name, ID, department, or program</div>
+                            </div>
+                        </div>
+                    </transition>
+                </div>
+            </div>
+
             <!-- Mobile Button Grid -->
             <div class="flex-grow flex items-center justify-center px-6 pb-20">
                 <div class="w-full max-w-sm">
@@ -647,7 +802,7 @@
                 <div class="bg-gray-600 text-white px-6 py-4">
                     <h2 class="text-2xl font-bold">
                         Student Attendance Report
-                        <span v-if="selectedStudent" class="text-lg font-normal ml-2">
+                        <span v-if="selectedStudent" class="hidden text-lg font-normal ml-2">
                         - {{ selectedStudent.full_name || selectedStudent.name }}
                     </span>
                     </h2>
@@ -676,7 +831,7 @@
                 <div class="bg-gray-600 text-white px-6 py-4">
                     <h2 class="text-2xl font-bold">
                         Faculty & Staff Attendance Report
-                        <span v-if="selectedFaculty" class="text-lg font-normal ml-2">
+                        <span v-if="selectedFaculty" class="hidden text-lg font-normal ml-2">
                         - {{ selectedFaculty.name }}
                     </span>
                     </h2>
