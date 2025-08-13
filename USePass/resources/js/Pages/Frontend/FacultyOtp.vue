@@ -79,7 +79,7 @@
             }
         } catch (error) {
             alert('Failed to resend OTP. Please try again.');
-            console.error(error);
+
         } finally {
             isResending.value = false;
         }
@@ -89,6 +89,16 @@
         if (e.inputType === 'deleteContentBackward') return;
         if (otpDigits[i].length === 1 && i < 5) {
             document.getElementById(`otp-${i + 1}`).focus();
+        }
+    };
+
+    const focusBack = (i, e) => {
+        if (e.key === 'Backspace') {
+            if (otpDigits[i] === '' && i > 0) {
+                // Move focus back to the previous field
+                document.getElementById(`otp-${i - 1}`).focus();
+                otpDigits[i - 1] = ''; // Clear previous digit
+            }
         }
     };
 
@@ -230,6 +240,7 @@
                             :id="`otp-${i}`"
                             maxlength="1"
                             @input="focusNext(i, $event)"
+                            @keydown="focusBack(i, $event)"
                             @paste="handlePaste($event)"
                             type="tel"
                             class="w-12 h-12 text-center text-white text-xl rounded-md border border-white bg-white/10 backdrop-blur-md shadow-sm

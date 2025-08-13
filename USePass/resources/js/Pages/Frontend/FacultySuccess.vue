@@ -66,10 +66,6 @@
                                 <span class="break-all">{{ facultyData?.faculty_email }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="font-medium">Position:</span>
-                                <span>{{ facultyData?.faculty_position }}</span>
-                            </div>
-                            <div class="flex justify-between">
                                 <span class="font-medium">Phone:</span>
                                 <span>{{ facultyData?.faculty_phone_num }}</span>
                             </div>

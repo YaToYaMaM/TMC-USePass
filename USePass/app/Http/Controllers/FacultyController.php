@@ -71,18 +71,29 @@ class FacultyController extends Controller
 
     public function fetchFacultyProfile($faculty_id)
     {
-        $faculty = Faculty::select(
-            'faculty_id as id',
-            \DB::raw("CONCAT(faculty_first_name, ' ', faculty_middle_initial, ' ', faculty_last_name) as fullName"),
-            'faculty_department as program',
-            'faculty_profile_image as profileImage'
-        )->where('faculty_id', $faculty_id)->first();
+        try {
+            $faculty = Faculty::where('faculty_id', $faculty_id)->first();
 
-        return response()->json([
-            'exists' => $faculty !== null,
-            'faculty' => $faculty,
-        ]);
+            if ($faculty) {
+                return response()->json([
+                    'success' => true,
+                    'faculty' => $faculty
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Faculty not found'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving faculty data'
+            ], 500);
+        }
     }
+
+
 
     private function logActivity($userId, $role, $action, $description)
     {

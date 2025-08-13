@@ -58,12 +58,14 @@ Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'veri
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
 
 //Faculty-Staff Registration
-Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
+Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyStaffHome'])->name('faculty.home');
+Route::get('/faculty-staff/register', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
 Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
 Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
 Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
 Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
 Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
+
 
 //Activity Logs
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);

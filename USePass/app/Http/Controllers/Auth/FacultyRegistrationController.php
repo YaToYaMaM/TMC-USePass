@@ -20,7 +20,7 @@ class FacultyRegistrationController extends Controller
             if (Faculty::where('faculty_id', $request->faculty_id)->exists()) {
                 return response()->json([
                     'success' => false,
-                    'error' => 'Faculty ID already exists',
+                    'error' => 'Faculty/Staff ID already exists',
                     'field' => 'faculty_id',
                     'message' => 'This Faculty ID is already registered in the system.'
                 ], 422);
