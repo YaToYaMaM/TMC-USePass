@@ -43,31 +43,49 @@
                 <h3 class="font-bold text-lg mb-3 text-center text-gray-800">Faculty/Staff Information</h3>
                 <div class="space-y-2 text-sm">
                     <div class="flex justify-between">
-                        <span class="font-medium">Faculty/Staff ID:</span>
-                        <span>{{ facultyData?.faculty_id }}</span>
+                        <span class="font-medium">
+                                    Faculty/Staff ID:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_id }}</span>
+                                </span>
                     </div>
                     <div class="flex justify-between">
-                        <span class="font-medium">Name:</span>
-                        <span>{{ fullName }}</span>
+                         <span class="font-medium">
+                                    Name:
+                                    <span class="italic text-gray-600">{{ fullName }}</span>
+                                </span>
                     </div>
 
                     <transition name="fade">
                         <div v-if="showMoreInfo">
                             <div class="flex justify-between">
-                                <span class="font-medium">Department:</span>
-                                <span>{{ facultyData?.faculty_department }}</span>
+                                <span class="font-medium">
+                                    College:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_college }}</span>
+                                </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="font-medium">Unit:</span>
-                                <span>{{ facultyData?.faculty_unit }}</span>
+                                <span class="font-medium">
+                                    Department:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_department }}</span>
+                                </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="font-medium">Email:</span>
-                                <span class="break-all">{{ facultyData?.faculty_email }}</span>
+                               <span class="font-medium">
+                                    Unit:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_unit }}</span>
+                                </span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="font-medium">Phone:</span>
-                                <span>{{ facultyData?.faculty_phone_num }}</span>
+                                <span class="font-medium">
+                                    Email:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_email }}</span>
+                                </span>
+                            </div>
+                            <div class="flex justify-between">
+                                 <span class="font-medium">
+                                    Phone:
+                                    <span class="italic text-gray-600">{{ facultyData?.faculty_phone_num }}</span>
+                                </span>
                             </div>
                         </div>
                     </transition>

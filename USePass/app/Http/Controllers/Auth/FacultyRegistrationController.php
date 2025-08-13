@@ -41,7 +41,12 @@ class FacultyRegistrationController extends Controller
                 'faculty_last_name' => 'required|string|max:100',
                 'faculty_middle_initial' => 'nullable|string|max:1',
                 'faculty_gender' => 'required|string|max:50',
-                'faculty_department' => 'required|string|max:100',
+                'faculty_college' => [
+                    'required',
+                    'string',
+                    'in:College of Teacher Education and Technology (CTET),School of Medicine (SoM),College of Agriculture and Related Sciences (CARS)'
+                ],
+                'faculty_department' => 'required|string|max:150',
                 'faculty_unit' => 'required|in:Tagum,Mabini',
                 'faculty_email' => 'required|email|unique:facultyStaff,faculty_email',
                 'faculty_phone_num' => 'required|string|max:20',
@@ -52,6 +57,8 @@ class FacultyRegistrationController extends Controller
                 'faculty_first_name.required' => 'First name is required.',
                 'faculty_last_name.required' => 'Last name is required.',
                 'faculty_gender.required' => 'Please select a gender.',
+                'faculty_college.required' => 'College is required.',
+                'faculty_college.in' => 'Please select a valid college.',
                 'faculty_department.required' => 'Department is required.',
                 'faculty_unit.required' => 'Please select a unit.',
                 'faculty_email.required' => 'Email address is required.',
@@ -61,6 +68,15 @@ class FacultyRegistrationController extends Controller
                 'profile_image.max' => 'Profile image must be less than 5MB.',
                 'profile_image.mimes' => 'Profile image must be a valid image file (jpeg, png, jpg).'
             ]);
+
+            $collegeDepartments = Faculty::getDepartmentsByCollege($validated['faculty_college']);
+            if (!in_array($validated['faculty_department'], $collegeDepartments)) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'The selected department does not belong to the selected college.',
+                    'field' => 'faculty_department'
+                ], 422);
+            }
 
             // Handle profile image upload
             $imagePath = null;
