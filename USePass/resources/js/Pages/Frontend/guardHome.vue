@@ -30,15 +30,16 @@
 
         <!-- Center Search -->
         <div class="flex items-center space-x-6 justify-end">
+            <!-- Enhanced Search Section in the Desktop Navbar -->
             <div class="flex items-center space-x-2 border-r-2 relative">
                 <div class="relative">
                     <input
                         type="text"
                         v-model="searchQuery"
                         @input="onSearchInput"
-                        @focus="searchQuery && searchStudents()"
+                        @focus="searchQuery && performSearch()"
                         @blur="hideSearchDropdown"
-                        placeholder="Search Students..."
+                        placeholder="Search Students, Faculty & Staff..."
                         class="bg-black bg-opacity-40 text-white px-3 py-1 rounded-[10px] border border-white border-opacity-30 placeholder-white placeholder-opacity-70 focus:outline-none focus:ring-1 focus:ring-white w-64"
                     />
 
@@ -61,21 +62,24 @@
                     <!-- Enhanced Search Results Dropdown -->
                     <transition name="dropdown">
                         <div
-                            v-if="showSearchDropdown && searchResults.length > 0"
+                            v-if="showSearchDropdown && (searchResults.students.length > 0 || searchResults.faculty.length > 0)"
                             class="absolute top-full left-0 right-0 mt-1 bg-black/65 rounded-lg shadow-lg z-[100] max-h-80 overflow-y-auto min-w-80"
                         >
-                            <div class="py-2 bg-transparent">
+                            <!-- Students Section -->
+                            <div v-if="searchResults.students.length > 0" class="py-2 bg-transparent">
+                                <div class="px-4 py-2 bg-blue-600/20 text-white text-xs font-semibold uppercase tracking-wide border-b border-gray-600">
+                                    Students ({{ searchResults.students.length }})
+                                </div>
                                 <div
-                                    v-for="student in searchResults"
-                                    :key="student.id"
-                                    @click="selectStudent(student)"
+                                    v-for="student in searchResults.students.slice(0, 5)"
+                                    :key="`student-${student.id}`"
+                                    @click="selectPerson(student, 'student')"
                                     class="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-150"
                                 >
                                     <div class="flex items-center space-x-3">
-                                        <!-- Student Avatar placeholder -->
+                                        <!-- Student Avatar -->
                                         <div class="flex-shrink-0">
                                             <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
-                                                <!-- Profile Image -->
                                                 <img
                                                     v-if="student.profile && student.profile.trim()"
                                                     :src="student.profile"
@@ -83,16 +87,17 @@
                                                     class="w-full h-full object-cover rounded-full"
                                                     @error="handleImageError($event)"
                                                 />
+                                                <span v-else>{{ getInitials(student.full_name) }}</span>
                                             </div>
                                         </div>
 
                                         <!-- Student Info -->
                                         <div class="flex-1 min-w-0">
-                                            <div class="flex text-sm font-bold text-white truncate">
+                                            <div class="flex items-center text-sm font-bold text-white truncate">
                                                 {{ student.full_name }}
-                                                <div class="ml-2 mt-1 w-2 h-2 bg-green-400 rounded-full" title="Active Student"></div>
+                                                <div class="ml-2 mt-1 w-2 h-2 bg-blue-400 rounded-full" title="Student"></div>
                                             </div>
-                                            <div class="hidden text-xs text-blue-600 font-medium truncate">
+                                            <div class="text-xs text-blue-300 font-medium truncate">
                                                 ID: {{ student.id_number }}
                                             </div>
                                             <div class="text-xs text-white truncate">
@@ -101,13 +106,63 @@
                                             <div v-if="student.major" class="text-xs text-white truncate">
                                                 Major: {{ student.major }}
                                             </div>
-                                            <div v-if="student.unit" class="text-xs text-white truncate">
-                                                Unit: {{ student.unit }}
+                                        </div>
+
+                                        <!-- Arrow indicator -->
+                                        <div class="flex-shrink-0">
+                                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Faculty & Staff Section -->
+                            <div v-if="searchResults.faculty.length > 0" class="py-2 bg-transparent">
+                                <div class="px-4 py-2 bg-green-600/20 text-white text-xs font-semibold uppercase tracking-wide border-b border-gray-600">
+                                    Faculty & Staff ({{ searchResults.faculty.length }})
+                                </div>
+                                <div
+                                    v-for="faculty in searchResults.faculty.slice(0, 5)"
+                                    :key="`faculty-${faculty.id}`"
+                                    @click="selectPerson(faculty, 'faculty')"
+                                    class="px-4 py-3 hover:bg-gray-700 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors duration-150"
+                                >
+                                    <div class="flex items-center space-x-3">
+                                        <!-- Faculty Avatar -->
+                                        <div class="flex-shrink-0">
+                                            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center text-white font-bold text-sm">
+                                                <img
+                                                    v-if="faculty.profile && faculty.profile.trim()"
+                                                    :src="faculty.profile"
+                                                    :alt="faculty.name"
+                                                    class="w-full h-full object-cover rounded-full"
+                                                    @error="handleImageError($event)"
+                                                />
+                                                <span v-else>{{ getInitials(faculty.name) }}</span>
                                             </div>
                                         </div>
 
-                                        <!-- Status indicator -->
-                                        <div class="flex-shrink-0 flex flex-col items-end space-y-1">
+                                        <!-- Faculty Info -->
+                                        <div class="flex-1 min-w-0">
+                                            <div class="flex items-center text-sm font-bold text-white truncate">
+                                                {{ faculty.name }}
+                                                <div class="ml-2 mt-1 w-2 h-2 bg-green-400 rounded-full" title="Faculty/Staff"></div>
+                                            </div>
+                                            <div class="text-xs text-green-300 font-medium truncate">
+                                                ID: {{ faculty.employee_id }}
+                                            </div>
+                                            <div class="text-xs text-white truncate">
+                                                {{ faculty.department || 'N/A' }}
+                                            </div>
+                                            <div v-if="faculty.unit" class="text-xs text-white truncate">
+                                                Unit: {{ faculty.unit }}
+                                            </div>
+                                        </div>
+
+                                        <!-- Arrow indicator -->
+                                        <div class="flex-shrink-0">
                                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                             </svg>
@@ -118,24 +173,24 @@
 
                             <!-- Search summary -->
                             <div class="px-4 py-2 bg-transparent border-t text-xs text-white text-center">
-                                {{ searchResults.length }} student(s) found
-                                <span v-if="searchResults.length >= 10">• Showing first 10 results</span>
+                                {{ getTotalResults() }} result(s) found
+                                <span v-if="getTotalResults() >= 10">• Showing first 10 results</span>
                             </div>
 
                             <!-- No results message -->
-                            <div v-if="searchQuery && !isSearching && searchResults.length === 0" class="px-4 py-6 text-sm text-gray-500 text-center">
+                            <div v-if="searchQuery && !isSearching && getTotalResults() === 0" class="px-4 py-6 text-sm text-gray-500 text-center">
                                 <svg class="w-8 h-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
-                                No students found for "{{ searchQuery }}"
-                                <div class="text-xs text-gray-400 mt-1">Try searching by name, ID, or program</div>
+                                No results found for "{{ searchQuery }}"
+                                <div class="text-xs text-gray-400 mt-1">Try searching by name, ID, department, or program</div>
                             </div>
                         </div>
                     </transition>
                 </div>
 
                 <button
-                    @click="searchStudents"
+                    @click="performSearch"
                     :disabled="!searchQuery.trim() || isSearching"
                     class="text-white pr-8 hover:text-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150"
                 >
@@ -152,7 +207,12 @@
                     <div class="font-semibold uppercase">{{ user.first_name }} {{ user.last_name}}</div>
                     <div class="text-xs text-gray-300">{{ user.role === 'guard' ? 'Security Guard' : 'Unknown'}}</div>
                 </div>
-                <img src="/images/profile.png" alt="Profile" class="w-10 h-10 rounded-full border border-white object-cover" />
+                <img
+                    :src="user.profile_image || '/guard_profiles/user.png'"
+                    @error="handleImageError"
+                    alt="Profile"
+                    class="h-10 w-10 sm:h-10 sm:w-10 rounded-full object-cover border-2 border-white"
+                />
                 <button @click="menuOpen = !menuOpen" class="focus:outline-none" aria-label="Toggle menu">
                     <svg class="h-5 w-5 sm:h-5 sm:w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
@@ -608,19 +668,27 @@
         <div v-if="showFacultyAndStaffAttendanceModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
             <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
                 <!-- Close Button -->
-                <button @click="showFacultyAndStaffAttendanceModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                <button @click="closeFacultyAttendanceModal" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
                     ×
                 </button>
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">Faculty And Staff Attendance Report</h2>
+                    <h2 class="text-2xl font-bold">
+                        Faculty & Staff Attendance Report
+                        <span v-if="selectedFaculty" class="text-lg font-normal ml-2">
+                        - {{ selectedFaculty.name }}
+                    </span>
+                    </h2>
                 </div>
 
                 <!-- Modal Body -->
                 <div class="h-full overflow-y-auto p-6">
                     <div class="space-y-4">
-                        <p>HELLOOO</p>
+                        <FacultyStaffAttendance
+                                :selected-faculty="selectedFaculty"
+                            :key="selectedFaculty ? selectedFaculty.id : 'no-faculty'"
+                        />
                     </div>
                 </div>
             </div>
@@ -665,6 +733,7 @@ import StudentReportTable from "@/Components/StudentReportTable.vue";
 import Ghome from "@/Pages/Frontend/Ghome.vue";
 import QrScanner from "qr-scanner";
 import Glogs from "@/Pages/Frontend/Glogs.vue";
+import FacultyStaffAttendance from "@/Pages/Frontend/FacultyStaffAttendance.vue";
 
 
 // Move reactive data outside of component for proper composition API usage
@@ -677,6 +746,7 @@ const logout = () => {
 export default {
     name: "guardHome",
     components: {
+        FacultyStaffAttendance,
         Glogs,
         SpotTable,
         Ghome,
@@ -1226,12 +1296,15 @@ export default {
             incidentReports: [],
             spotReports: [],
             searchQuery: '',
-            searchResults: [],
+            searchResults: {
+                students: [],
+                faculty: []
+            },
             showSearchDropdown: false,
             isSearching: false,
             searchTimeout: null,
-            allStudentRecords: [],
             selectedStudent: null,
+            selectedFaculty: null,
         };
     },
     computed: {
@@ -1344,15 +1417,40 @@ export default {
                 console.error("Error loading spot reports:", error);
             }
         },
-        async searchStudents() {
+
+        async performSearch() {
             if (!this.searchQuery.trim() || this.searchQuery.length < 2) {
-                this.searchResults = [];
+                this.searchResults = { students: [], faculty: [] };
                 this.showSearchDropdown = false;
                 return;
             }
 
             this.isSearching = true;
 
+            try {
+                // Search both students and faculty simultaneously
+                const [studentsResponse, facultyResponse] = await Promise.all([
+                    this.searchStudents(),
+                    this.searchFaculty()
+                ]);
+
+                this.searchResults = {
+                    students: studentsResponse || [],
+                    faculty: facultyResponse || []
+                };
+
+                this.showSearchDropdown = this.getTotalResults() > 0;
+
+            } catch (error) {
+                console.error('Search error:', error);
+                this.searchResults = { students: [], faculty: [] };
+                this.showSearchDropdown = false;
+            } finally {
+                this.isSearching = false;
+            }
+        },
+
+        async searchStudents() {
             try {
                 const response = await axios.get('/students/search-active', {
                     params: {
@@ -1364,20 +1462,29 @@ export default {
                     }
                 });
 
-                this.searchResults = response.data.students || [];
-                this.showSearchDropdown = this.searchResults.length > 0;
-
+                return response.data.students || [];
             } catch (error) {
-                console.error('Search error:', error);
-                this.searchResults = [];
-                this.showSearchDropdown = false;
+                console.error('Student search error:', error);
+                return [];
+            }
+        },
 
-                // Optional: Show error message to user
-                if (error.response && error.response.status === 500) {
-                    console.error('Server error during search');
-                }
-            } finally {
-                this.isSearching = false;
+        async searchFaculty() {
+            try {
+                const response = await axios.get('/faculty/search-active', {
+                    params: {
+                        query: this.searchQuery.trim()
+                    },
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                return response.data.faculty || [];
+            } catch (error) {
+                console.error('Faculty search error:', error);
+                return [];
             }
         },
 
@@ -1389,41 +1496,68 @@ export default {
 
             // If search query is empty, clear results immediately
             if (!this.searchQuery.trim()) {
-                this.searchResults = [];
+                this.searchResults = { students: [], faculty: [] };
                 this.showSearchDropdown = false;
                 return;
             }
 
             // Debounce search - wait 300ms after user stops typing
             this.searchTimeout = setTimeout(() => {
-                this.searchStudents();
+                this.performSearch();
             }, 300);
         },
 
-        selectStudent(student) {
-            // Transform the search result to match the expected format for ghome component
-            this.selectedStudent = {
-                id: student.id,
-                student_id: student.id, // Add this for compatibility
-                name: student.full_name,
-                full_name: student.full_name,
-                program: student.program,
-                major: student.major,
-                unit: student.unit,
-                id_number: student.id_number,
-                profile: student.profile
-            };
+        selectPerson(person, type) {
+            if (type === 'student') {
+                this.selectedStudent = {
+                    id: person.id,
+                    student_id: person.id,
+                    name: person.full_name,
+                    full_name: person.full_name,
+                    program: person.program,
+                    major: person.major,
+                    unit: person.unit,
+                    id_number: person.id_number,
+                    profile: person.profile
+                };
 
-            // Hide the search dropdown
-            this.showSearchDropdown = false;
+                // Show student attendance modal
+                this.showStudentAttendanceModal = true;
 
-            // Clear the search query
-            this.searchQuery = '';
+            } else if (type === 'faculty') {
+                this.selectedFaculty = {
+                    id: person.id,
+                    name: person.name,
+                    department: person.department,
+                    unit: person.unit,
+                    employee_id: person.employee_id,
+                    profile: person.profile
+                };
 
-            // Show the student attendance modal
-            this.showStudentAttendanceModal = true;
+                // Show faculty attendance modal
+                this.showFacultyAndStaffAttendanceModal = true;
+            }
 
-            console.log('Selected student for attendance:', this.selectedStudent);
+            // Hide the search dropdown and clear search
+            this.hideSearchDropdown();
+            this.searchQuery = person.name || person.full_name;
+
+            console.log(`Selected ${type}:`, type === 'student' ? this.selectedStudent : this.selectedFaculty);
+        },
+
+        getTotalResults() {
+            return this.searchResults.students.length + this.searchResults.faculty.length;
+        },
+
+        getInitials(name) {
+            if (!name) return '?';
+
+            const names = name.trim().split(' ');
+            if (names.length === 1) {
+                return names[0].charAt(0).toUpperCase();
+            }
+
+            return (names[0].charAt(0) + names[names.length - 1].charAt(0)).toUpperCase();
         },
 
         hideSearchDropdown() {
@@ -1434,7 +1568,7 @@ export default {
 
         clearSearch() {
             this.searchQuery = '';
-            this.searchResults = [];
+            this.searchResults = { students: [], faculty: [] };
             this.showSearchDropdown = false;
             if (this.searchTimeout) {
                 clearTimeout(this.searchTimeout);
@@ -1452,6 +1586,12 @@ export default {
             // Reset selected student after a short delay to allow for smooth transition
             setTimeout(() => {
                 this.selectedStudent = null;
+            }, 300);
+        },
+        closeFacultyAttendanceModal() {
+            this.showFacultyAndStaffAttendanceModal = false;
+            setTimeout(() => {
+                this.selectedFaculty = null;
             }, 300);
         },
     },

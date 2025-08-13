@@ -45,6 +45,11 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/guardHome');
     }
 
+    public function facultystaffAttendance()
+    {
+        return Inertia::render('Frontend/FacultyStaffAttendance');
+    }
+
     public function checking()
     {
         return Inertia::render('Frontend/Checking');

@@ -65,7 +65,8 @@ Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resen
 Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
 Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
 Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
-
+Route::get('/facultystaffAttendance', [App\Http\Controllers\FrontendControllers::class, 'facultystaffAttendance'])->name('facultystaffattendance');
+Route::get('/faculty/search-active', [FacultyRecordController::class, 'searchActiveFaculty']);
 
 //Activity Logs
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);
