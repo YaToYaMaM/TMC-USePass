@@ -390,14 +390,6 @@
                             </div>
                         </div>
 
-                        <!-- Loading overlay -->
-                        <div v-if="isLoading" class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                            <div class="text-white text-center">
-                                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
-                                <p class="text-sm">Starting camera...</p>
-                            </div>
-                        </div>
-
                         <!-- Error overlay -->
                         <div v-if="cameraError" class="absolute inset-0 bg-red-50 flex items-center justify-center">
                             <div class="text-red-600 text-center p-4">
