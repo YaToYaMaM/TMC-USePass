@@ -18,10 +18,51 @@ const form = ref({
     faculty_last_name: '',
     faculty_middle_initial: '',
     faculty_gender: '',
+    faculty_college: '',
     faculty_department: '',
     faculty_unit: '',
     faculty_email: '',
     faculty_phone_num: ''
+});
+
+const departmentData = {
+    "College of Teacher Education and Technology (CTET)": [
+        "Bachelor of Early Childhood Education Department",
+        "Bachelor of Elementary Education Department",
+        "Bachelor of Secondary Education - English Department",
+        "Bachelor of Secondary Education - Filipino Department",
+        "Bachelor of Secondary Education - Mathematics Department",
+        "Bachelor of Science in Information Technology Department",
+        "Bachelor of Special Needs Education Department",
+        "Bachelor of Technical-Vocational Teacher Education Department",
+        "General Education Department",
+        "Graduate School - Doctor of Education Department",
+        "Graduate School - Master of Education in Language Teaching Department",
+        "Graduate School - Master of Education in Educational Management Department"
+    ],
+    "School of Medicine (SoM)": [
+        "Medical Faculty",
+        "Administrative Staff",
+        "Laboratory Services",
+        "Support Staff"
+    ],
+    "College of Agriculture and Related Sciences (CARS)": [
+        "Agriculture Program",
+        "Animal Science Program",
+        "Crop Protection Program",
+        "Environmental Science Program",
+        "Food Science Program",
+        "Forestry Program",
+        "Horticulture Program",
+        "Soil Science Program",
+        "Agricultural Extension Program",
+        "Administrative Staff",
+        "Support Staff"
+    ]
+};
+
+const availableDepartments = computed(() => {
+    return form.value.faculty_college ? departmentData[form.value.faculty_college] || [] : [];
 });
 
 const isFormValid = computed(() => {
@@ -29,11 +70,16 @@ const isFormValid = computed(() => {
         form.value.faculty_first_name.trim() &&
         form.value.faculty_last_name.trim() &&
         form.value.faculty_gender &&
+        form.value.faculty_college &&
         form.value.faculty_department.trim() &&
         form.value.faculty_unit &&
         form.value.faculty_email.trim() &&
         form.value.faculty_phone_num.trim();
 });
+
+const onCollegeChange = () => {
+    form.value.faculty_department = '';
+};
 
 const handleImageUpload = (event) => {
     const file = event.target.files[0];
@@ -142,6 +188,7 @@ const formatValidationErrors = (errors) => {
         'faculty_email': 'Email address issue',
         'faculty_first_name': 'First name issue',
         'faculty_last_name': 'Last name issue',
+        'faculty_college': 'College selection issue',
         'faculty_department': 'Department issue',
         'faculty_unit': 'Unit selection issue',
         'faculty_phone_num': 'Phone number issue',
@@ -245,8 +292,7 @@ if (window.location.search.includes('success=true')) {
         class="relative min-h-screen bg-cover bg-center flex flex-col items-center justify-center px-4"
         :style="{ backgroundImage: 'url(/images/bg_tmc.jpg)' }"
     >
-
-        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center mt-2 text-white ">
+        <div class="absolute top-0 left-1/2 transform -translate-x-1/2 z-10 flex flex-col items-center mt-2 text-white">
             <div class="relative z-10 p-2 rounded-lg text-center max-w-lg w-full mb-20">
                 <img
                     src="/images/logo3.png"
@@ -258,7 +304,6 @@ if (window.location.search.includes('success=true')) {
 
         <!-- Dark overlay -->
         <div class="absolute inset-0 bg-black bg-opacity-60"></div>
-
 
         <!-- Registration Form -->
         <div class="relative z-10 mt-40 bg-white bg-opacity-90 rounded-md shadow-md p-6 max-w-4xl mx-auto space-y-6 mb-8">
@@ -342,7 +387,6 @@ if (window.location.search.includes('success=true')) {
                         </div>
                     </div>
 
-                    <!-- Row 2: Faculty ID | Gender | Unit -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium mb-1 text-gray-700">Faculty/Staff ID*</label>
@@ -389,16 +433,63 @@ if (window.location.search.includes('success=true')) {
                     <h3 class="font-bold text-lg mb-4 text-gray-800">Professional Information</h3>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- College Selection -->
                         <div>
-                            <label class="block text-sm font-medium mb-1 text-gray-700">Department*</label>
-                            <input
-                                type="text"
-                                v-model="form.faculty_department"
-                                placeholder="Enter department"
+                            <label class="block text-sm font-medium mb-1 text-gray-700">College*</label>
+                            <select
+                                v-model="form.faculty_college"
+                                @change="onCollegeChange"
                                 class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
                                 required
                                 :disabled="loading"
-                            />
+                            >
+                                <option value="">Select College</option>
+                                <option value="College of Teacher Education and Technology (CTET)">
+                                    College of Teacher Education and Technology (CTET)
+                                </option>
+                                <option value="School of Medicine (SoM)">
+                                    School of Medicine (SoM)
+                                </option>
+                                <option value="College of Agriculture and Related Sciences (CARS)">
+                                    College of Agriculture and Related Sciences (CARS)
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Department Selection -->
+                        <div>
+                            <label class="block text-sm font-medium mb-1 text-gray-700">Department/Program*</label>
+                            <select
+                                v-model="form.faculty_department"
+                                class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
+                                required
+                                :disabled="loading || !form.faculty_college"
+                            >
+                                <option value="">
+                                    {{ form.faculty_college ? 'Select Department/Program' : 'Select College first' }}
+                                </option>
+                                <option
+                                    v-for="department in availableDepartments"
+                                    :key="department"
+                                    :value="department"
+                                >
+                                    {{ department }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!--Show selected info -->
+                    <div v-if="form.faculty_college && form.faculty_department"
+                         class="mt-3 text-sm text-gray-600 bg-blue-50 p-3 rounded-md border-l-4 border-blue-400">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <strong>Selected:</strong> {{ form.faculty_department }}<br>
+                                <span class="text-gray-500 text-xs">{{ form.faculty_college }}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -465,7 +556,7 @@ if (window.location.search.includes('success=true')) {
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="error" class="text-red-600 text-sm">
+                <div v-if="error" class="text-red-600 text-sm bg-red-50 p-3 rounded-md border-l-4 border-red-400">
                     {{ error }}
                 </div>
 
@@ -492,6 +583,17 @@ if (window.location.search.includes('success=true')) {
 body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+select:disabled {
+    background-color: #f9fafb;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.bg-blue-50 {
+    background-color: #eff6ff;
+}
+.space-y-4 > * {
+    transition: all 0.2s ease-in-out;
 }
 </style>
 
