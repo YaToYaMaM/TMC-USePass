@@ -14,24 +14,24 @@ class FacultyRecordController extends Controller
 {
     public function fetchFacultyRecords(Request $request)
     {
-        $query = DB::table('faculty_staff_records')
-            ->join('facultystaff', 'facultystaff.faculty_id', '=', 'faculty_staff_records.faculty_id')
+        $query = DB::table('facultystaff_records')
+        ->join('facultystaff', 'facultystaff.faculty_id', '=', 'facultystaff_records.faculty_id')
             ->select(
                 'facultystaff.faculty_id as faculty_id',
                 DB::raw("CONCAT(facultystaff.faculty_first_name, ' ', facultystaff.faculty_middle_initial, '. ', facultystaff.faculty_last_name) as name"),
-                'faculty.faculty_department',
+                'facultystaff.faculty_department',
                 'facultystaff.faculty_unit',
-                DB::raw('DATE(faculty_staff_records.created_at) as date'),
-                'faculty_staff_records.record_in',
-                'faculty_staff_records.record_out'
+                DB::raw('DATE(facultystaff_records.created_at) as date'),
+                'facultystaff_records.record_in',
+                'facultystaff_records.record_out'
             );
 
         if ($request->filled('date')) {
-            $query->whereDate('faculty_staff_records.created_at', $request->date);
+            $query->whereDate('facultystaff_records.created_at', $request->date);
         }
 
         if ($request->filled('department')) {
-            $query->where('facultystaff.faculty_department', $request->dapartment);
+            $query->where('facultystaff.faculty_department', $request->department); // ✅ fixed typo
         }
 
         $records = $query->get();

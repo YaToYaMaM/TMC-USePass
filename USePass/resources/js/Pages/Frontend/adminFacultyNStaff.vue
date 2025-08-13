@@ -270,10 +270,10 @@ const filteredStudents = computed(() => {
 
             <!-- Top Control Buttons -->
             <div class="flex justify-end right-3 gap-4 mb-4">
-<!--                <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Faculty/Staff</button>-->
+                <!--                <button @click="showModal = true" class="px-4 py-2 bg-white text-black border border-black rounded">+ Faculty/Staff</button>-->
 
                 <div class="flex flex-wrap gap-2">
-<!--                    <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>-->
+                    <!--                    <button @click="triggerImport" class="px-3 py-1 text-sm bg-green-500 text-white rounded">Import</button>-->
 
                     <!-- Button Group -->
                     <div class="inline-flex px-1 py-1 text-[0.775rem] bg-gray-100 p-0.5 rounded-md shadow max-w-fit ">
@@ -301,24 +301,24 @@ const filteredStudents = computed(() => {
                         </button>
                     </div>
                 </div>
-<!--                &lt;!&ndash; Hidden file input &ndash;&gt;-->
-<!--                <input-->
-<!--                    type="file"-->
-<!--                    ref="importFileInput"-->
-<!--                    @change="handleImportFile"-->
-<!--                    accept=".csv,.xlsx,.xls,.docx,.pdf"-->
-<!--                    class="hidden"-->
-<!--                />-->
+                <!--                &lt;!&ndash; Hidden file input &ndash;&gt;-->
+                <!--                <input-->
+                <!--                    type="file"-->
+                <!--                    ref="importFileInput"-->
+                <!--                    @change="handleImportFile"-->
+                <!--                    accept=".csv,.xlsx,.xls,.docx,.pdf"-->
+                <!--                    class="hidden"-->
+                <!--                />-->
             </div>
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <h1 class="text-xl font-bold">Faculty and Staff</h1>
-<!--                    <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">-->
-<!--                        <option>Active</option>-->
-<!--                        <option>Inactive</option>-->
-<!--                        <option>Disabled</option>-->
-<!--                    </select>-->
+                    <!--                    <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">-->
+                    <!--                        <option>Active</option>-->
+                    <!--                        <option>Inactive</option>-->
+                    <!--                        <option>Disabled</option>-->
+                    <!--                    </select>-->
                 </div>
                 <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
 
@@ -338,14 +338,14 @@ const filteredStudents = computed(() => {
                             </svg>
                         </div>
                     </div>
-<!--                    <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">-->
-<!--                        <option value="">All Programs</option>-->
-<!--                        <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>-->
-<!--                        <option value="Education" class="whitespace-nowrap">Bachelor of Education</option>-->
-<!--                        <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>-->
-<!--                        <option value="TVL Teacher Education" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>-->
-<!--                        <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>-->
-<!--                    </select>-->
+                    <!--                    <select v-model="selectedProgram" class="border border-gray-300 p-2 w-fit min-w-[350px] text-sm rounded-lg">-->
+                    <!--                        <option value="">All Programs</option>-->
+                    <!--                        <option value="Information Technology" class="whitespace-nowrap" >Bachelor of Science in Information Technology</option>-->
+                    <!--                        <option value="Education" class="whitespace-nowrap">Bachelor of Education</option>-->
+                    <!--                        <option value="Secondary Education" class="whitespace-nowrap">Bachelor of Secondary Education</option>-->
+                    <!--                        <option value="TVL Teacher Education" class="whitespace-nowrap">Bachelor of Technical Vocational Teacher Education</option>-->
+                    <!--                        <option value="Engineering" class="whitespace-nowrap">Bachelor of Science in Agricultural Biosystem Engineering</option>-->
+                    <!--                    </select>-->
                 </div>
             </div>
             <div v-if="filteredStudents.length === 0" class="text-gray-500 p-4 text-center">
@@ -357,15 +357,15 @@ const filteredStudents = computed(() => {
             <!-- student Card -->
             <div v-for="facultystaff in paginatedStudents" :key="facultystaff.faculty_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
                 <div class="flex items-center gap-4">
-                    <img :src="`/${facultystaff.fcaulty_profile_image}`" class="h-14 w-14 rounded-full border" alt="Student Image" />
+                    <img :src="`/${facultystaff.faculty_profile_image}`" class="h-14 w-14 rounded-full border" alt="Student Image" />
                     <div>
                         <h2 class="text-[18px] font-bold">
                             {{ facultystaff.faculty_first_name }} {{facultystaff.faculty_middle_initial}} {{ facultystaff.faculty_last_name }}
                         </h2>
-<!--                        <p class="text-sm text-gray-600">-->
-<!--                            Bachelor of {{ student.students_program }} Major in-->
-<!--                            {{facultystaff.students_major}}-->
-<!--                        </p>-->
+                        <!--                        <p class="text-sm text-gray-600">-->
+                        <!--                            Bachelor of {{ student.students_program }} Major in-->
+                        <!--                            {{facultystaff.students_major}}-->
+                        <!--                        </p>-->
                     </div>
                 </div>
 
