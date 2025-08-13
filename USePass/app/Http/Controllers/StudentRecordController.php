@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\StudentRecord;
@@ -39,6 +40,9 @@ class StudentRecordController extends Controller
         if ($request->filled('program')) {
             $query->where('students.students_program', $request->program);
         }
+
+        // Sort by latest time in (most recent first)
+        $query->orderBy('students_records.record_in', 'desc');
 
         $records = $query->get();
 
@@ -152,12 +156,24 @@ class StudentRecordController extends Controller
                 'record_out' => null,
             ]);
             $status = 'Time In';
+            $this->logActivity(
+                $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+                $request->user()->role ?? 'System', // Get user role or default to 'System'
+                'Student Time In',
+                "Student ID: {$student->students_id}, Time-In By Guard ID:{$request->user()->id}"
+            );
         } else {
             // Time Out
             $latestRecord->update([
                 'record_out' => $now,
             ]);
             $status = 'Time Out';
+            $this->logActivity(
+                $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+                $request->user()->role ?? 'System', // Get user role or default to 'System'
+                'Student Time Out',
+                "Student ID: {$student->students_id}, Time-Out By Guard ID:{$request->user()->id}"
+            );
         }
 
         // Send email using PHPMailer
@@ -205,6 +221,22 @@ class StudentRecordController extends Controller
             'status' => strtolower($status),
             'time' => $now->toDateTimeString(),
         ]);
+
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 
 }

@@ -351,6 +351,52 @@ const closeSidebarOnMobile = () => {
                     </a>
                 </li>
 
+                <!-- Faculty n' Staff Management - Admin only (Akselot) -->
+                <li v-if="isAdmin" class="relative">
+                    <a
+                        href="/faculty-and-staff"
+                        :class="[
+                                'flex items-center p-3 rounded-xl transition-all duration-300 ease-in-out group relative overflow-hidden',
+                                isCollapsed ? 'justify-center' : 'space-x-3',
+                                isActiveRoute('/faculty-and-staff')
+                                    ? 'bg-[#760000] text-white shadow-lg transform scale-105'
+                                    : 'hover:bg-red-50 hover:text-[#760000] text-gray-700'
+                            ]"
+                    >
+                        <div
+                            v-if="isActiveRoute('/faculty-and-staff')"
+                            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+                        ></div>
+
+                        <div class="flex-shrink-0">
+                            <img
+                                src="@/Icons/students.png"
+                                alt="Students Icon"
+                                width="20"
+                                height="20"
+                                :class="[
+                                    'transition-transform duration-300',
+                                    isActiveRoute('/faculty-and-staff') ? 'scale-110' : 'group-hover:scale-110'
+                                ]"
+                            />
+                        </div>
+
+                        <span
+                            v-if="!isCollapsed"
+                            class="font-medium truncate flex-1 transition-all duration-300"
+                        >
+                                Faculty and Staff
+                            </span>
+
+                        <div
+                            v-if="isCollapsed"
+                            class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
+                        >
+                            Students
+                        </div>
+                    </a>
+                </li>
+
                 <!-- Statistics - Admin only -->
                 <li v-if="isAdmin" class="relative">
                     <a

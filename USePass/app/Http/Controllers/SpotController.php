@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\IncidentReport;
 use App\Models\SpotReport;
 use Illuminate\Http\Request;
@@ -146,6 +147,13 @@ class SpotController extends Controller
             ];
         });
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Spot Report Created',
+            "Spot Report Added: {$report->guard_name} {$report->findings}"
+        );
+
         // Redirect back with the updated reports data
         return redirect()->back()->with([
             'success' => 'Spot report created successfully!',
@@ -160,6 +168,28 @@ class SpotController extends Controller
             'department_representative', 'location', 'time', 'date'
         ]);
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Spot Report Print',
+            "Spot Report Printed: {$reportData->guard_name} {$reportData->findings}"
+        );
+
         return view('reports.spot-print', compact('reportData'));
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 }

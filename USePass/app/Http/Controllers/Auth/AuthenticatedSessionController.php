@@ -36,23 +36,25 @@ class AuthenticatedSessionController extends Controller
 
         $user = Auth::user();
 
-        // Redirect based on role
+        // ✅ Log login activity BEFORE redirect
+        $this->logActivity(
+            $user->id ?? null,
+            $user->role ?? 'System',
+            'Account Login',
+            "User ID: {$user->id}, {$user->first_name} {$user->last_name} Logged In"
+        );
+
+        // 🔁 Redirect based on role
         if ($user->role === 'admin') {
             return redirect()->route('admin.dashboard');
         } elseif ($user->role === 'guard') {
             return redirect()->route('guardHome');
         }
 
-        $this->logActivity(
-            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
-            $request->user()->role ?? 'System', // Get user role or default to 'System'
-            'Account Login',
-            "{$user->first_name} {$user->last_name} Logged In"
-        );
-
         // fallback redirect if role is unknown
         return redirect('/');
     }
+
 
     private function logActivity($userId, $role, $action, $description)
     {
@@ -73,12 +75,21 @@ class AuthenticatedSessionController extends Controller
      */
     public function destroy(Request $request): RedirectResponse
     {
+        $user = Auth::user();
+
+        $this->logActivity(
+            $user->id ?? null,
+            $user->role ?? 'System',
+            'Account Logout',
+            "User ID: {$user->id}, {$user->first_name} {$user->last_name} Logged Out"
+        );
+
         Auth::guard('web')->logout();
 
         $request->session()->invalidate();
-
         $request->session()->regenerateToken();
 
         return redirect('/');
     }
+
 }

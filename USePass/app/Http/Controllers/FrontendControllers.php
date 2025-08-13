@@ -45,6 +45,11 @@ class FrontendControllers extends Controller
         return Inertia::render('Frontend/guardHome');
     }
 
+    public function checking()
+    {
+        return Inertia::render('Frontend/Checking');
+    }
+
     public function ghome()
     {
         return Inertia::render('Frontend/Ghome');
@@ -123,6 +128,16 @@ class FrontendControllers extends Controller
     public function students()
     {
         return Inertia::render('Frontend/secStudents');
+    }
+
+    public function facultyStaffHome()
+    {
+        return Inertia::render('Frontend/FacultyStaffHome');
+    }
+
+    public function facultynstaff()
+    {
+        return Inertia::render('Frontend/adminFacultyNStaff');
     }
 
     public function statistics()

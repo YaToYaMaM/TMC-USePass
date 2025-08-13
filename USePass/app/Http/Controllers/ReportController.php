@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActivityLog;
 use App\Models\IncidentReport;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -80,6 +81,13 @@ class ReportController extends Controller
         $report->incidentPicture = $paths; // This will be automatically cast to JSON
         $report->save();
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Incident Report Created',
+            "Incident Report Added: {$report->guard_name} {$report->what}"
+        );
+
         return back()->with('success', 'Report submitted.');
     }
 
@@ -90,6 +98,28 @@ class ReportController extends Controller
             'where', 'when', 'how', 'why', 'recommendation'
         ]);
 
+        $this->logActivity(
+            $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
+            $request->user()->role ?? 'System', // Get user role or default to 'System'
+            'Incident Report Print',
+            "Incident Report Printed: {$reportData->guard_name} {$reportData->what}"
+        );
+
         return view('reports.print', compact('reportData'));
+    }
+
+    private function logActivity($userId, $role, $action, $description)
+    {
+        try {
+            ActivityLog::create([
+                'user_id' => $userId,
+                'role' => $role,
+                'log_action' => $action,
+                'log_description' => $description,
+            ]);
+        } catch (\Exception $e) {
+            // Log to Laravel's default log if activity logging fails
+            \Log::error('Failed to create activity log: ' . $e->getMessage());
+        }
     }
 }

@@ -103,7 +103,6 @@ const submitRegistration = async () => {
             });
         }
     } catch (err) {
-        console.error('Registration error details:', err.response || err);
 
         if (err.response?.data?.error) {
             // Handle single error message

@@ -44,6 +44,7 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->name('user');
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
+Route::get('/checking', [App\Http\Controllers\FrontendControllers::class, 'checking'])->name('checking');
 
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
@@ -57,12 +58,14 @@ Route::post('/student/verify-otp', [CustomForgotPasswordController::class, 'veri
 Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveStudentParentData'])->name('student.save.data');
 
 //Faculty-Staff Registration
-Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
+Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyStaffHome'])->name('faculty.home');
+Route::get('/faculty-staff/register', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
 Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
 Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
 Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');
 Route::post('/faculty/verify-otp', [FacultyRegistrationController::class, 'verifyFacultyOtp'])->name('faculty.otp.verify');
 Route::get('/faculty-staff/success', [App\Http\Controllers\FrontendControllers::class, 'facultySuccess'])->name('faculty.success');
+
 
 //Activity Logs
 Route::get('/activity-logs', [ActivityLogController::class, 'index']);
@@ -76,6 +79,7 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/dashboard', [FrontendControllers::class, 'dashboard'])->name('admin.dashboard');
     Route::get('/guard', [FrontendControllers::class, 'guard'])->name('guard');
     Route::get('/students', [FrontendControllers::class, 'students'])->name('students');
+    Route::get('/faculty-and-staff', [FrontendControllers::class, 'facultynstaff'])->name('faculty-and-staff');
     Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
