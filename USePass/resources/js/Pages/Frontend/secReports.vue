@@ -99,7 +99,7 @@ const majorsByProgram = {
 
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
-                    <h1 class="text-xl font-bold">Reports</h1>
+                    <h1 class="text-xl font-bold">Student Reports</h1>
 
                 </div>
                 <div class="no-print flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
