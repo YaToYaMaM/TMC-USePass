@@ -4,11 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use App\Models\Faculty;
+
 class FacultyRecords extends Model
 {
     use HasFactory;
-    protected $table = 'faculty_staff_records';
+    protected $table = 'facultystaff_records';
     protected $primaryKey = 'record_id';
     public $incrementing = true;
     protected $keyType = 'int';
@@ -20,6 +20,6 @@ class FacultyRecords extends Model
     ];
     public function faculty()
     {
-        return $this->belongsTo(faculty::class, 'faculty_id', 'faculty_id');
+        return $this->belongsTo(Faculty::class, 'faculty_id', 'faculty_id');
     }
 }

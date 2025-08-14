@@ -147,7 +147,13 @@ Route::post('/users', [GuardController::class, 'store']);
 Route::get('/guard/list', [GuardController::class, 'index']);
 Route::put('/guard/{id}', [GuardController::class, 'update']);
 
+// For manual attendance
+Route::post('/manual-attendance', [StudentRecordController::class, 'manualAttendance']);
+Route::get('/check-student-attendance', [StudentRecordController::class, 'checkStudentAttendance']);
+// For searching students in the modal
+Route::get('/search-students', [StudentRecordController::class, 'searchStudents']);
 Route::get('/students/search-active', [StudentRecordController::class, 'searchActiveStudents']);
+
 Route::get('/student-records', [StudentRecordController::class, 'fetchRecords']);
 Route::get('/students-by-category', [StudentController::class, 'getCountsByCategory']);
 Route::get('/getCounts', [DashboardController::class, 'getCounts']);
@@ -167,6 +173,13 @@ Route::post('/faculty-log', [FacultyRecordController::class, 'facultyLog']);
 Route::post('/faculty', [FacultyController::class, 'store']);
 Route::get('/faculty', [FacultyController::class, 'index']);
 Route::get('/faculty/{faculty_id}', [FacultyController::class, 'fetchFacultyProfile']);
+
+//FacultyStaff Search and Manual attendance
+Route::post('/manual-faculty-attendance', [FacultyRecordController::class, 'manualFacultyAttendance']);
+Route::get('/check-faculty-attendance', [FacultyRecordController::class, 'checkFacultyAttendance']);
+Route::get('/search-faculty', [FacultyRecordController::class, 'searchFaculty']);
+Route::get('/search-active-faculty', [FacultyRecordController::class, 'searchActiveFaculty']);
+
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
