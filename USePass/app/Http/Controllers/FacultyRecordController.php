@@ -7,15 +7,15 @@ use App\Models\Faculty;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\FacultyRecords;
-use App\Models\FacultyStaff;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 
 class FacultyRecordController extends Controller
 {
     public function fetchFacultyRecords(Request $request)
     {
         $query = DB::table('facultystaff_records')
-        ->join('facultystaff', 'facultystaff.faculty_id', '=', 'facultystaff_records.faculty_id')
+            ->join('facultystaff', 'facultystaff.faculty_id', '=', 'facultystaff_records.faculty_id')
             ->select(
                 'facultystaff.faculty_id as faculty_id',
                 DB::raw("CONCAT(facultystaff.faculty_first_name, ' ', facultystaff.faculty_middle_initial, '. ', facultystaff.faculty_last_name) as name"),
@@ -31,8 +31,11 @@ class FacultyRecordController extends Controller
         }
 
         if ($request->filled('department')) {
-            $query->where('facultystaff.faculty_department', $request->department); // ✅ fixed typo
+            $query->where('facultystaff.faculty_department', $request->department);
         }
+
+        // Sort by latest time in (most recent first)
+        $query->orderBy('facultystaff_records.record_in', 'desc');
 
         $records = $query->get();
 
@@ -75,12 +78,9 @@ class FacultyRecordController extends Controller
                     'facultystaff_records.record_out',
                     DB::raw('DATE(facultystaff_records.created_at) as date')
                 )
-                // Only get records from today
                 ->whereDate('facultystaff_records.created_at', today())
-                // Only faculty who have checked in but not out (record_out is null)
                 ->whereNotNull('facultystaff_records.record_in')
                 ->whereNull('facultystaff_records.record_out')
-                // Search by name, ID, department, or unit
                 ->where(function($q) use ($query) {
                     $q->where(DB::raw("CONCAT(facultystaff.faculty_first_name, ' ',
                     CASE
@@ -95,7 +95,7 @@ class FacultyRecordController extends Controller
                         ->orWhere('facultystaff.faculty_email', 'LIKE', "%{$query}%");
                 })
                 ->orderBy('facultystaff.faculty_first_name')
-                ->limit(10) // Limit to 10 results for performance
+                ->limit(10)
                 ->get()
                 ->map(function($faculty) {
                     return [
@@ -113,7 +113,7 @@ class FacultyRecordController extends Controller
                         'record_in' => $faculty->record_in,
                         'record_out' => $faculty->record_out,
                         'date' => $faculty->date,
-                        'status' => 'Present' // Since we're only getting those who haven't checked out
+                        'status' => 'Present'
                     ];
                 });
 
@@ -123,13 +123,252 @@ class FacultyRecordController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Faculty search error: ' . $e->getMessage());
+            Log::error('Faculty search error: ' . $e->getMessage());
 
             return response()->json([
                 'faculty' => [],
                 'message' => 'An error occurred while searching faculty.',
-                'error' => $e->getMessage() // Remove this in production
+                'error' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Manual attendance logging function - Updated to match student logic
+     */
+    public function manualFacultyAttendance(Request $request)
+    {
+        $request->validate([
+            'faculty_id' => 'required|exists:facultystaff,faculty_id',
+            'date' => 'required|date',
+            'time' => 'required|string', // Format: HH:MM
+            'type' => 'required|in:time_in,time_out',
+        ]);
+
+        $facultyId = $request->input('faculty_id');
+        $date = $request->input('date');
+        $time = $request->input('time');
+        $type = $request->input('type');
+
+        try {
+            $faculty = Faculty::where('faculty_id', $facultyId)->first();
+
+            if (!$faculty) {
+                return response()->json(['error' => 'Faculty not found.'], 404);
+            }
+
+            // Combine date and time to create a Carbon instance
+            $dateTime = Carbon::createFromFormat('Y-m-d H:i', $date . ' ' . $time, 'Asia/Manila');
+
+            if ($type === 'time_in') {
+                // Check if there's already a time-in record for this date without time-out
+                $existingRecord = FacultyRecords::where('faculty_id', $facultyId)
+                    ->whereDate('created_at', $date) // Changed to match student logic
+                    ->whereNotNull('record_in')
+                    ->whereNull('record_out')
+                    ->first();
+
+                if ($existingRecord) {
+                    return response()->json([
+                        'error' => 'Faculty already has an active time-in record for this date. Please time-out first.'
+                    ], 422);
+                }
+
+                // Create new time-in record
+                $record = FacultyRecords::create([
+                    'faculty_id' => $facultyId,
+                    'record_in' => $dateTime,
+                    'record_out' => null,
+                    'created_at' => $dateTime,
+                    'updated_at' => $dateTime,
+                ]);
+
+                $status = 'Time In';
+                $this->logActivity(
+                    $request->user()->id ?? null,
+                    $request->user()->role ?? 'System',
+                    'Manual Faculty Time In',
+                    "Faculty ID: {$faculty->faculty_id}, Manual Time-In at {$dateTime->format('Y-m-d H:i:s')} by Guard ID: " . ($request->user()->id ?? 'System')
+                );
+
+            } else { // time_out
+                // Find the latest time-in record for this date that doesn't have time-out
+                $record = FacultyRecords::where('faculty_id', $facultyId)
+                    ->whereDate('created_at', $date) // Changed to match student logic
+                    ->whereNotNull('record_in')
+                    ->whereNull('record_out')
+                    ->latest('created_at') // Changed to match student logic
+                    ->first();
+
+                if (!$record) {
+                    return response()->json([
+                        'error' => 'No active time-in record found for this faculty on the specified date.'
+                    ], 422);
+                }
+
+                // Check if time-out is after time-in
+                if ($dateTime->lt($record->record_in)) {
+                    return response()->json([
+                        'error' => 'Time-out cannot be earlier than time-in.'
+                    ], 422);
+                }
+
+                // Update the record with time-out
+                $record->update([
+                    'record_out' => $dateTime,
+                    'updated_at' => Carbon::now('Asia/Manila'),
+                ]);
+
+                $status = 'Time Out';
+                $this->logActivity(
+                    $request->user()->id ?? null,
+                    $request->user()->role ?? 'System',
+                    'Manual Faculty Time Out',
+                    "Faculty ID: {$faculty->faculty_id}, Manual Time-Out at {$dateTime->format('Y-m-d H:i:s')} by Guard ID: " . ($request->user()->id ?? 'System')
+                );
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => "{$status} recorded successfully for {$faculty->faculty_first_name} {$faculty->faculty_last_name}",
+                'status' => strtolower(str_replace(' ', '_', $status)),
+                'time' => $dateTime->format('Y-m-d H:i:s'),
+                'faculty' => [
+                    'id' => $faculty->faculty_id,
+                    'name' => "{$faculty->faculty_first_name} {$faculty->faculty_middle_initial}. {$faculty->faculty_last_name}",
+                    'department' => $faculty->faculty_department,
+                    'unit' => $faculty->faculty_unit,
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Manual faculty attendance error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'An error occurred while recording attendance.',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Search all faculty (for manual attendance modal)
+     */
+    public function searchFaculty(Request $request)
+    {
+        $query = $request->get('query');
+
+        if (empty($query) || strlen(trim($query)) < 2) {
+            return response()->json([
+                'faculty' => [],
+                'message' => 'Query must be at least 2 characters long.'
+            ]);
+        }
+
+        try {
+            $faculty = DB::table('facultystaff')
+                ->select(
+                    'faculty_id as id',
+                    'faculty_id as employee_id',
+                    DB::raw("CONCAT(faculty_first_name, ' ', COALESCE(faculty_middle_initial, ''), '. ', faculty_last_name) as name"),
+                    'faculty_department as department',
+                    'faculty_unit as unit',
+                    'faculty_email as email',
+                    'faculty_phone_num as phone',
+                    'faculty_profile_image as profile'
+                )
+                ->where(function($q) use ($query) {
+                    $q->where(DB::raw("CONCAT(faculty_first_name, ' ', COALESCE(faculty_middle_initial, ''), '. ', faculty_last_name)"), 'LIKE', "%{$query}%")
+                        ->orWhere('faculty_id', 'LIKE', "%{$query}%")
+                        ->orWhere('faculty_department', 'LIKE', "%{$query}%")
+                        ->orWhere('faculty_unit', 'LIKE', "%{$query}%");
+                })
+                ->orderBy('faculty_first_name')
+                ->limit(15)
+                ->get();
+
+            return response()->json([
+                'faculty' => $faculty,
+                'count' => $faculty->count()
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Faculty search error: ' . $e->getMessage());
+
+            return response()->json([
+                'faculty' => [],
+                'message' => 'An error occurred while searching faculty.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Check faculty attendance status - Fixed to match student logic
+     */
+    public function checkFacultyAttendance(Request $request)
+    {
+        $request->validate([
+            'faculty_id' => 'required',
+            'date' => 'required|date'
+        ]);
+
+        $facultyId = $request->input('faculty_id');
+        $date = $request->input('date');
+
+        try {
+            // Get the most recent record for the faculty on the specified date
+            // This is the key fix - order by created_at DESC and get the latest
+            $record = DB::table('facultystaff_records')
+                ->where('faculty_id', $facultyId)
+                ->whereDate('created_at', $date)
+                ->orderBy('created_at', 'desc') // Get the most recent record
+                ->first();
+
+            if (!$record) {
+                return response()->json([
+                    'record' => null,
+                    'message' => 'No attendance record found for this date.'
+                ]);
+            }
+
+            return response()->json([
+                'record' => [
+                    'id' => $record->id ?? null,
+                    'faculty_id' => $record->faculty_id,
+                    'time_in' => $record->record_in,
+                    'time_out' => $record->record_out,
+                    'date' => $record->created_at,
+                    'status' => $this->getAttendanceStatus($record->record_in, $record->record_out)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Check faculty attendance error: ' . $e->getMessage());
+            Log::error('Faculty ID: ' . $facultyId . ', Date: ' . $date);
+
+            return response()->json([
+                'record' => null,
+                'message' => 'An error occurred while checking attendance status.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Helper method to determine attendance status
+     */
+    private function getAttendanceStatus($timeIn, $timeOut)
+    {
+        $hasTimeIn = $timeIn && $timeIn !== 'N/A' && !is_null($timeIn);
+        $hasTimeOut = $timeOut && $timeOut !== 'N/A' && !is_null($timeOut);
+
+        if ($hasTimeIn && !$hasTimeOut) {
+            return 'present'; // Faculty is currently inside
+        } elseif ($hasTimeIn && $hasTimeOut) {
+            return 'completed'; // Faculty has completed attendance
+        } else {
+            return 'no_record'; // No valid record
         }
     }
 
@@ -142,12 +381,15 @@ class FacultyRecordController extends Controller
         $facultyId = $request->input('faculty_id');
         $now = Carbon::now('Asia/Manila');
 
-        Faculty::where('faculty_id', $facultyId)->first();
+        $faculty = Faculty::where('faculty_id', $facultyId)->first();
 
+        if (!$faculty) {
+            return response()->json(['error' => 'Faculty not found.'], 404);
+        }
 
         // Get today's latest record
         $latestRecord = FacultyRecords::where('faculty_id', $facultyId)
-            ->whereDate('record_in', $now->toDateString())
+            ->whereDate('created_at', $now->toDateString())
             ->latest()
             ->first();
 
@@ -159,11 +401,13 @@ class FacultyRecordController extends Controller
                 'faculty_id' => $facultyId,
                 'record_in' => $now,
                 'record_out' => null,
+                'created_at' => $now,
+                'updated_at' => $now,
             ]);
             $status = 'Time In';
             $this->logActivity(
-                $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
-                $request->user()->role ?? 'System', // Get user role or default to 'System'
+                $request->user()->id ?? null,
+                $request->user()->role ?? 'System',
                 'Faculty/Staff Time In',
                 "Faculty/Staff ID: {$facultyId}, Time-In By Guard ID:{$request->user()->id}"
             );
@@ -171,11 +415,12 @@ class FacultyRecordController extends Controller
             // Time Out
             $latestRecord->update([
                 'record_out' => $now,
+                'updated_at' => $now,
             ]);
             $status = 'Time Out';
             $this->logActivity(
-                $request->user()->id ?? null, // Assuming you have authenticated user, use null if not
-                $request->user()->role ?? 'System', // Get user role or default to 'System'
+                $request->user()->id ?? null,
+                $request->user()->role ?? 'System',
                 'Faculty/Staff Time Out',
                 "Faculty/Staff ID: {$facultyId}, Time-Out By Guard ID:{$request->user()->id}"
             );
@@ -197,8 +442,7 @@ class FacultyRecordController extends Controller
                 'log_description' => $description,
             ]);
         } catch (\Exception $e) {
-            // Log to Laravel's default log if activity logging fails
-            \Log::error('Failed to create activity log: ' . $e->getMessage());
+            Log::error('Failed to create activity log: ' . $e->getMessage());
         }
     }
 }

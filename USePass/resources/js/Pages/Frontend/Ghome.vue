@@ -103,8 +103,6 @@
             </div>
         </div>
 
-
-
         <!-- Main Content Area -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <!-- Loading State -->
@@ -130,19 +128,29 @@
 
             <!-- Students Table -->
             <div v-else class="bg-white shadow rounded-lg overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-200">
-                    <h3 class="text-lg font-medium text-gray-900">Students Inside Campus</h3>
-                    <p class="mt-1 text-sm text-gray-500">
-                        Showing {{ filteredStudents.length }} students for {{ selectedUnit }} unit
-                        <span v-if="localSelectedStudent">
-                            (Selected: {{ localSelectedStudent.name }})
-                        </span>
-                        <span v-else-if="props.selectedStudent && searchText === props.selectedStudent.name">
-                            (Selected: {{ props.selectedStudent.name }})
-                        </span>
-                    </p>
+                <div class="flex justify-between">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-medium text-gray-900">Students Inside Campus</h3>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Showing {{ filteredStudents.length }} students for {{ selectedUnit }} unit
+                            <span v-if="localSelectedStudent">
+                                (Selected: {{ localSelectedStudent.name }})
+                            </span>
+                            <span v-else-if="props.selectedStudent && searchText === props.selectedStudent.name">
+                                (Selected: {{ props.selectedStudent.name }})
+                            </span>
+                        </p>
+                    </div>
+                    <!-- Manual Attendance -->
+                    <div class="flex px-6 py-6">
+                        <button
+                            @click="openManualAttendanceModal"
+                            class="px-4 py-2 rounded-[5px] text-white bg-[#760000] hover:bg-[#5a0000] transition-colors duration-200"
+                        >
+                            Manual Attendance
+                        </button>
+                    </div>
                 </div>
-
                 <div class="overflow-x-auto">
                     <div class="max-h-96 overflow-y-auto">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -282,6 +290,224 @@
                 </div>
             </div>
         </div>
+
+        <!-- Manual Attendance Modal -->
+        <div v-if="showManualAttendanceModal" class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Background overlay -->
+                <div
+                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    @click="closeManualAttendanceModal"
+                ></div>
+
+                <!-- Modal panel -->
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="w-full">
+                                <div class="text-center sm:text-left">
+                                    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">Manual Attendance</h3>
+
+                                    <!-- Student Search/Select -->
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-400 mb-2">Search Student By: ( ID, Name, or Program )</label>
+                                        <div class="relative">
+                                            <input
+                                                type="text"
+                                                v-model="manualAttendanceSearch"
+                                                placeholder="Search for a student..."
+                                                class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            />
+                                            <svg class="absolute left-3 top-2.5 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M15.5 10.5a5 5 0 11-10 0 5 5 0 0110 0z" />
+                                            </svg>
+                                        </div>
+
+                                        <!-- Search Results Dropdown -->
+                                        <div v-if="manualAttendanceSearch && filteredManualStudents.length > 0"
+                                             class="mt-1 max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg">
+                                            <div
+                                                v-for="student in filteredManualStudents.slice(0, 10)"
+                                                :key="student.id"
+                                                @click="selectManualStudent(student)"
+                                                class="px-4 py-2 hover:bg-gray-100 cursor-pointer border-b border-gray-100 last:border-b-0"
+                                            >
+                                                <div class="text-sm font-medium text-gray-900">{{ student.name }}</div>
+                                                <div class="text-xs text-gray-500">{{ student.program }} - {{ student.unit }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Selected Student Info -->
+                                    <div v-if="selectedManualStudent" class="mb-6 p-4 bg-gray-50 rounded-lg">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div>
+                                                <div class="text-sm font-medium text-gray-900">{{ selectedManualStudent.name }}</div>
+                                                <div class="text-xs text-gray-500">{{ selectedManualStudent.program }} - {{ selectedManualStudent.unit }}</div>
+                                            </div>
+                                            <button
+                                                @click="clearManualStudent"
+                                                class="text-gray-400 hover:text-gray-600"
+                                            >
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                        <!-- Loading state for checking attendance status -->
+                                        <div v-if="checkingAttendanceStatus" class="text-center py-2">
+                                            <div class="inline-flex items-center text-sm text-gray-500">
+                                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                </svg>
+                                                Checking attendance status...
+                                            </div>
+                                        </div>
+
+                                        <!-- Student Current Status Display -->
+                                        <div v-if="!checkingAttendanceStatus && selectedManualStudent" class="mb-4">
+                                            <div class="text-xs text-gray-600 mb-2">Current Status for {{ selectedAttendanceDate }}:</div>
+                                            <div class="flex items-center space-x-2">
+                                        <span :class="getCurrentStatusClass()" class="inline-flex px-2 py-1 text-xs font-semibold rounded-full">
+                                            {{ getCurrentStatusText() }}
+                                        </span>
+                                                <div v-if="studentCurrentRecord" class="text-xs text-gray-500">
+                                                    <span v-if="studentCurrentRecord.time_in">In: {{ formatTime(studentCurrentRecord.time_in) }}</span>
+                                                    <span v-if="studentCurrentRecord.time_out" class="ml-2">Out: {{ formatTime(studentCurrentRecord.time_out) }}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Action Buttons - Conditionally shown based on current status -->
+                                        <div class="mt-4 flex space-x-3">
+                                            <!-- Show Time In button only if student hasn't timed in yet or has already timed out -->
+                                            <button
+                                                v-if="canTimeIn()"
+                                                @click="openTimeModal('time_in')"
+                                                :disabled="!selectedManualStudent || checkingAttendanceStatus"
+                                                class="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Time In
+                                            </button>
+
+                                            <!-- Show Time Out button only if student has timed in but hasn't timed out yet -->
+                                            <button
+                                                v-if="canTimeOut()"
+                                                @click="openTimeModal('time_out')"
+                                                :disabled="!selectedManualStudent || checkingAttendanceStatus"
+                                                class="flex-1 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                            >
+                                                Time Out
+                                            </button>
+
+                                            <!-- Show both buttons if no record exists for the selected date -->
+                                            <template v-if="!studentCurrentRecord">
+                                                <button
+                                                    @click="openTimeModal('time_in')"
+                                                    :disabled="!selectedManualStudent || checkingAttendanceStatus"
+                                                    class="flex-1 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    Time In
+                                                </button>
+                                            </template>
+                                        </div>
+
+                                        <!-- Status message -->
+                                        <div v-if="!checkingAttendanceStatus && selectedManualStudent" class="mt-3 text-xs text-gray-500 text-center">
+                                            <template v-if="!studentCurrentRecord">
+                                                No attendance record found for this date.
+                                            </template>
+                                            <template v-else-if="canTimeOut()">
+                                                Student is currently inside campus.
+                                            </template>
+                                            <template v-else-if="canTimeIn()">
+                                                Student can time in again.
+                                            </template>
+                                            <template v-else>
+                                                Student has completed attendance for this date.
+                                            </template>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button
+                            @click="closeManualAttendanceModal"
+                            class="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Selection Modal -->
+        <div v-if="showTimeModal" class="fixed inset-0 z-50 overflow-y-auto">
+            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+                <!-- Background overlay -->
+                <div
+                    class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+                    @click="closeTimeModal"
+                ></div>
+
+                <!-- Modal panel -->
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-md sm:w-full">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="text-center">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+                                Set {{ timeModalType === 'time_in' ? 'Time In' : 'Time Out' }}
+                            </h3>
+
+                            <!-- Student Info -->
+                            <div class="mb-4 p-3 bg-gray-50 rounded-lg">
+                                <div class="text-sm font-medium text-gray-900">{{ selectedManualStudent?.name }}</div>
+                                <div class="text-xs text-gray-500">{{ selectedManualStudent?.program }}</div>
+                            </div>
+
+                            <!-- Time Input -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Time:</label>
+                                <input
+                                    type="time"
+                                    v-model="selectedTime"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+
+                            <!-- Date Input -->
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Select Date:</label>
+                                <input
+                                    type="date"
+                                    v-model="selectedAttendanceDate"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button
+                            @click="submitManualAttendance"
+                            :disabled="!selectedTime || !selectedAttendanceDate"
+                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Submit
+                        </button>
+                        <button
+                            @click="closeTimeModal"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -290,6 +516,7 @@ import Frontend from '@/Layouts/FrontendLayout.vue'
 import {Head} from "@inertiajs/vue3";
 import axios from 'axios';
 import { ref, computed, watch, onMounted } from 'vue';
+import Swal from "sweetalert2";
 
 // Define props using defineProps (Composition API way)
 const props = defineProps({
@@ -310,6 +537,15 @@ const allStudentRecords = ref([]); // Store all records
 const loading = ref(false);
 const error = ref('');
 const localSelectedStudent = ref(null);
+
+// Manual Attendance Modal States
+const showManualAttendanceModal = ref(false);
+const showTimeModal = ref(false);
+const manualAttendanceSearch = ref('');
+const selectedManualStudent = ref(null);
+const timeModalType = ref(''); // 'time_in' or 'time_out'
+const selectedTime = ref('');
+const selectedAttendanceDate = ref(new Date().toISOString().split('T')[0]);
 
 // Computed properties
 const availablePrograms = computed(() => {
@@ -340,6 +576,76 @@ const filteredStudents = computed(() => {
         return matchesUnit && matchesSearch && matchesProgram;
     });
 });
+
+// Manual attendance search results (separate from filtered students)
+// Add these to your existing reactive data
+const manualStudentSearchResults = ref([]);
+const isSearchingManualStudents = ref(false);
+const checkingAttendanceStatus = ref(false);
+const studentCurrentRecord = ref(null);
+
+// Add this computed property
+const filteredManualStudents = computed(() => {
+    return manualStudentSearchResults.value;
+});
+
+// Add this search function
+const searchManualStudents = async (query) => {
+    if (!query || query.length < 2) {
+        manualStudentSearchResults.value = [];
+        return;
+    }
+
+    isSearchingManualStudents.value = true;
+
+    try {
+        const response = await axios.get('/search-students', {
+            params: { query }
+        });
+
+        manualStudentSearchResults.value = response.data.students || [];
+        console.log('Search results:', response.data.students); // Debug log
+    } catch (error) {
+        console.error('Error searching students:', error);
+        manualStudentSearchResults.value = [];
+    } finally {
+        isSearchingManualStudents.value = false;
+    }
+};
+
+// Add this to your checkStudentAttendanceStatus function for debugging
+const checkStudentAttendanceStatus = async (studentId) => {
+    if (!studentId || !selectedAttendanceDate.value) return;
+
+    checkingAttendanceStatus.value = true;
+    studentCurrentRecord.value = null;
+
+    try {
+        console.log('Checking attendance for:', studentId, 'on date:', selectedAttendanceDate.value);
+
+        const response = await axios.get('/check-student-attendance', {
+            params: {
+                student_id: studentId,
+                date: selectedAttendanceDate.value
+            }
+        });
+
+        console.log('Response received:', response.data);
+
+        studentCurrentRecord.value = response.data.record;
+
+        // Refresh the main student records after checking attendance
+        // This ensures the main table also shows the latest data
+        fetchStudentRecords();
+
+    } catch (error) {
+        console.error('Error checking attendance status:', error);
+        studentCurrentRecord.value = null;
+    } finally {
+        checkingAttendanceStatus.value = false;
+    }
+};
+
 
 const totalPages = computed(() => {
     return Math.ceil(filteredStudents.value.length / itemsPerPage.value);
@@ -441,6 +747,89 @@ const formatTime = (timeString) => {
     }
 };
 
+// Manual Attendance Functions
+const openManualAttendanceModal = () => {
+    showManualAttendanceModal.value = true;
+    manualAttendanceSearch.value = '';
+    selectedManualStudent.value = null;
+    studentCurrentRecord.value = null;
+    checkingAttendanceStatus.value = false;
+};
+
+const closeManualAttendanceModal = () => {
+    showManualAttendanceModal.value = false;
+    manualAttendanceSearch.value = '';
+    selectedManualStudent.value = null;
+};
+
+const selectManualStudent = async (student) => {
+    selectedManualStudent.value = student;
+    manualAttendanceSearch.value = student.name;
+    manualStudentSearchResults.value = [];
+
+    // Always check the database for the most recent record
+    // Remove the local data check and always call the API
+    await checkStudentAttendanceStatus(student.id);
+};
+
+const checkStudentRecordInCurrentData = (studentId) => {
+    // This function should be removed or modified to call the API
+    // instead of checking local data
+    checkStudentAttendanceStatus(studentId);
+};
+
+const clearManualStudent = () => {
+    selectedManualStudent.value = null;
+    manualAttendanceSearch.value = '';
+    studentCurrentRecord.value = null;
+};
+
+const openTimeModal = (type) => {
+    timeModalType.value = type;
+    showTimeModal.value = true;
+    // Set current time as default
+    const now = new Date();
+    selectedTime.value = now.toTimeString().slice(0, 5);
+    selectedAttendanceDate.value = selectedDate.value;
+};
+
+const closeTimeModal = () => {
+    showTimeModal.value = false;
+    selectedTime.value = '';
+    timeModalType.value = '';
+};
+
+const submitManualAttendance = () => {
+    const attendanceData = {
+        student_id: selectedManualStudent.value.id,
+        date: selectedAttendanceDate.value,
+        time: selectedTime.value,
+        type: timeModalType.value
+    };
+
+    axios.post('/manual-attendance', attendanceData)
+        .then(response => {
+            Swal.fire({
+                title: 'Success!',
+                text: response.data.message,
+                icon: 'success',
+                confirmButtonText: 'OK'
+            });
+            fetchStudentRecords(); // Refresh data
+            closeTimeModal();
+            closeManualAttendanceModal();
+        })
+        .catch(error => {
+            const errorMsg = error.response?.data?.error || 'Error recording attendance';
+            Swal.fire({
+                title: 'Error!',
+                text: errorMsg,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+};
+
 const fetchStudentRecords = () => {
     loading.value = true;
     error.value = '';
@@ -485,6 +874,102 @@ const fetchStudentRecords = () => {
         .finally(() => {
             loading.value = false;
         });
+};
+
+// New computed properties for button visibility
+const canTimeIn = () => {
+    if (checkingAttendanceStatus.value) return false;
+
+    // Can time in if:
+    // 1. No record exists for the date, OR
+    // 2. Student has already timed out (completed a full cycle)
+    if (!studentCurrentRecord.value) return true;
+
+    const hasTimeIn = studentCurrentRecord.value.time_in &&
+        studentCurrentRecord.value.time_in !== 'N/A' &&
+        studentCurrentRecord.value.time_in !== null &&
+        studentCurrentRecord.value.time_in !== 'null';
+
+    const hasTimeOut = studentCurrentRecord.value.time_out &&
+        studentCurrentRecord.value.time_out !== 'N/A' &&
+        studentCurrentRecord.value.time_out !== null &&
+        studentCurrentRecord.value.time_out !== 'null';
+
+    // Can time in if student has completed a full cycle (both time in and out)
+    return !hasTimeIn || (hasTimeIn && hasTimeOut);
+};
+
+const canTimeOut = () => {
+    if (checkingAttendanceStatus.value) return false;
+
+    // Can time out if:
+    // 1. Student has timed in but not timed out yet
+    if (!studentCurrentRecord.value) return false;
+
+    const hasTimeIn = studentCurrentRecord.value.time_in &&
+        studentCurrentRecord.value.time_in !== 'N/A' &&
+        studentCurrentRecord.value.time_in !== null &&
+        studentCurrentRecord.value.time_in !== 'null';
+
+    const hasTimeOut = studentCurrentRecord.value.time_out &&
+        studentCurrentRecord.value.time_out !== 'N/A' &&
+        studentCurrentRecord.value.time_out !== null &&
+        studentCurrentRecord.value.time_out !== 'null';
+
+    return hasTimeIn && !hasTimeOut;
+};
+
+
+const getCurrentStatusText = () => {
+    if (checkingAttendanceStatus.value) return 'Checking...';
+
+    if (!studentCurrentRecord.value) {
+        return 'No Record';
+    }
+
+    const hasTimeIn = studentCurrentRecord.value.time_in &&
+        studentCurrentRecord.value.time_in !== 'N/A' &&
+        studentCurrentRecord.value.time_in !== null &&
+        studentCurrentRecord.value.time_in !== 'null';
+
+    const hasTimeOut = studentCurrentRecord.value.time_out &&
+        studentCurrentRecord.value.time_out !== 'N/A' &&
+        studentCurrentRecord.value.time_out !== null &&
+        studentCurrentRecord.value.time_out !== 'null';
+
+    if (hasTimeIn && !hasTimeOut) {
+        return 'Present (Inside Campus)';
+    } else if (hasTimeIn && hasTimeOut) {
+        return 'Completed';
+    } else {
+        return 'No Record';
+    }
+};
+
+const getCurrentStatusClass = () => {
+    if (checkingAttendanceStatus.value) return 'bg-gray-100 text-gray-600';
+
+    if (!studentCurrentRecord.value) {
+        return 'bg-gray-100 text-gray-800';
+    }
+
+    const hasTimeIn = studentCurrentRecord.value.time_in &&
+        studentCurrentRecord.value.time_in !== 'N/A' &&
+        studentCurrentRecord.value.time_in !== null &&
+        studentCurrentRecord.value.time_in !== 'null';
+
+    const hasTimeOut = studentCurrentRecord.value.time_out &&
+        studentCurrentRecord.value.time_out !== 'N/A' &&
+        studentCurrentRecord.value.time_out !== null &&
+        studentCurrentRecord.value.time_out !== 'null';
+
+    if (hasTimeIn && !hasTimeOut) {
+        return 'bg-green-100 text-green-800'; // Present
+    } else if (hasTimeIn && hasTimeOut) {
+        return 'bg-blue-100 text-blue-800'; // Completed
+    } else {
+        return 'bg-gray-100 text-gray-800'; // No Record
+    }
 };
 
 const selectUnit = (unit) => {
@@ -570,8 +1055,20 @@ watch(searchText, (newSearchText, oldSearchText) => {
     // Reset pagination when searching
     currentPage.value = 1;
 });
-// Note: removed the selectedUnit watcher that was calling fetchStudentRecords
-// since we now do frontend filtering
+
+watch(manualAttendanceSearch, (newValue) => {
+    if (newValue && newValue.length >= 2) {
+        searchManualStudents(newValue);
+    } else {
+        manualStudentSearchResults.value = [];
+    }
+});
+
+watch(selectedAttendanceDate, () => {
+    if (selectedManualStudent.value) {
+        checkStudentRecordInCurrentData(selectedManualStudent.value.id);
+    }
+});
 
 // Lifecycle
 onMounted(() => {
