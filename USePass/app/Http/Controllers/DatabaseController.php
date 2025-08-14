@@ -98,70 +98,75 @@ class DatabaseController extends Controller
     {
         try {
             $request->validate([
-                'backup_file' => 'required|file|max:102400'
+                'backup_file' => 'required|file|max:102400|mimetypes:text/plain,application/sql'
             ]);
 
             $uploadedFile = $request->file('backup_file');
-
-            // Create backups directory if it doesn't exist
-            $backupsDir = storage_path('app/backups');
-            if (!is_dir($backupsDir)) {
-                mkdir($backupsDir, 0755, true);
-            }
-
-            // Read file content directly from temp file
             $sqlContent = file_get_contents($uploadedFile->getPathname());
 
+            // Clean the SQL content by removing mysqldump warnings
+            $sqlContent = preg_replace('/^mysqldump:.*$/m', '', $sqlContent);
+            $sqlContent = trim($sqlContent);
+
             if (empty($sqlContent)) {
-                return response()->json(['error' => 'Uploaded file is empty'], 500);
-            }
-
-            // Save to our location
-            $fileName = 'restore-' . time() . '.sql';
-            $fullPath = $backupsDir . '/' . $fileName;
-
-            if (!file_put_contents($fullPath, $sqlContent)) {
-                return response()->json(['error' => 'Failed to save file'], 500);
+                return response()->json(['error' => 'Uploaded file is empty or only contained warnings'], 500);
             }
 
             // Database config
-            $dbHost = config('database.connections.mysql.host', 'localhost');
+            $dbHost = config('database.connections.mysql.host', '127.0.0.1');
             $dbName = config('database.connections.mysql.database');
             $dbUser = config('database.connections.mysql.username');
             $dbPass = config('database.connections.mysql.password');
 
-            $mysqlPath = 'C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe';
+            // Use mysql from PATH if not found at hardcoded location
+            $mysqlPath = 'mysql';
+            if (file_exists('C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe')) {
+                $mysqlPath = 'C:/laragon/bin/mysql/mysql-8.4.3-winx64/bin/mysql.exe';
+            }
+
+            // Create temporary file with cleaned SQL
+            $tempFile = tempnam(sys_get_temp_dir(), 'sqlrestore');
+            file_put_contents($tempFile, $sqlContent);
 
             // Build command
-            $passwordArg = empty($dbPass) ? '' : "--password=\"{$dbPass}\"";
             $command = sprintf(
                 '"%s" --host=%s --user=%s %s %s < "%s" 2>&1',
                 $mysqlPath,
-                $dbHost,
-                $dbUser,
-                $passwordArg,
-                $dbName,
-                $fullPath
+                escapeshellarg($dbHost),
+                escapeshellarg($dbUser),
+                empty($dbPass) ? '' : '--password='.escapeshellarg($dbPass),
+                escapeshellarg($dbName),
+                $tempFile
             );
 
+            \Log::debug("Executing command: ".$command);
             exec($command, $output, $resultCode);
 
             // Clean up
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
             }
 
             if ($resultCode === 0) {
                 return response()->json(['success' => 'Database restored successfully']);
             } else {
+                \Log::error("Restore failed", [
+                    'output' => $output,
+                    'result_code' => $resultCode,
+                    'command' => $command
+                ]);
                 return response()->json([
                     'error' => 'Restore failed',
-                    'output' => $output,
+                    'output' => implode("\n", $output),
                     'result_code' => $resultCode
                 ], 500);
             }
 
         } catch (\Exception $e) {
+            \Log::error("Restore exception", [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             return response()->json([
                 'error' => 'Restore failed',
                 'details' => $e->getMessage()
