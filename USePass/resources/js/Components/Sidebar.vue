@@ -463,14 +463,51 @@ const closeSidebarOnMobile = () => {
                             v-if="!isCollapsed"
                             class="font-medium truncate flex-1 transition-all duration-300"
                         >
-                                Attendance Reports
+                                Student Attendance
                             </span>
 
                         <div
                             v-if="isCollapsed"
                             class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
                         >
-                            Attendance Reports
+                            Student Attendance
+                        </div>
+                    </a>
+                </li>
+                <li v-if="isAdmin" class="relative">
+                    <a
+                        href="/facultynstaffAttendance"
+                        :class="[
+                                'flex items-center p-3 rounded-xl transition-all duration-300 ease-in-out group relative overflow-hidden',
+                                isCollapsed ? 'justify-center' : 'space-x-3',
+                                isActiveRoute('/facultynstaffAttendance')
+                                    ? 'bg-[#760000] text-white shadow-lg transform scale-105'
+                                    : 'hover:bg-red-50 hover:text-[#760000] text-gray-700'
+                            ]"
+                    >
+                        <div
+                            v-if="isActiveRoute('/facultynstaffAttendance')"
+                            class="absolute left-0 top-1/2 transform -translate-y-1/2 w-1 h-8 bg-white rounded-r-full"
+                        ></div>
+
+                        <div class="flex-shrink-0">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+
+                        <span
+                            v-if="!isCollapsed"
+                            class="font-medium truncate flex-1 transition-all duration-300"
+                        >
+                                Faculty Attendance
+                            </span>
+
+                        <div
+                            v-if="isCollapsed"
+                            class="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50"
+                        >
+                            Faculty Attendance
                         </div>
                     </a>
                 </li>
