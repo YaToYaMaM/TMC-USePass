@@ -115,6 +115,7 @@ class FacultyRegistrationController extends Controller
                 'faculty_last_name' => $validated['faculty_last_name'],
                 'faculty_middle_initial' => $validated['faculty_middle_initial'],
                 'faculty_gender' => $validated['faculty_gender'],
+                'faculty_college' => $validated['faculty_college'],
                 'faculty_department' => $validated['faculty_department'],
                 'faculty_unit' => $validated['faculty_unit'],
                 'faculty_email' => $validated['faculty_email'],

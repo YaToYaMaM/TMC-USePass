@@ -14,7 +14,7 @@
                 class="mx-auto mb-4 w-[300px] h-auto"
             />
             <h1 class="text-white font-extrabold text-2xl mb-2">
-                Faculty/Staff Portal
+                Faculty/Staff Registration
             </h1>
             <p class="text-white italic text-base">
                 Access your QR code or register for the first time
@@ -187,9 +187,8 @@ const checkFacultyId = async () => {
     console.log('Checking faculty ID:', facultyId.value.trim());
 
     try {
-        const response = await axios.get(`/faculty/${facultyId.value.trim()}`);
+        const response = await axios.get(`/faculty/qr/${facultyId.value.trim()}`);
 
-        console.log('API Response:', response.data);
 
         if (response.data.success && response.data.faculty) {
             facultyData.value = response.data.faculty;
