@@ -179,4 +179,8 @@ class FrontendControllers extends Controller
             'facultyData' => $request->facultyData,
         ]);
     }
+
+    public function backupnRestore(){
+        return Inertia::render('Frontend/Backup&Restore');
+    }
 }
