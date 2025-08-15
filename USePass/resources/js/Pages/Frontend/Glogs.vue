@@ -48,7 +48,69 @@
                     <p class="mt-1 text-sm text-gray-500">Total: {{ totalLogs }} logs</p>
                 </div>
 
-                <div class="overflow-x-auto">
+                <!--MOBILE PART-->
+                <div class="block lg:hidden">
+                    <div class="p-4">
+                        <div v-if="loading && logs.length === 0">
+                            <div class="flex items-center justify-center">
+                                <svg class="animate-spin h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor"
+                                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Loading logs...
+                            </div>
+                        </div>
+
+                        <div v-else-if="filteredLogs.length === 0">
+                            <p class="px-6 py-4 text-center text-gray-500">
+                                No logs found for the selected date.
+                            </p>
+                        </div>
+
+                        <div v-else class="space-y-3 max-h-96 overflow-y-auto">
+                            <div
+                                v-for="(log, index) in paginatedLogs"
+                                :key="log.log_id || index"
+                                class="hover:bg-gray-50 transition-colors duration-150"
+                            >
+                                <!-- Logs Details Grid -->
+                                <div class="grid grid-cols-1 text-xs px-1 py-1 border-b border-gray-200">
+                                    <div class="space-y-1">
+                                        <div class="inline-block items-center">
+                                            <span class="text-black text-[15px] font-bold"> {{ log.user ? log.user.name : 'Unknown User' }}</span>
+                                            <div>
+                                                <span class="font-medium text-gray-900"> {{ log.role == 'guard' ? 'Security Guard' : 'No Role'}}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Description:</span>
+                                            <div>
+                                                <span class="font-medium text-gray-900"> {{ log.log_description }}</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <span class="text-gray-500">Date | Time:</span>
+                                            <div>
+                                                <span class="font-medium text-gray-900"> {{ formatTime(log.created_at) }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex justify-center">
+                                            <span class="inline-flex px-2 py-0 mt-2 mb-2 text-xs font-semibold rounded-full"
+                                                  :class="getActionClass(log.log_action)">
+                                                  {{ log.log_action }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!--DESKTOP PART-->
+                <div class="hidden lg:block overflow-x-auto">
                     <div class="max-h-96 overflow-y-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 sticky top-0">

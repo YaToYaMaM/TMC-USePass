@@ -80,24 +80,6 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Optional: Mobile-specific action buttons -->
-                        <div class="block sm:hidden pt-2 border-t border-gray-200">
-                            <div class="flex space-x-3">
-                                <button
-                                    @click="clearFilters"
-                                    class="flex-1 px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
-                                >
-                                    Clear All
-                                </button>
-                                <button
-                                    @click="applyFilters"
-                                    class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
-                                >
-                                    Apply Filters
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -128,31 +110,94 @@
 
             <!-- Faculty/Staff Table -->
             <div v-else class="bg-white shadow rounded-lg overflow-hidden">
-                <div class="flex justify-between">
-                    <div class="px-6 py-4 border-b border-gray-200">
-                        <h3 class="text-lg font-medium text-gray-900">Faculty/Staff Inside Campus</h3>
-                        <p class="mt-1 text-sm text-gray-500">
-                            Showing {{ filteredFaculty.length }} faculty/staff members for {{ selectedUnit }} unit
-                            <span v-if="localSelectedFaculty">
-                                (Selected: {{ localSelectedFaculty.name }})
-                            </span>
-                            <span v-else-if="props.selectedFaculty && searchText === props.selectedFaculty.name">
-                                (Selected: {{ props.selectedFaculty.name }})
-                            </span>
-                        </p>
-                    </div>
-                    <!-- Manual Attendance -->
-                    <div class="flex px-6 py-6">
-                        <button
-                            @click="openManualAttendanceModal"
-                            class="px-4 py-2 rounded-[5px] text-white bg-[#760000] hover:bg-[#5a0000] transition-colors duration-200"
-                        >
-                            Manual Attendance
-                        </button>
-                    </div>
+              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center p-4 sm:p-6 border-b border-gray-200">
+                <div class="mb-3 sm:mb-0">
+                  <h3 class="text-base sm:text-lg font-medium text-gray-900">Faculty/Staff Inside Campus</h3>
+                  <p class="mt-1 text-xs sm:text-sm text-gray-500">
+                    Showing {{ filteredFaculty.length }} faculty/staff members for {{ selectedUnit }} unit
+                    <span v-if="localSelectedFaculty" class="block sm:inline">
+                      (Selected: {{ localSelectedFaculty.name }})
+                    </span>
+                    <span v-else-if="props.selectedFaculty && searchText === props.selectedFaculty.name" class="block sm:inline">
+                      (Selected: {{ props.selectedFaculty.name }})
+                    </span>
+                  </p>
                 </div>
+                <!-- Manual Attendance -->
+                <div class="flex">
+                  <button
+                      @click="openManualAttendanceModal"
+                      class="w-full sm:w-auto px-3 sm:px-4 py-2 rounded-md text-white bg-[#760000] hover:bg-[#5a0000] transition-colors duration-200 text-sm"
+                  >
+                    Manual Attendance
+                  </button>
+                </div>
+              </div>
 
-                <div class="overflow-x-auto">
+              <!-- Mobile Card Layout -->
+              <div class="block lg:hidden">
+                <div class="p-4">
+                  <div v-if="filteredFaculty.length === 0" class="text-center py-8">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-gray-900">No faculty/staff found</h3>
+                    <p class="mt-1 text-sm text-gray-500">No faculty/staff members are currently inside the campus matching your filters.</p>
+                  </div>
+
+                  <div v-else class="space-y-3 max-h-96 overflow-y-auto">
+                    <div
+                        v-for="(faculty, index) in paginatedFaculty"
+                        :key="faculty.id"
+                        @click="selectFaculty(faculty)"
+                        :class="[
+                                    'bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors duration-150',
+                                    (localSelectedFaculty?.id === faculty.id ||
+                                     (props.selectedFaculty?.id === faculty.id && searchText === props.selectedFaculty.name)) &&
+                                     getStatusText(faculty) === 'Present' ? 'bg-blue-50 border-blue-300 border-l-4 border-l-[#760000]' : 'hover:bg-gray-100'
+                                ]"
+                    >
+                      <!-- Faculty Header -->
+                      <div class="flex justify-between items-start mb-3">
+                        <div class="flex-1 min-w-0">
+                          <h5 class="text-sm font-medium text-gray-900 truncate">{{ faculty.name }}</h5>
+                          <p class="hidden text-xs text-gray-500 mt-1">ID: {{ faculty.employee_id }}</p>
+                          <p class="text-xs text-gray-500 mt-1">Department: {{ faculty.department || 'N/A' }}</p>
+                        </div>
+                      </div>
+
+                      <!-- Faculty Details Grid -->
+                      <div class="grid grid-cols-1 text-xs">
+                        <div class="space-y-1">
+                          <div>
+                            <span class="text-gray-500">Date:</span>
+                            <span class="ml-1 font-medium text-gray-900">{{ formatDate(faculty.date) }}</span>
+                          </div>
+                          <div>
+                            <span class="text-gray-500">Unit:</span>
+                            <span class="ml-1 font-medium text-gray-900">{{ faculty.unit || 'N/A' }}</span>
+                          </div>
+                          <div>
+                            <span class="text-gray-500">Time In:</span>
+                            <span class="ml-1 font-medium text-gray-900">{{ formatTime(faculty.time_in) }}</span>
+                          </div>
+                          <div>
+                            <span class="text-gray-500">Time Out:</span>
+                            <span class="ml-1 font-medium text-gray-900">{{ formatTime(faculty.time_out) }}</span>
+                          </div>
+                          <div>
+                            <span :class="getStatusClass(faculty)" class="flex mt-2 px-2 py-0 text-xs justify-center font-medium rounded-full whitespace-nowrap">
+                              {{ getStatusText(faculty) }}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+                <div class="hidden lg:block overflow-x-auto">
                     <div class="max-h-96 overflow-y-auto">
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50 sticky top-0">
@@ -182,7 +227,7 @@
                                     <div class="flex items-center">
                                         <div class="ml-4">
                                             <div class="text-sm font-medium text-gray-900">{{ faculty.name }}</div>
-                                            <div class="text-sm text-gray-500">ID: {{ faculty.employee_id }}</div>
+                                            <div class="hidden text-sm text-gray-500">ID: {{ faculty.employee_id }}</div>
                                         </div>
                                     </div>
                                 </td>

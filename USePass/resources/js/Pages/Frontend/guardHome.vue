@@ -317,6 +317,17 @@
                                placeholder="Enter Student ID" />
                     </div>
                 </div>
+                <!-- User ID input -->
+                <div class="flex items-center justify-center pt-2">
+                    <div class="relative w-full max-w-xs text-center">
+                        <button
+                            @click="openScanModal"
+                            class="px-16 py-1 bg-[#760000] text-white rounded-[5px] hover:bg-gray-500 transition-colors duration-300 ease-in-out"
+                        >
+                            Open Scan
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -488,20 +499,21 @@
             <!-- Mobile Button Grid -->
             <div class="flex-grow flex items-center justify-center px-6 pb-20">
                 <div class="w-full max-w-sm">
+                    <button
+                        @click="openScanModal"
+                        class="w-full mb-6 bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3"
+                    >
+                        <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                            <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
+                                <path d="M13 13h1.5v1.5H13zM14.5 14.5H16V16h-1.5zM16 13h1.5v1.5H16zM13 16h1.5v1.5H13zM14.5 17.5H16V19h-1.5zM16 16h1.5v1.5H16zM17.5 14.5H19V16h-1.5zM17.5 17.5H19V19h-1.5zM22 17.5h-1.5V19H22zM22 13h-1.5v1.5H22zM20.5 19H22v1.5h-1.5z"/>
+                            </svg>
+                        </div>
+                        <span class="font-semibold text-sm">Scan QR</span>
+                    </button>
                     <div class="grid grid-cols-2 gap-6">
                         <!-- Scan QR Button -->
-                        <button
-                            @click="openScanModal"
-                            class="bg-blue-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3"
-                        >
-                            <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
-                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M3 11h8V3H3v8zm2-6h4v4H5V5zM13 3v8h8V3h-8zm6 6h-4V5h4v4zM3 21h8v-8H3v8zm2-6h4v4H5v-4z"/>
-                                    <path d="M13 13h1.5v1.5H13zM14.5 14.5H16V16h-1.5zM16 13h1.5v1.5H16zM13 16h1.5v1.5H13zM14.5 17.5H16V19h-1.5zM16 16h1.5v1.5H16zM17.5 14.5H19V16h-1.5zM17.5 17.5H19V19h-1.5zM22 17.5h-1.5V19H22zM22 13h-1.5v1.5H22zM20.5 19H22v1.5h-1.5z"/>
-                                </svg>
-                            </div>
-                            <span class="font-semibold text-sm">Scan QR</span>
-                        </button>
+
 
                         <!-- Report Incident Button -->
                         <button @click="showIncidentModal = true"
@@ -549,7 +561,7 @@
 
                         <!-- Visitor Button -->
                         <button
-                            class="mobile-btn bg-gray-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                            class="mobile-btn bg-gray-500 hover:bg-gray-700 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
                             <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
@@ -560,7 +572,7 @@
 
                         <!-- Logs Button -->
                         <button @click="showLogsModal = true"
-                                class="mobile-btn bg-yellow-500 hover:bg-blue-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
+                                class="mobile-btn bg-yellow-500 hover:bg-yellow-600 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
                             <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
@@ -663,82 +675,67 @@
     <!-- Student Profile Modal -->
     <transition name="fade">
         <div v-if="showProfileModal"
-             class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-70 px-4"
-             style="z-index: 999999 !important;">
+             class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-70 px-2 sm:px-4 overflow-y-auto">
 
-            <div class="relative z-10 flex flex-col items-center px-4 sm:px-8 md:px-12 lg:px-20 py-6 md:py-10 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg xl:max-w-xl 2xl:max-w-2xl space-y-6 md:space-y-8 bg-white rounded-xl shadow-lg text-center">
+            <div class="relative z-10 flex flex-col items-center w-full max-w-sm sm:max-w-md md:max-w-lg space-y-4 bg-white rounded-xl shadow-lg text-center p-4 sm:p-6">
                 <!-- Close Button -->
                 <button @click="closeProfileModal"
-                        class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                        class="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow">
                     ×
                 </button>
 
                 <!-- Modal Header -->
-                <img src="/images/Logo2.png" alt="USePass Logo" class="mb-2 w-48 sm:w-56 md:w-64 lg:w-80 h-auto" />
+                <img src="/images/Logo2.png" alt="USePass Logo" class="w-40 h-auto mb-2" />
 
-                <!-- Modal Content - USING KEY TO FORCE RE-RENDER -->
-                <div class="p-6" :key="`modal-${modalKey}`">
+                <!-- Time Display -->
+                <div class="text-xs bg-yellow-100 text-gray-700 rounded px-2 py-1">
+                    Time: {{ currentTime }}
+                </div>
 
-                    <!-- Debug Info -->
-                    <div class="mb-4 p-2 bg-yellow-100 rounded text-xs">
-                        State: {{ studentFound }} | Key: {{ modalKey }} | Time: {{ currentTime }}
+                <!-- Loading State -->
+                <div v-show="isLoading" class="text-center py-4">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto mb-2"></div>
+                    <p class="text-xs text-gray-400">Please wait...</p>
+                </div>
+
+                <!-- Student Found -->
+                <div v-show="isStudentFound" class="flex flex-col items-center space-y-2">
+                    <div class="rounded-full overflow-hidden border-4 border-white shadow w-32 h-32">
+                        <img :src="studentImageUrl"
+                             @error="handleImageError"
+                             class="object-cover w-full h-full"
+                             alt="Student Profile" />
                     </div>
+                    <h3 class="text-base font-bold text-gray-800">{{ studentName }}</h3>
+                    <p class="text-sm italic text-gray-600">{{ studentProgram }}</p>
+                    <p class="text-sm font-mono text-gray-700">ID: {{ studentId }}</p>
 
-                    <!-- LOADING STATE -->
-                    <div v-show="isLoading" class="text-center py-8">
-                        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                        <p class="text-gray-600">Loading student data...</p>
-                        <p class="text-xs text-gray-400 mt-2">Please wait...</p>
-                    </div>
-
-                    <!-- STUDENT FOUND STATE -->
-                    <div v-show="isStudentFound" class="flex flex-col items-center space-y-4">
-                        <div class="mb-4">
-                            <div class="rounded-full overflow-hidden shadow border-4 border-white w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
-                                <img
-                                    :src="studentImageUrl"
-                                    @error="handleImageError"
-                                    class="object-cover rounded-lg w-full h-full"
-                                    alt="Student Profile"
-                                />
-                            </div>
+                    <!-- Status Info -->
+                    <div class="mt-2 text-sm font-semibold">
+                        <div v-if="lastScanType" :class="{
+              'text-green-600': lastScanType === 'time in',
+              'text-red-600': lastScanType === 'time out'
+            }">
+                            {{ lastScanType === 'time in' ? 'Time In' : 'Time Out' }}
                         </div>
-                        <div class="text-gray-800 text-center">
-                        <h3 class="text-lg sm:text-xl md:text-2xl font-bold tracking-wide">{{ studentName }}</h3>
-                        <p class="text-sm md:text-base lg:text-lg font-medium italic">{{ studentProgram }}</p>
-                        <p class="text-base md:text-lg mt-2 font-mono tracking-widest">ID: {{ studentId }}</p>
-
-                        <div class="mt-4 p-3">
-                            <div v-if="lastScanType" class="mt-2 p-2 text-lg font-bold">
-                                <div class="text-green-600" v-if="lastScanType === 'time in'">Time In</div>
-                                <div class="text-red-600" v-else-if="lastScanType === 'time out'">Time Out</div>
-                                <div v-else>❓ Unknown Status</div>
-                            </div>
-                            <div v-if="userType" class="mt-2 p-2 text-blue-800 text-2xl font-bold">
-                                <div v-if="userType === 'Student'">Student</div>
-                                <div v-else-if="userType === 'Faculty'">Faculty</div>
-                                <div v-else>❓ Unknown Status</div>
-                            </div>
+                        <div v-if="userType" class="text-blue-800">
+                            {{ userType }}
                         </div>
-
-
-
                     </div>
-                    </div>
+                </div>
 
-                    <!-- STUDENT NOT FOUND STATE -->
-                    <div v-show="isStudentNotFound" class="text-center py-8">
-                        <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-red-500 text-2xl">✗</span>
-                        </div>
-                        <h3 class="text-lg font-bold text-gray-800 mb-2">Student Not Found</h3>
-                        <p class="text-gray-600">No student record found for ID: {{ userIdInput }}</p>
+                <!-- Student Not Found -->
+                <div v-show="isStudentNotFound" class="text-center py-6">
+                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-2">
+                        <span class="text-red-500 text-xl">✗</span>
                     </div>
-
+                    <h3 class="text-base font-bold text-gray-800 mb-1">Student Not Found</h3>
+                    <p class="text-sm text-gray-600">No record found for ID: {{ userIdInput }}</p>
                 </div>
             </div>
         </div>
     </transition>
+
 
 
     <!-- Incident Report Modal -->
@@ -752,7 +749,7 @@
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">Incident Report</h2>
+                    <p class="text-sm font-bold">Incident Report</p>
                 </div>
 
                 <!-- Modal Body -->
@@ -776,7 +773,7 @@
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">Spot Report</h2>
+                    <p class="text-sm font-bold">Spot Report</p>
                 </div>
 
                 <!-- Modal Body -->
@@ -800,12 +797,12 @@
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">
+                    <p class="text-sm font-bold">
                         Student Attendance Report
                         <span v-if="selectedStudent" class="hidden text-lg font-normal ml-2">
                         - {{ selectedStudent.full_name || selectedStudent.name }}
                     </span>
-                    </h2>
+                    </p>
                 </div>
 
                 <!-- Modal Body -->
@@ -829,12 +826,12 @@
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">
+                    <p class="text-sm font-bold">
                         Faculty & Staff Attendance Report
                         <span v-if="selectedFaculty" class="hidden text-lg font-normal ml-2">
                         - {{ selectedFaculty.name }}
                     </span>
-                    </h2>
+                    </p>
                 </div>
 
                 <!-- Modal Body -->
@@ -861,7 +858,7 @@
 
                 <!-- Modal Header -->
                 <div class="bg-gray-600 text-white px-6 py-4">
-                    <h2 class="text-2xl font-bold">Activity Logs</h2>
+                    <p class="text-sm font-bold">Activity Logs</p>
                 </div>
 
                 <!-- Modal Body -->

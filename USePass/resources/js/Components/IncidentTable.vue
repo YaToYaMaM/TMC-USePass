@@ -450,7 +450,7 @@ console.log('Reports received:', props.reports);
 
 <template>
     <!-- User Info Header -->
-    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4" v-if="currentUser">
+    <div class="hidden lg:block bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4" v-if="currentUser">
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-semibold text-blue-900">Welcome, {{ currentUser.first_name }} {{ currentUser.last_name }}</h3>
@@ -465,7 +465,7 @@ console.log('Reports received:', props.reports);
     </div>
 
     <!-- Add Incident Report Button -->
-    <div class="mb-4">
+    <div class="hidden lg:block mb-4">
         <button
             v-if="currentUser?.role === 'guard'"
             @click="openAddModal"
@@ -475,7 +475,117 @@ console.log('Reports received:', props.reports);
         </button>
     </div>
 
-    <div class="overflow-x-auto mt-6 rounded-lg shadow border border-gray-200">
+    <div class="block lg:hidden mb-4">
+        <button
+            v-if="currentUser?.role === 'guard'"
+            @click="openAddModal"
+            class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-4 rounded shadow transition duration-200"
+        >
+            + Incident Report
+        </button>
+    </div>
+
+    <!-- Mobile Card Layout -->
+    <div class="block lg:hidden">
+        <div class="p-4">
+            <div v-if="paginatedIncident.length === 0" class="text-center py-8">
+                <div class="flex flex-col items-center">
+                    <svg
+                        class="w-12 h-12 mb-2 text-gray-400"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            stroke-width="2"
+                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        />
+                    </svg>
+                    <p class="text-lg font-medium">No reports available</p>
+                    <p class="text-sm">
+                        {{ currentUser && currentUser.role === "guard"
+                        ? "You haven't created any reports yet."
+                        : "No reports match your current filter." }}
+                    </p>
+                </div>
+            </div>
+            <div v-else class="space-y-3 max-h-96 overflow-y-auto">
+                <div
+                    v-for="(item, index) in paginatedIncident"
+                    :key="item.id || index"
+                    :class="{
+                    'bg-gray-50 border border-gray-200 rounded-lg p-4 cursor-pointer transition-colors duration-150'
+                    : currentUser && item.user_id === currentUser.id && currentUser.role === 'guard',
+                }"
+                >
+                    <!-- Incident Details Grid -->
+                    <div class="grid grid-cols-1 text-xs">
+                        <div class="space-y-1">
+                            <div class="flex justify-between items-center">
+                                <span class="text-black text-[15px] font-bold"> {{ item.guard_name }}</span>
+                                <span
+                                    v-if="currentUser && item.user_id === currentUser.id && currentUser.role === 'guard'"
+                                    class="text-xs font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded"
+                                >
+                                    Your Report
+                                </span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">What:</span>
+                                <span class="ml-1 font-medium text-gray-900"> {{ item.what }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Description:</span>
+                                <span class="ml-1 font-medium text-gray-900"> {{ item.description }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Where:</span>
+                                <span class="ml-1 font-medium text-gray-900"> {{ item.where }}</span>
+                            </div>
+                            <div>
+                                <span class="text-gray-500">Date | Time:</span>
+                                <span class="ml-1 font-medium text-gray-900"> {{ formatDateTime(item.created_at) }}</span>
+                            </div>
+                            <div class="flex justify-center">
+                                <button
+                                    @click="openEditModal(item)"
+                                    :disabled="!canViewReport(item)"
+                                    class="inline-flex items-center mt-2 gap-1 px-3 py-1.5 rounded text-xs transition"
+                                    :class="canViewReport(item)
+                            ? 'bg-blue-500 text-white hover:bg-blue-600'
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'"
+                                >
+                                    <svg
+                                        class="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                                        />
+                                    </svg>
+                                    {{ canViewReport(item) ? "View" : "Restricted" }}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="hidden lg:block overflow-x-auto mt-6 rounded-lg shadow border border-gray-200">
         <table class="min-w-full divide-y divide-gray-200 bg-white text-sm text-left">
             <thead class="bg-gray-50">
             <tr class="text-gray-600 uppercase text-xs tracking-wider">
