@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import {ref, watch} from 'vue';
 import {router, usePage} from "@inertiajs/vue3";
 import { route } from 'ziggy-js';
 import axios from 'axios';
@@ -13,32 +13,110 @@ const logout = () => {
 
 const showChangePasswordModal = ref(false);
 
+const openChangePasswordModal = () => {
+    console.log('Change password clicked!');
+    console.log('User role:', user.role);
+    console.log('User data:', user);
+    menuOpen.value = false;
+    showChangePasswordModal.value = true;
+
+    console.log('Modal should be open:', showChangePasswordModal.value);
+};
+
+watch(showChangePasswordModal, (newValue) => {
+    if (newValue) {
+        menuOpen.value = false;
+    }
+});
+
 const passwordForm = ref({
     current_password: '',
-    new_password: '',
-    confirm_password: '',
+    password: '',
+    password_confirmation: '',
 });
 
 const passwordErrors = ref<string[]>([]);
 const isSubmitting = ref(false);
+const passwordError = ref('');
+let passwordErrorTimeout = null;
+
+const validatePassword = (password) => {
+    const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#?&._-])[A-Za-z\d@$!%*#?&._-]{8,}$/;
+
+    if (!pattern.test(password)) {
+        passwordError.value = 'Password must be at least 8 characters long, and include uppercase, lowercase, number, and special character.';
+
+        if (passwordErrorTimeout) {
+            clearTimeout(passwordErrorTimeout);
+        }
+
+        passwordErrorTimeout = setTimeout(() => {
+            passwordError.value = '';
+        }, 5000); // Show error for 5 seconds
+
+        return false;
+    }
+
+    if (passwordForm.value.password !== passwordForm.value.password_confirmation) {
+        passwordError.value = 'Passwords do not match. Please re-enter the same password.';
+
+        if (passwordErrorTimeout) {
+            clearTimeout(passwordErrorTimeout);
+        }
+
+        passwordErrorTimeout = setTimeout(() => {
+            passwordError.value = '';
+        }, 5000);
+        return false;
+    }
+
+    passwordError.value = '';
+    return true;
+};
+
+const validatePasswordRealTime = () => {
+    if (passwordForm.value.password) {
+        validatePassword(passwordForm.value.password);
+    }
+};
 
 const submitPasswordChange = () => {
     passwordErrors.value = [];
     isSubmitting.value = true;
 
-    axios.post('/change-password', passwordForm.value)
-        .then(() => {
+    if (!validatePassword(passwordForm.value.password)) {
+        isSubmitting.value = false;
+        return;
+    }
+
+    const formData = {
+        current_password: passwordForm.value.current_password,
+        password: passwordForm.value.password,
+        password_confirmation: passwordForm.value.password_confirmation,
+    };
+
+    // Add headers to ensure JSON response
+    axios.put('/password', formData, {
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+        .then((response) => {
             alert('Password updated successfully!');
             showChangePasswordModal.value = false;
             passwordForm.value = {
                 current_password: '',
-                new_password: '',
-                confirm_password: '',
+                password: '',
+                password_confirmation: '',
             };
         })
         .catch((error) => {
+            console.log('Error details:', error.response);
             if (error.response?.status === 422) {
                 const errors = error.response.data.errors;
+                passwordErrors.value = [];
                 for (const key in errors) {
                     passwordErrors.value.push(...errors[key]);
                 }
@@ -47,7 +125,6 @@ const submitPasswordChange = () => {
             }
         })
         .then(() => {
-            // Mimics the purpose of `.finally()`
             isSubmitting.value = false;
         });
 };
@@ -102,7 +179,8 @@ const user = page.props.auth.user as User;
                             </div>
                         </div>
                         <nav class="flex flex-col px-3 py-2 space-y-1 sm:space-y-2">
-                            <a href="#" @click.prevent="showChangePasswordModal = true"  class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
+                            <a href="#" @click.prevent="openChangePasswordModal"  class="text-white font-bold text-xs sm:text-sm hover:underline">CHANGE PASSWORD</a>
+                            <a href="/backupnRestore"  class="text-white font-bold text-xs sm:text-sm hover:underline">BACKUP & RESTORE</a>
                             <button @click="logout" class="text-white font-bold text-xs sm:text-sm hover:underline text-left">LOGOUT</button>
                         </nav>
                     </div>
@@ -114,8 +192,8 @@ const user = page.props.auth.user as User;
 
     </nav>
     <transition name="fade">
-        <div v-if="showChangePasswordModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-[90%] sm:w-[400px] relative">
+        <div v-if="showChangePasswordModal" class="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-[90%] sm:w-[400px] relative z-[100000]">
                 <h2 class="text-lg font-bold mb-4">Change Password</h2>
                 <form @submit.prevent="submitPasswordChange" class="space-y-4">
                     <div>
@@ -150,8 +228,10 @@ const user = page.props.auth.user as User;
                         <div class="relative">
                             <input
                                 :type="showNew ? 'text' : 'password'"
-                                v-model="passwordForm.new_password"
+                                v-model="passwordForm.password"
+                                @input="validatePasswordRealTime"
                                 class="w-full border px-3 py-2 rounded pr-10"
+                                :class="{ 'border-red-500': passwordError }"
                                 required
                             />
                             <span
@@ -170,14 +250,27 @@ const user = page.props.auth.user as User;
                             </svg>
                             </span>
                         </div>
+                        <div v-if="passwordForm.password" class="mt-1 text-xs">
+                            <div class="flex space-x-1">
+                                <div :class="passwordForm.password.length >= 8 ? 'bg-green-500' : 'bg-red-500'" class="h-1 w-1/4 rounded"></div>
+                                <div :class="/[a-z]/.test(passwordForm.password) && /[A-Z]/.test(passwordForm.password) ? 'bg-green-500' : 'bg-red-500'" class="h-1 w-1/4 rounded"></div>
+                                <div :class="/\d/.test(passwordForm.password) ? 'bg-green-500' : 'bg-red-500'" class="h-1 w-1/4 rounded"></div>
+                                <div :class="/[@$!%*#?&._-]/.test(passwordForm.password) ? 'bg-green-500' : 'bg-red-500'" class="h-1 w-1/4 rounded"></div>
+                            </div>
+                            <p class="text-gray-600 mt-1">
+                                Must include: 8+ chars, uppercase, lowercase, number, special character
+                            </p>
+                        </div>
                     </div>
                     <div>
                         <label class="block text-sm font-medium">Confirm New Password</label>
                         <div class="relative">
                             <input
                                 :type="showConfirm ? 'text' : 'password'"
-                                v-model="passwordForm.confirm_password"
+                                v-model="passwordForm.password_confirmation"
+                                @input="validatePasswordRealTime"
                                 class="w-full border px-3 py-2 rounded pr-10"
+                                :class="{ 'border-red-500': passwordError }"
                                 required
                             />
                             <span
@@ -199,8 +292,12 @@ const user = page.props.auth.user as User;
                         </div>
                     </div>
 
-                    <div v-if="passwordErrors.length" class="text-sm text-red-600 space-y-1">
-                        <div v-for="(err, i) in passwordErrors" :key="i">{{ err }}</div>
+                    <div v-if="passwordError" class="text-sm text-red-600 bg-red-50 p-2 rounded mt-2">
+                        {{ passwordError }}
+                    </div>
+
+                    <div v-if="passwordErrors.length" class="text-sm text-red-600 space-y-1 mt-2">
+                        <div v-for="(err, i) in passwordErrors" :key="i" class="bg-red-50 p-2 rounded">{{ err }}</div>
                     </div>
 
                     <div class="flex justify-end space-x-2 pt-2">

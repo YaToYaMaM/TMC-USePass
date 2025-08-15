@@ -20,6 +20,7 @@ use App\Http\Controllers\Auth\FacultyRegistrationController;
 use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\FacultyRecordController;
+use App\Http\Controllers\DatabaseController;
 
 use Illuminate\Support\Facades\Log;
 
@@ -59,6 +60,7 @@ Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveS
 
 //Faculty-Staff Registration
 Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyStaffHome'])->name('faculty.home');
+Route::get('/faculty/qr/{faculty_id}', [FacultyController::class, 'fetchForQR']);
 Route::get('/faculty-staff/register', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
 Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
 Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
@@ -85,6 +87,8 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
     Route::get('/facultynstaffAttendance', [FrontendControllers::class, 'facultynstaffAttendance'])->name('reports');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
+    //Backup & Restore
+    Route::get('/backupnRestore', [FrontendControllers::class, 'backupnRestore']);
 });
 
 // User Guard Dashboard
@@ -181,6 +185,10 @@ Route::get('/check-faculty-attendance', [FacultyRecordController::class, 'checkF
 Route::get('/search-faculty', [FacultyRecordController::class, 'searchFaculty']);
 Route::get('/search-active-faculty', [FacultyRecordController::class, 'searchActiveFaculty']);
 
+//Database Backup and Restore
+
+Route::get('/backupData', [DatabaseController::class, 'backupData'])->name('database.backup');
+Route::post('/restoreData', [DatabaseController::class, 'restoreData'])->name('database.restore');
 
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);

@@ -84,6 +84,30 @@ class FacultyController extends Controller
         ]);
     }
 
+    public function fetchForQR($faculty_id)
+    {
+        try {
+            $faculty = Faculty::where('faculty_id', $faculty_id)->first();
+
+            if ($faculty) {
+                return response()->json([
+                    'success' => true,
+                    'faculty' => $faculty
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Faculty not found'
+                ], 404);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error retrieving faculty data'
+            ], 500);
+        }
+    }
+
 
 
     private function logActivity($userId, $role, $action, $description)
