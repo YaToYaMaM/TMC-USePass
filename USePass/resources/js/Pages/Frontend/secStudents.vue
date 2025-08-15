@@ -354,7 +354,7 @@ const filteredStudents = computed(() => {
             <!-- student Card -->
             <div v-for="student in paginatedStudents" :key="student.students_id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
                 <div class="flex items-center gap-4">
-                    <img :src="`/${student.students_profile_image} || '/images/user.png'`"
+                    <img :src="`/${student.students_profile_image}`"
                          @error="(e) => ((e.target as HTMLImageElement).src = '/images/user.png')"
                          class="h-14 w-14 rounded-full border" alt="Student Image" />
                     <div>
