@@ -447,8 +447,10 @@ class StudentRecordController extends Controller
             $mail->Subject = 'Student Attendance Report';
 
             $studentName = "{$student->students_first_name} {$student->students_last_name}";
+            $parentLastName = "{$parent->parent_last_name}";
             $formattedTime = $dateTime->format('h:i A');
             $formattedDate = $dateTime->format('F j, Y');
+
 
             $logoPath = public_path('images/usep-logo-small.png');
             if (file_exists($logoPath)) {
@@ -456,17 +458,25 @@ class StudentRecordController extends Controller
             }
 
             $mail->Body = "
-            <div style='font-family: Arial, sans-serif;'>
-                <div style='text-align: center; margin-bottom: 10px;'>
-                    <img src='cid:useplogo' alt='USePASS Logo' style='width: 120px;'>
-                    <h2 style='color: #2d3748;'>USePASS</h2>
+                <div style='font-family: Arial, sans-serif;'>
+                    <div style='text-align: center; margin-bottom: 10px;'>
+                        <img src='cid:useplogo' alt='USePASS Logo' style='width: 120px;'>
+                        <h2 style='color: #2d3748;'>USePASS</h2>
+                    </div>
+                    <p><strong>Date:</strong> {$formattedDate}</p>
+                    <p style='margin-top: 20px;'>Dear Mr./Ms. {$parentLastName},</p>
+                    <p style='text-align: justify;'>
+                        " . (
+                            $status === 'Time In'
+                                ? "We would like to inform you that your child, <strong>{$studentName}</strong>, has entered the USeP Tagum Unit at <strong>{$formattedTime}</strong>.<br><br>
+                               Thank you for trusting USePass to help you stay informed about your child’s attendance and safety."
+                                : "We would like to inform you that your child, <strong>{$studentName}</strong>, has left the USeP Tagum Unit at <strong>{$formattedTime}</strong>.<br><br>
+                               Thank you for trusting USePass to keep you updated on your child’s campus activities."
+                            ) . "
+                    </p>
                 </div>
-                <p><strong>Date:</strong> {$formattedDate}</p>
-                <p style='margin-top: 20px;'>Dear Parent,</p>
-                <p>Your child <strong>{$studentName}</strong> has recorded a <strong>{$status}</strong> at <strong>{$formattedTime}</strong>.</p>
-                <p>Thank you for using USePass.</p>
-            </div>
             ";
+
 
             $mail->send();
         } catch (Exception $e) {
