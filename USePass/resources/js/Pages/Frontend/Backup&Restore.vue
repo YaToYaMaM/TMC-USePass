@@ -6,12 +6,27 @@ import Swal from 'sweetalert2';
 
 const isBackingUp = ref(false);
 const isRestoring = ref(false);
+const progress = ref(0);
+const progressMessage = ref('');
 
 const backupDatabase = async () => {
     isBackingUp.value = true;
+    progress.value = 0;
+    progressMessage.value = 'Preparing backup...';
 
     try {
-        const response = await axios.get("/backupData", { responseType: "blob" });
+        const response = await axios.get("/backupData", {
+            responseType: "blob",
+            onDownloadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    progressMessage.value = `Downloading backup: ${progress.value}%`;
+                }
+            }
+        });
+
+        progress.value = 95;
+        progressMessage.value = 'Creating download...';
 
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement("a");
@@ -23,6 +38,9 @@ const backupDatabase = async () => {
         // Clean up
         window.URL.revokeObjectURL(url);
         document.body.removeChild(link);
+
+        progress.value = 100;
+        progressMessage.value = 'Backup complete!';
 
         await Swal.fire({
             icon: 'success',
@@ -45,8 +63,13 @@ const backupDatabase = async () => {
         });
     } finally {
         isBackingUp.value = false;
+        setTimeout(() => {
+            progress.value = 0;
+            progressMessage.value = '';
+        }, 2000);
     }
 };
+
 const restoreDatabase = async (event: Event) => {
     const fileInput = event.target as HTMLInputElement;
     if (!fileInput.files?.length) return;
@@ -84,6 +107,8 @@ const restoreDatabase = async (event: Event) => {
     }
 
     isRestoring.value = true;
+    progress.value = 0;
+    progressMessage.value = 'Preparing restore...';
 
     try {
         const formData = new FormData();
@@ -92,8 +117,17 @@ const restoreDatabase = async (event: Event) => {
         await axios.post("/restoreData", formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
+            },
+            onUploadProgress: (progressEvent) => {
+                if (progressEvent.total) {
+                    progress.value = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    progressMessage.value = `Uploading backup: ${progress.value}%`;
+                }
             }
         });
+
+        progress.value = 100;
+        progressMessage.value = 'Restoring database...';
 
         await Swal.fire({
             icon: 'success',
@@ -102,7 +136,7 @@ const restoreDatabase = async (event: Event) => {
             timer: 3000,
             showConfirmButton: false,
             toast: true,
-            position: 'top-end'
+            position: 'top'
         });
 
     } catch (error: any) {
@@ -122,6 +156,10 @@ const restoreDatabase = async (event: Event) => {
     } finally {
         isRestoring.value = false;
         fileInput.value = '';
+        setTimeout(() => {
+            progress.value = 0;
+            progressMessage.value = '';
+        }, 2000);
     }
 };
 </script>
@@ -129,6 +167,7 @@ const restoreDatabase = async (event: Event) => {
 <template>
     <Frontend>
         <div class="flex gap-4 justify-center mt-10">
+            <!-- Your existing buttons remain the same -->
             <button
                 @click="backupDatabase"
                 :disabled="isBackingUp || isRestoring"
@@ -157,10 +196,47 @@ const restoreDatabase = async (event: Event) => {
             </label>
         </div>
 
-        <!-- Optional: Progress indicator -->
-        <div v-if="isBackingUp || isRestoring" class="flex justify-center mt-4">
-            <div class="text-gray-600">
-                {{ isBackingUp ? 'Creating database backup...' : 'Restoring database...' }}
+        <!-- Bigger Progress Indicator -->
+        <div v-if="isBackingUp || isRestoring" class="mt-8 mx-auto w-full max-w-2xl">
+            <div class="text-center mb-4">
+                <span class="text-lg font-semibold text-gray-800 block mb-1">{{ progressMessage }}</span>
+                <span class="text-3xl font-bold"
+                      :class="{
+                          'text-blue-600': isBackingUp,
+                          'text-orange-600': isRestoring
+                      }">
+                    {{ progress }}%
+                </span>
+            </div>
+
+            <div class="relative pt-1">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full"
+                              :class="{
+                                  'text-blue-600 bg-blue-200': isBackingUp,
+                                  'text-orange-600 bg-orange-200': isRestoring
+                              }">
+                            {{ isBackingUp ? 'BACKUP IN PROGRESS' : 'RESTORE IN PROGRESS' }}
+                        </span>
+                    </div>
+                </div>
+                <div class="overflow-hidden h-6 mb-4 text-xs flex rounded-full bg-gray-200 mt-2">
+                    <div :style="{ width: progress + '%' }"
+                         class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center transition-all duration-500 ease-in-out"
+                         :class="{
+                             'bg-blue-600': isBackingUp,
+                             'bg-orange-600': isRestoring
+                         }">
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-2">
+                <span class="text-sm text-gray-600">
+                    {{ isBackingUp ? 'Please wait while we prepare your database backup...' :
+                    'Restoring your database, this may take a few moments...' }}
+                </span>
             </div>
         </div>
     </Frontend>
