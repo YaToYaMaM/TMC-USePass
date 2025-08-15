@@ -272,7 +272,7 @@ async function updateGuard() {
             <!-- Guard Card -->
             <div v-for="guard in paginatedGuards" :key="guard.id" class="bg-white rounded-lg shadow-md p-4 flex flex-col md:flex-row items-center justify-between mt-5 gap-4">
                 <div class="flex items-center gap-4">
-                    <img :src="`/${guard.profile_image} || '/guard_profiles/guard_image.png'`"
+                    <img :src="`/${guard.profile_image}`"
                          @error="(e) => ((e.target as HTMLImageElement).src = '/guard_profiles/guard_image.png')"
                          alt="Guard Image" class="h-14 w-14 rounded-full border" />
                     <div>
