@@ -85,7 +85,7 @@ Route::middleware(['auth', 'can:isAdmin'])->group(function () {
     Route::get('/faculty-and-staff', [FrontendControllers::class, 'facultynstaff'])->name('faculty-and-staff');
     Route::get('/statistics', [FrontendControllers::class, 'statistics'])->name('statistics');
     Route::get('/reports', [FrontendControllers::class, 'reports'])->name('reports');
-    Route::get('/facultynstaffAttendance', [FrontendControllers::class, 'facultynstaffAttendance'])->name('reports');
+    Route::get('/facultynstaffAttendance', [FrontendControllers::class, 'facultynstaffAttendance'])->name('facultynstaffAttendance');
     Route::get('/logs', [FrontendControllers::class, 'logs'])->name('logs');
     //Backup & Restore
     Route::get('/backupnRestore', [FrontendControllers::class, 'backupnRestore']);
