@@ -48,7 +48,7 @@ onMounted(() => {
 });
 
 const currentPage = ref(1);
-const studentsPerPage = 4;
+const studentsPerPage = 1;
 
 const selectedProgram = ref('');
 const searchQuery = ref('');
