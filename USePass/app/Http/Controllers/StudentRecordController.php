@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Mail;
 use App\Mail\StudentAttendanceReport;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+use App\Jobs\SendAttendanceEmailJob;
 
 
 class StudentRecordController extends Controller
@@ -417,7 +418,12 @@ class StudentRecordController extends Controller
         }
 
         // Send email notification
-        $this->sendAttendanceEmail($student, $parent, $status, $now);
+        SendAttendanceEmailJob::dispatch(
+            $student->students_id,
+            $parent->parent_id,  // or correct primary key of ParentCredential
+            $status,
+            $now->toDateTimeString()
+        );
 
         return response()->json([
             'status' => strtolower($status),
@@ -428,61 +434,7 @@ class StudentRecordController extends Controller
     /**
      * Send attendance email notification
      */
-    private function sendAttendanceEmail($student, $parent, $status, $dateTime)
-    {
-        try {
-            $mail = new PHPMailer(true);
-            $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
-            $mail->SMTPAuth = true;
-            $mail->Username = 'usepasstmc.system@gmail.com';
-            $mail->Password = 'rhkwujluyfwnaxpy';
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
 
-            $mail->setFrom('usepasstmc.system@gmail.com', 'USePass System');
-            $mail->addAddress($parent->parent_email);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Student Attendance Report';
-
-            $studentName = "{$student->students_first_name} {$student->students_last_name}";
-            $parentLastName = "{$parent->parent_last_name}";
-            $formattedTime = $dateTime->format('h:i A');
-            $formattedDate = $dateTime->format('F j, Y');
-
-
-            $logoPath = public_path('images/usep-logo-small.png');
-            if (file_exists($logoPath)) {
-                $mail->addEmbeddedImage($logoPath, 'useplogo');
-            }
-
-            $mail->Body = "
-                <div style='font-family: Arial, sans-serif;'>
-                    <div style='text-align: center; margin-bottom: 10px;'>
-                        <img src='cid:useplogo' alt='USePASS Logo' style='width: 120px;'>
-                        <h2 style='color: #2d3748;'>USePASS</h2>
-                    </div>
-                    <p><strong>Date:</strong> {$formattedDate}</p>
-                    <p style='margin-top: 20px;'>Dear Mr./Ms. {$parentLastName},</p>
-                    <p style='text-align: justify;'>
-                        " . (
-                            $status === 'Time In'
-                                ? "We would like to inform you that your child, <strong>{$studentName}</strong>, has entered the USeP Tagum Unit at <strong>{$formattedTime}</strong>.<br><br>
-                               Thank you for trusting USePass to help you stay informed about your child’s attendance and safety."
-                                : "We would like to inform you that your child, <strong>{$studentName}</strong>, has left the USeP Tagum Unit at <strong>{$formattedTime}</strong>.<br><br>
-                               Thank you for trusting USePass to keep you updated on your child’s campus activities."
-                            ) . "
-                    </p>
-                </div>
-            ";
-
-
-            $mail->send();
-        } catch (Exception $e) {
-            Log::error('Email failed to send: ' . $e->getMessage());
-        }
-    }
 
     private function logActivity($userId, $role, $action, $description)
     {

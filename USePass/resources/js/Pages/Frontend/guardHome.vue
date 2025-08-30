@@ -700,6 +700,14 @@
 
                 <!-- Student Found -->
                 <div v-show="isStudentFound" class="flex flex-col items-center space-y-2">
+                    <div class="mt-2 text-2xl font-semibold">
+                        <div v-if="lastScanType" :class="{
+              'text-green-600': lastScanType === 'time in',
+              'text-red-600': lastScanType === 'time out'
+            }">
+                            {{ lastScanType === 'time in' ? 'Time In' : 'Time Out' }}
+                        </div>
+                    </div>
                     <div class="rounded-full overflow-hidden border-4 border-white shadow w-32 h-32">
                         <img :src="studentImageUrl"
                              @error="handleImageError"
@@ -711,13 +719,8 @@
                     <p class="text-sm font-mono text-gray-700">ID: {{ studentId }}</p>
 
                     <!-- Status Info -->
-                    <div class="mt-2 text-sm font-semibold">
-                        <div v-if="lastScanType" :class="{
-              'text-green-600': lastScanType === 'time in',
-              'text-red-600': lastScanType === 'time out'
-            }">
-                            {{ lastScanType === 'time in' ? 'Time In' : 'Time Out' }}
-                        </div>
+                    <div class="mt-2 text-lg font-semibold">
+
                         <div v-if="userType" class="text-blue-800">
                             {{ userType }}
                         </div>
