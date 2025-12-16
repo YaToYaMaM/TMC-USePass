@@ -60,8 +60,9 @@ Route::post('/student/save-data', [CustomForgotPasswordController::class, 'saveS
 
 //Faculty-Staff Registration
 Route::get('/faculty-staff', [App\Http\Controllers\FrontendControllers::class, 'facultyStaffHome'])->name('faculty.home');
-Route::get('/faculty/qr/{faculty_id}', [FacultyController::class, 'fetchForQR']);
-Route::get('/faculty-staff/register', [App\Http\Controllers\FrontendControllers::class, 'facultyRegistration'])->name('faculty.register');
+Route::get('/faculty/qr/{faculty_id_or_name}', [FacultyController::class, 'fetchForQR']);
+Route::get('/faculty/search', [FacultyController::class, 'searchSuggestions']);
+Route::get('/faculty-staff/register', [FacultyController::class, 'showRegistrationForm'])->name('faculty.register');
 Route::post('/faculty/send-otp', [FacultyRegistrationController::class, 'sendFacultyOtp'])->name('faculty.otp.send');
 Route::post('/faculty/resend-otp', [FacultyRegistrationController::class, 'resendFacultyOtp'])->name('faculty.otp.resend');
 Route::get('/faculty/otp/verify', [FacultyRegistrationController::class, 'showFacultyOtpForm'])->name('faculty.otp.form');

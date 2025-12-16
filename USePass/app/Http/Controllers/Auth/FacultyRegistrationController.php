@@ -36,7 +36,7 @@ class FacultyRegistrationController extends Controller
 
             // Validate request
             $validated = $request->validate([
-                'faculty_id' => 'required|string|unique:facultyStaff,faculty_id',
+                'faculty_id' => 'required|string|unique:facultyStaff,faculty_id|regex:/^USePass-\d{4}-\d{4}$/',
                 'faculty_first_name' => 'required|string|max:100',
                 'faculty_last_name' => 'required|string|max:100',
                 'faculty_middle_initial' => 'nullable|string|max:1',
@@ -128,6 +128,7 @@ class FacultyRegistrationController extends Controller
             Session::put('faculty_otp', $otp);
             Session::put('faculty_otp_email', $validated['faculty_email']);
             Session::put('faculty_otp_start_time', now());
+            Session::put('pending_faculty_id', $validated['faculty_id']);
 
             // Send OTP email
             $this->sendOtpEmail($validated['faculty_email'], $otp, 'Faculty Registration');
@@ -218,6 +219,9 @@ class FacultyRegistrationController extends Controller
                 ], 422);
             }
 
+            // Ensure the generated faculty_id is preserved
+            $registrationData['faculty_id'] = Session::get('pending_faculty_id');
+
             // Create faculty record
             $faculty = Faculty::create($registrationData);
 
@@ -226,7 +230,8 @@ class FacultyRegistrationController extends Controller
                 'faculty_otp',
                 'faculty_otp_start_time',
                 'faculty_otp_email',
-                'faculty_registration_data'
+                'faculty_registration_data',
+                'pending_faculty_id',
             ]);
 
             return response()->json([

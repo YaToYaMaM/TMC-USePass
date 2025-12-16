@@ -31,30 +31,84 @@
                     Enter your Faculty/Staff ID to download your QR code
                 </p>
 
+                <div class="mb-4 flex justify-center">
+                    <div class="bg-gray-200 rounded-lg p-1 flex">
+                        <button
+                            @click="searchMode = 'id'"
+                            :class="[
+                'px-4 py-2 rounded-md text-sm font-medium transition',
+                searchMode === 'id'
+                  ? 'bg-white text-gray-800 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              ]"
+                        >
+                            Search by ID
+                        </button>
+                        <button
+                            @click="searchMode = 'name'"
+                            :class="[
+                'px-4 py-2 rounded-md text-sm font-medium transition',
+                searchMode === 'name'
+                  ? 'bg-white text-gray-800 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              ]"
+                        >
+                            Search by Name
+                        </button>
+                    </div>
+                </div>
+
                 <div class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-2 text-gray-700">Faculty/Staff ID</label>
+                    <!-- Search Input -->
+                    <div class="relative">
+                        <label class="block text-sm font-medium mb-2 text-gray-700">
+                            {{ searchMode === 'id' ? 'Faculty/Staff ID' : 'Faculty/Staff Name' }}
+                        </label>
                         <input
                             type="text"
-                            v-model="facultyId"
-                            placeholder="Enter your Faculty/Staff ID"
+                            v-model="searchQuery"
+                            :placeholder="searchMode === 'id' ? 'Enter your Faculty/Staff ID' : 'Enter your name'"
                             class="w-full px-3 py-2 border border-gray-400 rounded-md focus:outline-none focus:border-red-600"
                             :disabled="loading"
-                            @keyup.enter="checkFacultyId"
+                            @keyup.enter="searchFaculty"
+                            @input="onSearchInput"
+                            @focus="showSuggestions = true"
+                            @blur="hideSuggestions"
                         />
+
+                        <!-- Suggestions Dropdown -->
+                        <div
+                            v-if="showSuggestions && suggestions.length > 0 && searchMode === 'name'"
+                            class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-48 overflow-y-auto"
+                        >
+                            <div
+                                v-for="(suggestion, index) in suggestions"
+                                :key="suggestion.faculty_id"
+                                @mousedown="selectSuggestion(suggestion)"
+                                class="px-3 py-2 cursor-pointer hover:bg-gray-100 border-b border-gray-100 last:border-b-0"
+                            >
+                                <div class="font-medium text-gray-800">{{ formatName(suggestion) }}</div>
+                                <div class="text-xs text-gray-500">
+                                    ID: {{ suggestion.faculty_id }} • {{ suggestion.faculty_department }}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <button
-                        @click="checkFacultyId"
-                        :disabled="loading || !facultyId.trim()"
+                        @click="searchFaculty"
+                        :disabled="loading || !searchQuery.trim()"
                         class="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-md font-semibold transition"
                     >
-                        {{ loading ? 'Checking...' : 'Get My QR Code' }}
+                        {{ loading ? 'Searching...' : 'Get My QR Code' }}
                     </button>
                 </div>
 
                 <!-- Error Message -->
-                <div v-if="errorMessage" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm">
+                <div
+                    v-if="errorMessage"
+                    class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded text-sm"
+                >
                     {{ errorMessage }}
                 </div>
             </div>
@@ -158,8 +212,15 @@ import { router } from '@inertiajs/vue3';
 import QRCode from 'qrcode';
 import axios from 'axios';
 
-const facultyId = ref('');
+
+const searchMode = ref('id'); // 'id' or 'name'
+const searchQuery = ref('');
+const suggestions = ref([]);
+const showSuggestions = ref(false);
+let searchTimeout = null;
+
 const loading = ref(false);
+const facultyId = ref('');
 const errorMessage = ref('');
 const showQRModal = ref(false);
 const facultyData = ref(null);
@@ -178,35 +239,93 @@ const fullName = computed(() => {
     return name;
 });
 
-const checkFacultyId = async () => {
-    if (!facultyId.value.trim()) return;
+const formatName = (faculty) => {
+    let name = `${faculty.faculty_first_name} `;
+    if (faculty.faculty_middle_initial) {
+        name += `${faculty.faculty_middle_initial}. `;
+    }
+    name += faculty.faculty_last_name;
+    return name;
+};
+
+const onSearchInput = () => {
+    if (searchMode.value === 'name' && searchQuery.value.trim().length >= 2) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            fetchSuggestions();
+        }, 200);
+    } else {
+        suggestions.value = [];
+    }
+};
+
+const fetchSuggestions = async () => {
+    if (!searchQuery.value.trim() || searchQuery.value.trim().length < 2) {
+        suggestions.value = [];
+        return;
+    }
+
+    try {
+        const response = await axios.get(`/faculty/search`, {
+            params: {
+                name: searchQuery.value.trim(),
+                limit: 5
+            }
+        });
+
+        if (response.data.success) {
+            suggestions.value = response.data.faculty || [];
+        }
+    } catch (error) {
+        console.error('Error fetching suggestions:', error);
+        suggestions.value = [];
+    }
+};
+
+const selectSuggestion = (faculty) => {
+    searchQuery.value = formatName(faculty);
+    suggestions.value = [];
+    showSuggestions.value = false;
+    facultyData.value = faculty;
+    showQRModal.value = true;
+
+    nextTick(() => {
+        generateQRCode();
+    });
+};
+
+const hideSuggestions = () => {
+    setTimeout(() => {
+        showSuggestions.value = false;
+    }, 200);
+};
+
+const searchFaculty = async () => {
+    if (!searchQuery.value.trim()) return;
 
     loading.value = true;
     errorMessage.value = '';
-
-    console.log('Checking faculty ID:', facultyId.value.trim());
+    console.log(`Searching faculty by ${searchMode.value}:`, searchQuery.value.trim());
 
     try {
-        const response = await axios.get(`/faculty/qr/${facultyId.value.trim()}`);
-
+        const response = await axios.get(`/faculty/qr/${encodeURIComponent(searchQuery.value.trim())}`);
 
         if (response.data.success && response.data.faculty) {
             facultyData.value = response.data.faculty;
             showQRModal.value = true;
 
-            // Generate QR code after modal is shown
             nextTick(() => {
                 generateQRCode();
             });
         } else {
-            errorMessage.value = 'Faculty/Staff ID not found. Please check your ID or register first.';
+            errorMessage.value = `Faculty/Staff ${searchMode.value === 'id' ? 'ID' : 'name'} not found. Please check your ${searchMode.value === 'id' ? 'ID' : 'name'} or register first.`;
         }
     } catch (error) {
         console.error('Full error object:', error);
         console.error('Error response:', error.response);
 
         if (error.response?.status === 404) {
-            errorMessage.value = 'Faculty/Staff ID not found. Please check your ID or register first.';
+            errorMessage.value = `Faculty/Staff ${searchMode.value === 'id' ? 'ID' : 'name'} not found. Please check your ${searchMode.value === 'id' ? 'ID' : 'name'} or register first.`;
         } else if (error.response?.status === 500) {
             errorMessage.value = 'Server error. Please try again or contact support.';
         } else {
@@ -259,7 +378,7 @@ const downloadQRCode = () => {
         const combinedCanvas = document.createElement('canvas');
         const ctx = combinedCanvas.getContext('2d');
 
-        const qrSize = 200;
+        const qrSize = 300;
         const textHeight = 100;
         const padding = 20;
 
@@ -275,7 +394,7 @@ const downloadQRCode = () => {
 
         // Add faculty information
         ctx.fillStyle = '#000000';
-        ctx.font = 'bold 14px Arial, sans-serif';
+        ctx.font = 'bold 20px Arial, sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
@@ -286,17 +405,9 @@ const downloadQRCode = () => {
         ctx.fillText(`Faculty ID: ${facultyData.value.faculty_id}`, textX, textY);
 
         // Name
-        ctx.font = '12px Arial, sans-serif';
+        ctx.font = '17px Arial, sans-serif';
         textY += 20;
         ctx.fillText(fullName.value, textX, textY);
-
-        // Department
-        textY += 15;
-        ctx.fillText(facultyData.value.faculty_department, textX, textY);
-
-        // Unit
-        textY += 15;
-        ctx.fillText(`Unit: ${facultyData.value.faculty_unit}`, textX, textY);
 
         // Border
         ctx.strokeStyle = '#CCCCCC';

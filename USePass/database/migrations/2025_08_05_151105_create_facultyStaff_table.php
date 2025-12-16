@@ -31,6 +31,7 @@ return new class extends Migration
 
             $table->index('faculty_college');
             $table->index('faculty_department');
+            $table->index('faculty_id');
         });
     }
 

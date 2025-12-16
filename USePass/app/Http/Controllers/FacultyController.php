@@ -69,6 +69,15 @@ class FacultyController extends Controller
 
     }
 
+    public function showRegistrationForm()
+    {
+        $generatedFacultyId = $this->generateFacultyId();
+
+        return inertia('Frontend/FacultyRegistration', [
+            'generatedFacultyId' => $generatedFacultyId
+        ]);
+    }
+
     public function fetchFacultyProfile($faculty_id)
     {
         $faculty = Faculty::select(
@@ -84,10 +93,38 @@ class FacultyController extends Controller
         ]);
     }
 
-    public function fetchForQR($faculty_id)
+    public function fetchForQR($faculty_id_or_name)
     {
         try {
-            $faculty = Faculty::where('faculty_id', $faculty_id)->first();
+            $faculty = null;
+
+            // First try to find by faculty_id
+            $faculty = Faculty::where('faculty_id', $faculty_id_or_name)->first();
+
+            // If not found by ID, try searching by name
+            if (!$faculty) {
+                // Search by concatenated full name
+                $faculty = Faculty::whereRaw("CONCAT(faculty_first_name, ' ', COALESCE(CONCAT(faculty_middle_initial, '. '), ''), faculty_last_name) LIKE ?", ["%$faculty_id_or_name%"])
+                    ->first();
+
+                // If still not found, try more flexible name search
+                if (!$faculty) {
+                    $nameParts = explode(' ', trim($faculty_id_or_name));
+
+                    $query = Faculty::query();
+                    foreach ($nameParts as $part) {
+                        if (!empty($part)) {
+                            $query->where(function($q) use ($part) {
+                                $q->where('faculty_first_name', 'LIKE', "%$part%")
+                                    ->orWhere('faculty_last_name', 'LIKE', "%$part%")
+                                    ->orWhere('faculty_middle_initial', 'LIKE', "%$part%");
+                            });
+                        }
+                    }
+
+                    $faculty = $query->first();
+                }
+            }
 
             if ($faculty) {
                 return response()->json([
@@ -108,6 +145,48 @@ class FacultyController extends Controller
         }
     }
 
+    public function searchSuggestions(Request $request)
+    {
+        try {
+            $name = $request->get('name');
+            $limit = $request->get('limit', 5);
+
+            if (strlen($name) < 2) {
+                return response()->json([
+                    'success' => true,
+                    'faculty' => []
+                ]);
+            }
+
+            // Search for suggestions
+            $nameParts = explode(' ', trim($name));
+            $query = Faculty::query();
+
+            foreach ($nameParts as $part) {
+                if (!empty($part)) {
+                    $query->where(function($q) use ($part) {
+                        $q->where('faculty_first_name', 'LIKE', "%$part%")
+                            ->orWhere('faculty_last_name', 'LIKE', "%$part%")
+                            ->orWhere('faculty_middle_initial', 'LIKE', "%$part%");
+                    });
+                }
+            }
+
+            $faculty = $query->limit($limit)->get();
+
+            return response()->json([
+                'success' => true,
+                'faculty' => $faculty
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error searching faculty'
+            ], 500);
+        }
+    }
+
 
 
     private function logActivity($userId, $role, $action, $description)
@@ -123,5 +202,30 @@ class FacultyController extends Controller
             // Log to Laravel's default log if activity logging fails
             \Log::error('Failed to create activity log: ' . $e->getMessage());
         }
+    }
+
+    private function generateFacultyId()
+    {
+        $year = date('Y');
+        $prefix = "USePass-{$year}-";
+
+        // Get the last faculty ID for this year
+        $lastFaculty = Faculty::where('faculty_id', 'LIKE', "{$prefix}%")
+            ->orderBy('faculty_id', 'desc')
+            ->first();
+
+        if ($lastFaculty) {
+            // Extract the sequential number and increment
+            $lastNumber = (int) substr($lastFaculty->faculty_id, -4);
+            $newNumber = $lastNumber + 1;
+        } else {
+            // Start from 0001 for this year
+            $newNumber = 1;
+        }
+
+        // Format with leading zeros (4 digits)
+        $sequentialNumber = str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+
+        return $prefix . $sequentialNumber;
     }
 }
