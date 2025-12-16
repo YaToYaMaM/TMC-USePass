@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'python_extractor' => [
+        'url' => env('PYTHON_EXTRACTOR_URL', 'http://127.0.0.1'),
+        'port' => env('PYTHON_EXTRACTOR_PORT', 5000),
+    ],
+
 ];

@@ -138,6 +138,13 @@
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/breeze" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/laravel/sanctum" />
       <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/phpmailer/phpmailer" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/barryvdh/laravel-dompdf" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/dompdf/dompdf" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/dompdf/php-font-lib" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/dompdf/php-svg-lib" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/masterminds/html5" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/sabberworm/php-css-parser" />
+      <excludeFolder url="file://$MODULE_DIR$/USePass/vendor/thiagoalessio/tesseract_ocr" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

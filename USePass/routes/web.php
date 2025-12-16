@@ -21,7 +21,7 @@ use App\Http\Controllers\ActivityLogController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\FacultyRecordController;
 use App\Http\Controllers\DatabaseController;
-
+use App\Http\Controllers\VisitorController;
 use Illuminate\Support\Facades\Log;
 
 Route::get('/.well-known/{any}', function ($any) {
@@ -46,6 +46,9 @@ Route::get('/user', [App\Http\Controllers\FrontendControllers::class, 'user'])->
 Route::get('/otp', [App\Http\Controllers\FrontendControllers::class, 'otp'])->name('otp');
 Route::get('/scan', [App\Http\Controllers\FrontendControllers::class, 'scan'])->name('scan');
 Route::get('/checking', [App\Http\Controllers\FrontendControllers::class, 'checking'])->name('checking');
+
+Route::get('/visitorsForm', [App\Http\Controllers\FrontendControllers::class, 'visitorsForm'])->name('visitorsForm');
+Route::post('/visitor-registration', [VisitorController::class, 'store']);
 
 Route::get('/gin', [App\Http\Controllers\FrontendControllers::class, 'gin'])->name('gin');
 Route::get('/gout', [App\Http\Controllers\FrontendControllers::class, 'gout'])->name('gout');
