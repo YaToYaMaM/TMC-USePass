@@ -20,7 +20,7 @@
             <button @click="showFacultyAndStaffAttendanceModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
                 Faculty & Staff
             </button>
-            <button class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
+            <button @click="showVisitorsModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
                 Visitors
             </button>
             <button @click="showLogsModal = true" class="hover:bg-gray-600 text-white px-4 py-1 rounded font-semibold shadow transition duration-300 ease-in-out">
@@ -560,7 +560,7 @@
                         </button>
 
                         <!-- Visitor Button -->
-                        <button
+                        <button @click="showVisitorsModal = true"
                             class="mobile-btn bg-gray-500 hover:bg-gray-700 text-white p-6 rounded-2xl shadow-lg flex flex-col items-center space-y-3">
                             <div class="w-12 h-12 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
                                 <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
@@ -850,6 +850,35 @@
         </div>
     </transition>
 
+    <!-- Visitor Modal -->
+
+    <transition name="fade">
+        <div v-if="showVisitorsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
+            <div class="relative z-10 w-full max-w-6xl h-full max-h-[90vh] bg-white rounded-xl shadow-2xl overflow-hidden">
+                <!-- Close Button -->
+                <button @click="showVisitorsModal = false" class="absolute top-4 right-4 z-20 text-gray-600 hover:text-red-500 text-2xl font-bold bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg">
+                    ×
+                </button>
+
+                <!-- Modal Header -->
+                <div class="bg-gray-600 text-white px-6 py-4">
+                    <h2 class="text-2xl font-bold">Visitor Registration</h2>
+                </div>
+
+                <!-- Modal Body -->
+                <div class="h-full overflow-y-auto p-6">
+                    <div class="space-y-4">
+                        <VisitorForm />
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden canvas for image processing -->
+            <canvas ref="canvasElement" class="hidden"></canvas>
+        </div>
+    </transition>
+
+
     <!-- Logs Modal -->
     <transition name="fade">
         <div v-if="showLogsModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 px-4">
@@ -1009,7 +1038,7 @@ import Ghome from "@/Pages/Frontend/Ghome.vue";
 import QrScanner from "qr-scanner";
 import Glogs from "@/Pages/Frontend/Glogs.vue";
 import FacultyStaffAttendance from "@/Pages/Frontend/FacultyStaffAttendance.vue";
-
+import VisitorForm from "@/Components/VisitorForm.vue";
 
 
 // Move reactive data outside of component for proper composition API usage
@@ -1026,6 +1055,7 @@ export default {
         FacultyStaffAttendance,
         Glogs,
         SpotTable,
+        VisitorForm,
         Ghome,
         StudentReportTable,
         IncidentTable,
@@ -1691,6 +1721,7 @@ export default {
             showSpotModal: false,
             showStudentAttendanceModal: false,
             showFacultyAndStaffAttendanceModal: false,
+            showVisitorsModal: false,
             showLogsModal: false,
             triggeredByButton: false,
             currentUser: {
@@ -2019,6 +2050,10 @@ export default {
     },
     beforeUnmount() {
         if (this.timerInterval) clearInterval(this.timerInterval);
+    },
+    // Add this lifecycle hook to cleanup camera when component is destroyed VISITOR
+    beforeDestroy() {
+        this.stopCamera();
     },
 };
 </script>

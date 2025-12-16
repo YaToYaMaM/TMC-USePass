@@ -158,6 +158,13 @@
       <path value="$PROJECT_DIR$/USePass/vendor/phpoffice/phpspreadsheet" />
       <path value="$PROJECT_DIR$/USePass/vendor/maennchen/zipstream-php" />
       <path value="$PROJECT_DIR$/USePass/vendor/maatwebsite/excel" />
+      <path value="$PROJECT_DIR$/USePass/vendor/thiagoalessio/tesseract_ocr" />
+      <path value="$PROJECT_DIR$/USePass/vendor/sabberworm/php-css-parser" />
+      <path value="$PROJECT_DIR$/USePass/vendor/barryvdh/laravel-dompdf" />
+      <path value="$PROJECT_DIR$/USePass/vendor/masterminds/html5" />
+      <path value="$PROJECT_DIR$/USePass/vendor/dompdf/dompdf" />
+      <path value="$PROJECT_DIR$/USePass/vendor/dompdf/php-svg-lib" />
+      <path value="$PROJECT_DIR$/USePass/vendor/dompdf/php-font-lib" />
     </include_path>
   </component>
   <component name="PhpProjectSharedConfiguration" php_language_level="8.2" />
