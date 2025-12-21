@@ -18,4 +18,4 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 EXPOSE 80
 
 # This image uses a default start script that handles Nginx and PHP
-CMD ["/start.sh"]
+CMD php artisan migrate --force && /start.sh
