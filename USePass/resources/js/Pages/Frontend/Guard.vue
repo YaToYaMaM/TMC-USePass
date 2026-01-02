@@ -19,6 +19,7 @@ const guardToEdit = ref<{
     contact_number: string;
     email?: string;
 } | null>(null);
+const selectedStatus = ref<'active' | 'disabled'>('active');
 
 
 function handleImageUpload(event: Event) {
@@ -66,6 +67,7 @@ const fetchguard = () => {
                 last_name: guard.last_name,
                 contact_number: guard.contact_number,
                 profile_image: guard.profile_image,
+                is_active: guard.is_active,
             }));
         })
         .catch((error) => {
@@ -130,9 +132,12 @@ async function submitForm() {
 
 const searchQuery = ref('');
 const filteredGuards = computed(() => {
-    let result = guards.value;
+    let result = guards.value.filter(guard =>
+        selectedStatus.value === 'active'
+            ? guard.is_active
+            : !guard.is_active
+    );
 
-    // Filter by search query
     if (searchQuery.value) {
         const query = searchQuery.value.toLowerCase();
         result = result.filter(guard =>
@@ -144,6 +149,7 @@ const filteredGuards = computed(() => {
     return result;
 });
 
+
 const currentPage = ref(1);
 const guardsPerPage = 4;
 
@@ -154,8 +160,9 @@ const paginatedGuards = computed(() => {
 });
 
 const totalPages = computed(() =>
-    Math.ceil(guards.value.length / guardsPerPage)
+    Math.ceil(filteredGuards.value.length / guardsPerPage)
 );
+
 
 function goToPage(page: number) {
     if (page >= 1 && page <= totalPages.value) {
@@ -195,6 +202,43 @@ async function updateGuard() {
         }
     }
 }
+
+async function toggleGuardStatus(guard: any) {
+    const action = guard.is_active ? 'disable' : 'enable';
+
+    const confirm = await Swal.fire({
+        title: guard.is_active ? 'Disable Guard?' : 'Enable Guard?',
+        text: guard.is_active
+            ? 'This guard will no longer be able to log in.'
+            : 'This guard will be re-activated.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: guard.is_active ? '#d33' : '#16a34a',
+        confirmButtonText: guard.is_active ? 'Disable' : 'Enable',
+    });
+
+    if (!confirm.isConfirmed) return;
+
+    try {
+        await axios.patch(`/guards/${guard.id}/${action}`);
+
+        Swal.fire({
+            icon: 'success',
+            title: guard.is_active ? 'Disabled' : 'Enabled',
+            timer: 1500,
+            showConfirmButton: false,
+        });
+
+        fetchguard(); // refresh list
+    } catch (error) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Action Failed',
+            text: 'Please try again.',
+        });
+    }
+}
+
 
 </script>
 
@@ -247,10 +291,28 @@ async function updateGuard() {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h1 class="text-xl font-bold mb-4">Security Guard</h1>
             <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
-            <select class="border border-gray-300 p-2 rounded w-full md:w-24 text-sm">
-                <option>Active</option>
-                <option>Inactive</option>
-            </select>
+                <div class="flex gap-2">
+                    <button
+                        @click="selectedStatus = 'active'"
+                        :class="selectedStatus === 'active'
+            ? 'bg-blue-500 text-white'
+            : 'bg-gray-200 text-black'"
+                        class="px-4 py-2 rounded text-sm"
+                    >
+                        Active
+                    </button>
+
+                    <button
+                        @click="selectedStatus = 'disabled'"
+                        :class="selectedStatus === 'disabled'
+            ? 'bg-red-500 text-white'
+            : 'bg-gray-200 text-black'"
+                        class="px-4 py-2 rounded text-sm"
+                    >
+                        Disabled
+                    </button>
+                </div>
+
                 <div class="relative w-full md:w-64">
                     <input
                         v-model="searchQuery"
@@ -283,7 +345,16 @@ async function updateGuard() {
 
                 <div class="flex space-x-2">
                     <button @click="openEditModal(guard)" class="bg-green-500 text-sm text-white px-4 py-2 rounded">Edit</button>
-                    <button class="bg-red-500 text-sm text-white px-4 py-2 rounded">Disable</button>
+                    <button
+                        @click="toggleGuardStatus(guard)"
+                        :class="guard.is_active
+        ? 'bg-red-500'
+        : 'bg-green-500'"
+                        class="text-sm text-white px-4 py-2 rounded"
+                    >
+                        {{ guard.is_active ? 'Disable' : 'Enable' }}
+                    </button>
+
                 </div>
             </div>
 

@@ -194,6 +194,10 @@ Route::get('/search-active-faculty', [FacultyRecordController::class, 'searchAct
 Route::get('/backupData', [DatabaseController::class, 'backupData'])->name('database.backup');
 Route::post('/restoreData', [DatabaseController::class, 'restoreData'])->name('database.restore');
 
+//disable and enable
+Route::patch('/guards/{id}/disable', [GuardController::class, 'disable']);
+Route::patch('/guards/{id}/enable', [GuardController::class, 'enable']);
+
 //Route::post('/change-password', [UserController::class, 'changePassword']);
 //Route::get('/download-attendance-pdf', [StudentReportController::class, 'downloadPDF']);
 //Route::get('/dashboard', function () {

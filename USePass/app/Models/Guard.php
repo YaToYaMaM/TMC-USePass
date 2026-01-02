@@ -18,5 +18,10 @@ class Guard extends Model
         'profile_image',
         'email',
         'password',
+        'is_active',
+    ];
+
+    protected $casts = [
+        'is_active' => 'boolean',
     ];
 }

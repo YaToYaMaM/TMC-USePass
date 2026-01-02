@@ -102,6 +102,45 @@ class GuardController extends Controller
 
         return response()->json(['message' => 'Guard updated successfully.']);
     }
+    public function disable(Request $request, $id)
+    {
+        $guard = Guard::where('role', 'guard')->findOrFail($id);
+
+        $guard->is_active = false;
+        $guard->save();
+
+        // Log activity
+        $this->logActivity(
+            $request->user()->id ?? null,
+            $request->user()->role ?? 'System',
+            'Guard Disabled',
+            "Guard Disabled: {$guard->first_name} {$guard->last_name}"
+        );
+
+        return response()->json([
+            'message' => 'Guard disabled successfully.'
+        ]);
+    }
+    public function enable(Request $request, $id)
+    {
+        $guard = Guard::where('role', 'guard')->findOrFail($id);
+
+        $guard->is_active = true;
+        $guard->save();
+
+        // Log activity
+        $this->logActivity(
+            $request->user()->id ?? null,
+            $request->user()->role ?? 'System',
+            'Guard Enabled',
+            "Guard Enabled: {$guard->first_name} {$guard->last_name}"
+        );
+
+        return response()->json([
+            'message' => 'Guard enabled successfully.'
+        ]);
+    }
+
 
 
 

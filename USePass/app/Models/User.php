@@ -26,6 +26,7 @@ class User extends Authenticatable
         'password',
         'role',
         'profile_image',
+        'is_active',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -60,4 +62,20 @@ class User extends Authenticatable
     {
         return $this->role === 'guard';
     }
+
+    public function isActive()
+    {
+        return $this->is_active;
+    }
+
+    public function disable()
+    {
+        $this->update(['is_active' => false]);
+    }
+
+    public function enable()
+    {
+        $this->update(['is_active' => true]);
+    }
+
 }
