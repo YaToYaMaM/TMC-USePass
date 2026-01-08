@@ -6,7 +6,9 @@
         </div>
         <ul>
             <li v-for="(student, index) in students" :key="index" class="flex items-center space-x-3 mb-3">
-                <img :src="`/${student.students_profile_image}`" class="w-10 h-10 rounded-full object-cover" alt="Student Image"/>
+                <img :src="`/${student.students_profile_image}`"
+                     @error="(e) => ((e.target as HTMLImageElement).src = '/images/user.png')"
+                     class="h-14 w-14 rounded-full border" alt="Student Image" />
                 <div>
                     <p class="text-sm font-semibold">{{ student.students_first_name }} {{ student.students_middle_initial }} {{ student.students_last_name }} </p>
                     <p class="text-xs text-gray-500">{{ student.students_email }}</p>

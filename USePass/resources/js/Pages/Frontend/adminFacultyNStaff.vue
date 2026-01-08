@@ -314,11 +314,10 @@ const filteredStudents = computed(() => {
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div class="flex items-center gap-4">
                     <h1 class="text-xl font-bold">Faculty and Staff</h1>
-                    <!--                    <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">-->
-                    <!--                        <option>Active</option>-->
-                    <!--                        <option>Inactive</option>-->
-                    <!--                        <option>Disabled</option>-->
-                    <!--                    </select>-->
+                            <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">
+                                <option>Active</option>
+                                <option>Inactive</option>
+                            </select>
                 </div>
                 <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
 

@@ -314,7 +314,6 @@ const filteredStudents = computed(() => {
                     <select class="border border-gray-300 p-2 w-full md:w-24 rounded text-sm">
                         <option>Active</option>
                         <option>Inactive</option>
-                        <option>Disabled</option>
                     </select>
                 </div>
                 <div class="flex flex-col md:flex-row items-center gap-2 w-full md:w-auto">
@@ -368,9 +367,6 @@ const filteredStudents = computed(() => {
                     </div>
                 </div>
 
-                <div class="flex space-x-2">
-                    <button class="bg-red-500 text-sm text-white px-4 py-2 rounded">Disable</button>
-                </div>
             </div>
 
 
